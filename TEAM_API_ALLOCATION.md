@@ -8,7 +8,7 @@ Mỗi người 3 API (Pool A, B, C). **Không có API nào trùng giữa 2 ngư�
 
 | # | Họ tên | MSSV | Pool A | Pool B | Pool C |
 |---|---|---|---|---|---|
-| 1 | | | **FR-02 Login**<br>`POST /api/login` | **FR-10 User hủy đơn**<br>`PUT /api/orders/:id/cancel` | **FR-15 Product CRUD**<br>`POST/PUT/DELETE /api/products[/:id]` |
+| 1 | | 23120190 | **FR-02 Login**<br>`POST /api/login` | **FR-10 User hủy đơn**<br>`PUT /api/orders/:id/cancel` | **FR-15 Product CRUD**<br>`POST/PUT/DELETE /api/products[/:id]` |
 | 2 | | | **FR-01 Đăng ký**<br>`POST /api/register` | **FR-08 Checkout**<br>`POST /api/checkout` | **FR-18 Admin đổi trạng thái đơn**<br>`PUT /api/admin/orders/:id/status` |
 | 3 | | | **FR-03 Quên/đặt lại mật khẩu**<br>`POST /api/forgot-password` + `POST /api/reset-password` | **FR-11 Xem đơn hàng**<br>`GET /api/orders/:id` + `GET /api/orders/my-orders` | **FR-16 Import CSV**<br>`POST /api/admin/import-products` |
 | 4 | | | **FR-04 Hồ sơ cá nhân**<br>`GET/PUT /api/users/me` | **FR-09 Áp mã giảm giá**<br>`POST /api/apply-coupon` | **FR-17 Admin coupon**<br>`POST /api/admin/coupons` + `DELETE /api/admin/coupons/:id` |
