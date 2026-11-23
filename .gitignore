@@ -1,0 +1,8 @@
+eshop-sut/
+results/server.log
+*.log
+node_modules/
+__pycache__/
+# Tài liệu môn học giữ local (chỉ đưa vào zip)
+*.pptx.pdf
+2026.HW06*.pdf
