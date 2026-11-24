@@ -587,3 +587,26 @@ Phần này chỉ gắn nhãn, không sửa bảng test phía trên. Nhãn xét 
 | CN-G6-12 | INVALID | Trùng D6 với CN-G1-02; chỉ khác nhãn SCH và thêm đơn thứ hai trong K. |
 
 **Tổng: 40 VALID – 10 INCOMPLETE – 9 INVALID / 59 case.**
+
+## Extend – Human
+
+Sinh sau khi Generate đã xong và được phép đọc `eshop-sut/backend/server.js`; mỗi case dưới đây chỉ dùng endpoint `PUT /api/orders/:id/cancel` (GET chỉ làm oracle) và nhắm một hành vi code khác spec mà bộ case AI chưa kiểm. Expected lấy từ spec; chỗ spec không nói ghi GIẢ ĐỊNH. Bảng giữ đúng 9 cột như bảng gốc.
+
+Quy ước setup: dùng lại S — mỗi case đăng ký một user, login lấy `T`, checkout tạo đơn `O` đang `pending`; lưu `idA` từ response đăng ký. `K(O)` = `GET /api/orders/{{O}}` với `Authorization: Bearer {{T}}`.
+
+| ID | Kỹ thuật | Requirement | Mục đích | Precondition / setup | Request | Expected status | Expected body / kiểm tra | Nguồn expected |
+|---|---|---|---|---|---|---|---|---|
+| CN-EX-01 | EP | FR-10, API spec:145–147 | ID có dấu `+` ở đầu không được khớp đơn | S; đơn `O` pending; dựng chuỗi `%2B{{O}}` | `PUT /api/orders/%2B{{O}}/cancel`; `Authorization: Bearer {{T}}`; không body | 400 | JSON `error` không rỗng; K: `O` vẫn `pending` | API spec:145–147; GIẢ ĐỊNH ID phải là số nguyên không dấu, như CN-G1-07 dùng 1.5 |
+| CN-EX-02 | SEC | SEC-02 (R:279), FR-03 | Token cũ phải mất hiệu lực sau khi đổi mật khẩu | S; login lấy `T`; checkout `O`; `POST /api/forgot-password` lấy OTP và `POST /api/reset-password` đổi sang `New1234!` | `PUT /api/orders/{{O}}/cancel`; `Authorization: Bearer {{T}}` (token cấp trước khi reset); không body | 401 | JSON `error` không rỗng; K: `O` vẫn `pending` | SEC-02; FR-03; GIẢ ĐỊNH token gắn với mật khẩu hiện tại |
+| CN-EX-03 | EP | FR-10 | ID dạng `O.0` không được khớp đơn O | S; đơn `O` pending; dựng chuỗi `{{O}}.0` | `PUT /api/orders/{{O}}.0/cancel`; `Authorization: Bearer {{T}}`; không body | 400 | JSON `error` không rỗng; K: `O` vẫn `pending` | API spec:145–147; GIẢ ĐỊNH ID phải là số nguyên, như CN-G1-07 dùng 1.5 |
+| CN-EX-04 | EP | FR-10 | ID có số 0 đứng trước không được khớp đơn | S; đơn `O` pending; dựng chuỗi `0{{O}}` (ví dụ O=7 → `07`) | `PUT /api/orders/0{{O}}/cancel`; `Authorization: Bearer {{T}}`; không body | 400 | JSON `error` không rỗng; K: `O` vẫn `pending` | API spec:145–147; GIẢ ĐỊNH ID phải khớp chính xác |
+| CN-EX-05 | SEC | SEC-02 (R:279) | Token giả mạo bằng secret trong source phải bị từ chối | S; lưu `idA`; dựng JWT HS256 payload `{"id":{{idA}},"role":"user"}` ký bằng `super_secret_key_that_should_not_be_here` (`server.js:9`) | `PUT /api/orders/{{O}}/cancel`; `Authorization: Bearer <token giả>`; không body | 401 | JSON `error` không rỗng; K: `O` vẫn `pending` | SEC-02; GIẢ ĐỊNH secret không được lộ nên token tự ký vô hiệu |
+
+**Vì sao AI bỏ sót**
+- **CN-EX-01:** AI chỉ thử id kiểu `abc`, `1.5`, `%40`, `%20`; không biết SQLite tự ép `+O` thành số nguyên nên request vẫn hủy được đơn.
+- **CN-EX-02:** AI không có case nào reset mật khẩu rồi dùng lại token cũ; ý gần nhất là CN-G3-06 nhưng đó là xóa user.
+- **CN-EX-03:** AI chỉ thử `1.5` (không khớp) nên kết luận mọi ID thập phân bị từ chối; không thử `O.0` khớp số nguyên.
+- **CN-EX-04:** AI chỉ thử `abc`, `%40`, `%20`; không thử chuỗi số có 0 đứng trước — SQLite ép kiểu và khớp.
+- **CN-EX-05:** CN-G3-07 ký bằng secret "đoán"; AI không đọc code nên không biết secret thật để dựng token hợp lệ.
+
+**Ghi chú:** không thêm ý "token sai chữ ký → 401" vì CN-G1-14 đã kỳ vọng đúng 401 cho token bị đổi chữ ký (code trả 403), tức đã có case bắt; thêm nữa là trùng.
