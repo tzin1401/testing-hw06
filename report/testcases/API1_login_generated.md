@@ -484,3 +484,24 @@ Phần này chỉ gắn nhãn, không sửa bảng test phía trên. Nhãn xét 
 | LG-G6-05 | VALID | Role admin do client gửi không nâng quyền; kiểm JWT và ME. |
 
 **Tổng: 61 VALID – 2 INCOMPLETE – 3 INVALID / 66 case.**
+
+## Extend – Human
+
+Sinh sau khi Generate đã xong và được phép đọc `eshop-sut/backend/server.js`; mỗi case dưới đây chỉ dùng endpoint `POST /api/login` (request phụ chỉ để làm oracle) và nhắm một hành vi code khác spec mà bộ case AI chưa kiểm. Expected lấy từ spec; chỗ spec không nói ghi GIẢ ĐỊNH. Bảng giữ đúng 9 cột như bảng gốc.
+
+Quy ước setup: dùng lại setup độc lập của G1 — mỗi case sinh UUID mới, đăng ký `lg-ex-<ID>-<UUID>@test.com` với password `Test1234!`, lưu `email`, `id`. `ME` = `GET /api/users/me`, `Authorization: Bearer <token>`, không body.
+
+| ID | Kỹ thuật | Requirement | Mục đích | Precondition / setup | Request | Expected status | Expected body / kiểm tra | Nguồn expected |
+|---|---|---|---|---|---|---|---|---|
+| LG-EX-01 | EP | FR-02 | Request thiếu password không được khóa tài khoản | Setup độc lập; đăng ký user mới, lưu `email`; chưa login lần nào | `POST /api/login` 3 lần liên tiếp, `Content-Type: application/json`, không Authorization, body `{"email":"{{email}}"}`; rồi 1 lần body `{"email":"{{email}}","password":"Test1234!"}` | 400, 400, 400, 200 | Ba response đầu: JSON `error` không rỗng, không `token`; response cuối 200 có `token` và `ME` với token đó trả 200 đúng `email` | R:40–42; GIẢ ĐỊNH 400 cho request thiếu field và request lỗi không tính là lần đăng nhập sai |
+| LG-EX-02 | EP | FR-02 (R:41) | Bộ đếm chỉ tăng đúng 1 sau một lần sai | Setup độc lập; đăng ký, login đúng lấy `token` T; sau đó gửi 1 lần W | `GET /api/users/me`; `Authorization: Bearer {{T}}`; không body | 200 | JSON có `login_attempts` bằng 1, không phải 0 hoặc 2 | R:41 "tăng bộ đếm lên đúng 1 đơn vị"; GIẢ ĐỊNH field `login_attempts` phản ánh bộ đếm hiện tại |
+| LG-EX-03 | SEC | SEC-02 (R:279) | JWT phải có hạn dùng | Setup độc lập; đăng ký + login đúng lấy `token` | `POST /api/login` body C; sau đó decode base64url phần payload của `token` (không gửi thêm request) | 200 | Payload có `exp` là số nguyên và `exp` > `iat`; ngoài ra có `id`, `role` | SEC-02 "JWT hợp lệ"; GIẢ ĐỊNH token phải có thời hạn — spec không nêu giá trị |
+| LG-EX-04 | ST | FR-02, FR-03 | Đổi mật khẩu phải vô hiệu mật khẩu cũ | Setup độc lập; đăng ký user; `POST /api/forgot-password` body `{"email":"{{email}}"}` → 200, lấy `resetToken`; `POST /api/reset-password` body `{"email":"{{email}}","resetToken":<OTP>,"newPassword":"New1234!"}` → 200 | `POST /api/login` body `{"email":"{{email}}","password":"Test1234!"}`; sau đó body `{"email":"{{email}}","password":"New1234!"}` | 400, 200 | Lần cũ: JSON `error`, không `token`; lần mới: 200 có `token`, `ME` đúng `email` | FR-02, FR-03; GIẢ ĐỊNH 400 cho mật khẩu cũ và 200 cho mật khẩu mới |
+| LG-EX-05 | SEC | SEC-02 (R:279) | Token ký bằng secret đọc từ source phải bị từ chối | Setup độc lập; đăng ký nạn nhân B, lưu `idB`; dựng JWT HS256 header `{"alg":"HS256","typ":"JWT"}`, payload `{"id":{{idB}},"role":"admin"}`, ký HMAC-SHA256 (base64url, không padding) bằng `super_secret_key_that_should_not_be_here` — secret hardcode ở `server.js:9` | `GET /api/users/me`; `Authorization: Bearer <token giả>`; không body | 401 | JSON `error` không rỗng; không trả dữ liệu của B | SEC-02; GIẢ ĐỊNH secret không được nằm trong source nên token tự ký không hợp lệ |
+
+**Vì sao AI bỏ sót**
+- **LG-EX-01:** AI chỉ kiểm status 400 của request thiếu field (LG-G1-18), không kiểm tác dụng phụ lên bộ đếm/khóa.
+- **LG-EX-02:** Ma trận M05 kết luận "bộ đếm không nằm trong response" nên không case nào kiểm số đếm; thực tế `SELECT *` trả `login_attempts` ở `ME`.
+- **LG-EX-03:** LG-G3-08 chỉ giải mã để xem `id`/`role`, LG-G6-02 chỉ dùng token; chưa case nào kiểm `exp`, và AI coi thời hạn là "spec không nêu" nên bỏ qua.
+- **LG-EX-04:** AI không có case nào đi qua luồng forgot/reset (FR-03) rồi quay lại login; toàn bộ G1–G3 chỉ dùng mật khẩu seed `Test1234!`.
+- **LG-EX-05:** AI chỉ thử secret "đoán" (CN-G3-07) và không đọc code nên không biết secret thật hardcode trong repo.
