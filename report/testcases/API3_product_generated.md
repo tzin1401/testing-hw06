@@ -572,3 +572,142 @@ Các điểm sau không tính là thiếu case vì là giới hạn của spec �
 **Ghi chú của AI:** Việc chọn nhóm trùng phụ thuộc tiêu chí ở 5.B1; D6 coi G6-28 thay thế G1-04, còn nếu giữ ô ST độc lập thì tổng là 121, kết luận ĐỦ không đổi.
 Full PUT là giả định hiện hành, không phải đặc tả; nếu audit chọn PUT một phần thì G2-16, G6-01, 11, 15 và các case G6 PUT thiếu field phải đổi expected cùng lúc.
 Mọi status, JSON lỗi, GET shape và việc chấp nhận literal HTML hoặc SQL đều là GIẢ ĐỊNH; độ phủ ở đây là độ phủ tình huống, chưa xác nhận hành vi SUT. Chưa gửi request nào.
+
+## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)
+
+Phần này chỉ gắn nhãn, không sửa bảng test phía trên. Nhãn xét theo quy ước hiện hành của chính file (quy tắc hợp nhất ở G6).
+- **VALID** – chạy được ngay theo dòng; expected rõ, có nguồn spec hoặc giả định đã ghi và không mâu thuẫn.
+- **INCOMPLETE** – request đúng nhưng còn thiếu hoặc không chắc một phần để chạy/assert: status cũ đã có quy ước thay thế, setup có điều kiện spec không bảo đảm, hoặc oracle chưa kiểm được.
+- **INVALID** – trùng ngữ nghĩa với case khác (không thêm độ phủ), hoặc case không kiểm được điều nó tuyên bố.
+
+| ID | Nhãn | Lý do (1 dòng) |
+|---|---|---|
+| PR-G1-01 | VALID | Thiếu name → 400; snapshot list xác nhận không đổi. |
+| PR-G1-02 | VALID | Name rỗng → 400; một field sai duy nhất. |
+| PR-G1-03 | VALID | Name toàn khoảng trắng → 400; giả định trim đã ghi. |
+| PR-G1-04 | INVALID | False-pass: nhận diện theo name 'a' có thể khớp sản phẩm khác; G6-28 thay thế. |
+| PR-G1-05 | VALID | Name 254 ký tự → 200; sát biên dưới 255. |
+| PR-G1-06 | VALID | Name 255 ký tự → 200; đúng biên trên của FR-15. |
+| PR-G1-07 | VALID | Name 256 ký tự → 400; ngay trên biên. |
+| PR-G1-08 | VALID | Name tiếng Việt có dấu → 200; kiểm Unicode. |
+| PR-G1-09 | VALID | Name null → 400; giả định kiểu đã ghi. |
+| PR-G1-10 | VALID | Name kiểu số → 400; API spec yêu cầu string. |
+| PR-G1-11 | VALID | Thiếu price → 400; trường bắt buộc theo R:196. |
+| PR-G1-12 | VALID | Price 0 → 400; biên dưới của > 0. |
+| PR-G1-13 | VALID | Price -1 → 400; phía âm. |
+| PR-G1-14 | VALID | Price 0.01 → 200; giá dương nhỏ nhất thực dụng. |
+| PR-G1-15 | VALID | Price 1 → 200; giá dương nhỏ. |
+| PR-G1-16 | VALID | Price 1e15 → 200; spec không nêu trần, giả định đã ghi. |
+| PR-G1-17 | VALID | Price chuỗi số → 400; giả định không ép kiểu đã ghi. |
+| PR-G1-18 | VALID | Price chuỗi chữ → 400; cùng lớp kiểu. |
+| PR-G1-19 | VALID | Price null → 400. |
+| PR-G1-20 | VALID | Price boolean → 400; giả định không ép kiểu. |
+| PR-G1-21 | VALID | Thiếu category_id → 400; trường bắt buộc. |
+| PR-G1-22 | INVALID | Trùng D1 với PR-G2-05: cùng POST body hợp lệ, cùng 200 và oracle. |
+| PR-G1-23 | VALID | Category 99999 không tồn tại → 400; xác minh trước bằng categories. |
+| PR-G1-24 | VALID | Category 0 → 400; biên dưới. |
+| PR-G1-25 | VALID | Category -1 → 400; phía âm. |
+| PR-G1-26 | VALID | Category chuỗi abc → 400; sai kiểu. |
+| PR-G1-27 | VALID | Thiếu description → 200; field tùy chọn theo A:91–99. |
+| PR-G1-28 | VALID | Description rỗng → 200; giả định cho rỗng đã ghi. |
+| PR-G1-29 | VALID | Description 10.000 ký tự → 200; giả định không giới hạn. |
+| PR-G1-30 | VALID | Thiếu imageUrl → 200; field tùy chọn. |
+| PR-G1-31 | VALID | ImageUrl rỗng → 200; giả định đã ghi. |
+| PR-G1-32 | VALID | ImageUrl 10.000 ký tự → 200; kiểm không giới hạn. |
+| PR-G1-33 | VALID | ImageUrl không phải URL → 200; giả định không validate URL. |
+| PR-G1-34 | VALID | PUT id tồn tại, chỉ đổi price → 200; các field khác giữ nguyên. |
+| PR-G1-35 | INVALID | Trùng D3 với PR-G2-03: cùng PUT id vắng, cùng 404. |
+| PR-G1-36 | VALID | PUT id 0 → 404; không upsert, giả định đã ghi. |
+| PR-G1-37 | VALID | PUT id âm → 404; cùng lớp id vắng. |
+| PR-G1-38 | VALID | PUT id abc → 400; id không phải số. |
+| PR-G1-39 | INVALID | Trùng D5 với PR-G2-08: cùng DELETE sản phẩm tồn tại, cùng 200. |
+| PR-G1-40 | INVALID | Trùng D4 với PR-G2-04: cùng DELETE id vắng, cùng 404. |
+| PR-G1-41 | VALID | DELETE id 0 → 404. |
+| PR-G1-42 | VALID | DELETE id âm → 404. |
+| PR-G1-43 | VALID | DELETE id abc → 400; sai kiểu. |
+| PR-G1-44 | VALID | Body {} → 400; thiếu đồng thời nhiều field. |
+| PR-G1-45 | VALID | JSON sai cú pháp → 400; parser phải từ chối. |
+| PR-G1-46 | VALID | Field id thừa → 200, id mới khác 99999; chống ghi đè. |
+| PR-G2-01 | INVALID | Trùng D1 với PR-G2-05: cùng POST body hợp lệ, cùng 200. |
+| PR-G2-02 | VALID | GET id chưa tồn tại → 404; trạng thái chưa tồn tại. |
+| PR-G2-03 | VALID | PUT id chưa tồn tại không upsert → 404. |
+| PR-G2-04 | VALID | DELETE id chưa tồn tại → 404. |
+| PR-G2-05 | VALID | POST khi P đang tồn tại → 200; P không đổi, id mới riêng. |
+| PR-G2-06 | VALID | GET P hiện tại → 200, đủ field B; K list bằng S. |
+| PR-G2-07 | INVALID | Trùng D2 với PR-G2-14: cùng PUT B2 đầy đủ, cùng 200 và oracle. |
+| PR-G2-08 | VALID | DELETE P → 200; GET 404, list không còn P. |
+| PR-G2-09 | INVALID | Trùng D1 với PR-G2-05: cùng POST body, cùng 200, khác trạng thái setup. |
+| PR-G2-10 | VALID | GET P đã xóa → 404; trạng thái đã xóa. |
+| PR-G2-11 | VALID | PUT P đã xóa → 404; không khôi phục. |
+| PR-G2-12 | VALID | DELETE hai lần → 404; idempotent ở mức lỗi. |
+| PR-G2-13 | VALID | Vòng đời đầy đủ POST→GET→PUT→GET→DELETE→GET→list; status từng bước. |
+| PR-G2-14 | VALID | Chỉ P đổi; Q và seed 1..5 giữ nguyên. |
+| PR-G2-15 | VALID | Hai sản phẩm trùng tên → 200; giả định tên không unique. |
+| PR-G2-16 | INCOMPLETE | PUT partial 200 trái quy ước full PUT hiện hành (400); phải sửa expected. |
+| PR-G3-01 | VALID | Thiếu token POST → 401; S không đổi. |
+| PR-G3-02 | VALID | Thiếu token PUT → 401. |
+| PR-G3-03 | VALID | Thiếu token DELETE → 401. |
+| PR-G3-04 | VALID | User thường POST → 403; role admin bắt buộc. |
+| PR-G3-05 | VALID | User thường PUT → 403. |
+| PR-G3-06 | VALID | User thường DELETE → 403. |
+| PR-G3-07 | VALID | Nâng role qua profile rồi POST → 403; profile vẫn user. |
+| PR-G3-08 | VALID | Nâng role rồi PUT → 403. |
+| PR-G3-09 | VALID | Nâng role rồi DELETE → 403. |
+| PR-G3-10 | VALID | JWT tự ký HS256 POST → 401. |
+| PR-G3-11 | VALID | JWT tự ký HS256 PUT → 401. |
+| PR-G3-12 | VALID | JWT tự ký HS256 DELETE → 401. |
+| PR-G3-13 | VALID | SQLi name POST → 200 lưu literal, N+1; kiểm hậu quả. |
+| PR-G3-14 | VALID | SQLi description POST → 200 lưu literal. |
+| PR-G3-15 | VALID | SQLi name PUT → 200 lưu literal; id khác không đổi. |
+| PR-G3-16 | VALID | SQLi description PUT → 200 lưu literal. |
+| PR-G3-17 | VALID | SQLi path PUT → 400; S và N không đổi. |
+| PR-G3-18 | VALID | SQLi path DELETE → 400. |
+| PR-G3-19 | VALID | XSS name POST → 200 lưu literal; không kết luận UI. |
+| PR-G3-20 | VALID | XSS name PUT → 200 lưu literal. |
+| PR-G3-21 | VALID | Mass assignment id + field lạ POST; id mới khác Q. |
+| PR-G3-22 | VALID | Mass assignment id + field lạ PUT; P giữ id. |
+| PR-G4-01 | VALID | Schema POST + round-trip price; assertion cụ thể. |
+| PR-G4-02 | VALID | Schema PUT + giá trị mới; kiểm price number. |
+| PR-G4-03 | VALID | Schema DELETE + GET 404; S2 và S3 rõ. |
+| PR-G4-04 | VALID | Schema lỗi thiếu name; list bằng snapshot. |
+| PR-G4-05 | VALID | Schema lỗi price 0; cùng predicate S3. |
+| PR-G4-06 | VALID | Schema lỗi DELETE id vắng → 404. |
+| PR-G4-07 | INCOMPLETE | Phụ thuộc phân bổ id chẵn/lẻ trong 10 lần POST; có thể dừng setup. |
+| PR-G4-08 | VALID | GET object đầy đủ; kiểm kiểu và giá trị từng field. |
+| PR-G6-01 | VALID | Thiếu name PUT → 400; dữ liệu không đổi. |
+| PR-G6-02 | VALID | Name rỗng PUT → 400. |
+| PR-G6-03 | VALID | Name số PUT → 400; giả định string bắt buộc. |
+| PR-G6-04 | VALID | Name 255 ký tự PUT → 200; đúng biên. |
+| PR-G6-05 | VALID | Name 256 ký tự PUT → 400; ngay trên biên. |
+| PR-G6-06 | VALID | Name null PUT → 400. |
+| PR-G6-07 | VALID | Price -1 PUT → 400; biên âm. |
+| PR-G6-08 | VALID | Price chuỗi PUT → 400. |
+| PR-G6-09 | VALID | Price null PUT → 400. |
+| PR-G6-10 | VALID | Price 0.01 PUT → 200; biên dương nhỏ. |
+| PR-G6-11 | VALID | Thiếu category PUT → 400; full PUT. |
+| PR-G6-12 | VALID | Category 99999 PUT → 400; xác minh vắng trước. |
+| PR-G6-13 | VALID | Category 0 PUT → 400. |
+| PR-G6-14 | VALID | Category -1 PUT → 400. |
+| PR-G6-15 | VALID | Thiếu price PUT → 400. |
+| PR-G6-16 | VALID | JWT alg none POST → 401; token N cụ thể. |
+| PR-G6-17 | VALID | JWT alg none PUT → 401. |
+| PR-G6-18 | VALID | JWT alg none DELETE → 401. |
+| PR-G6-19 | VALID | JWT sai cấu trúc not.a.jwt POST → 401. |
+| PR-G6-20 | VALID | JWT sai cấu trúc PUT → 401. |
+| PR-G6-21 | VALID | JWT sai cấu trúc DELETE → 401. |
+| PR-G6-22 | VALID | XSS description POST → 200 lưu literal; không kết luận UI. |
+| PR-G6-23 | VALID | XSS description PUT → 200 lưu literal. |
+| PR-G6-24 | VALID | javascript: ở imageUrl POST → 200 lưu literal. |
+| PR-G6-25 | VALID | javascript: ở imageUrl PUT → 200 lưu literal. |
+| PR-G6-26 | VALID | SQLi imageUrl POST → 200 lưu literal. |
+| PR-G6-27 | VALID | SQLi imageUrl PUT → 200 lưu literal. |
+| PR-G6-28 | VALID | Name 1 ký tự nhưng nhận diện bằng snapshot delta, không theo name. |
+| PR-G6-29 | VALID | Schema list; kiểm phần tử và đúng một object P. |
+| PR-G6-30 | VALID | Auth-first: POST body {} không token → 401. |
+| PR-G6-31 | VALID | Auth-first: PUT body {} không token → 401. |
+| PR-G6-32 | VALID | JWT không dấu chấm POST → 401; lớp cấu trúc khác. |
+| PR-G6-33 | VALID | Name array PUT → 400; sai kiểu. |
+| PR-G6-34 | VALID | Name boolean PUT → 400. |
+| PR-G6-35 | VALID | Price boolean PUT → 400. |
+
+**Tổng: 117 VALID – 2 INCOMPLETE – 8 INVALID / 127 case.**
