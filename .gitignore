@@ -6,3 +6,5 @@ __pycache__/
 # Tài liệu môn học giữ local (chỉ đưa vào zip)
 *.pptx.pdf
 2026.HW06*.pdf
+# Prompt giữ local (đề cấm copy prompt; chỉ đưa vào zip)
+*_PROMPTS.md
