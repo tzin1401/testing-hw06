@@ -406,3 +406,81 @@ Cột = nhãn "Kỹ thuật" ghi trong từng test. `∅ (nhãn)` = biên/lớp 
 - Ma trận dựa trên nhãn "Kỹ thuật" từng dòng; biên được phủ bằng ST thay vì BVA ghi `∅ (nhãn)` kèm ID, không coi là lỗ hổng.
 - F1/F2 được lấp bằng quy tắc văn bản, không bằng sửa dòng cũ; cần giữ quy tắc này khi chuyển sang Execute.
 - Không ghi nhãn VALID/INVALID/INCOMPLETE; số liệu là kết quả đọc và đếm tài liệu, không có lần chạy SUT.
+
+## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)
+
+Phần này chỉ gắn nhãn, không sửa bảng test phía trên. Nhãn xét theo quy ước hiện hành của chính file (quy tắc hợp nhất ở G6).
+- **VALID** – chạy được ngay theo dòng; expected rõ, có nguồn spec hoặc giả định đã ghi và không mâu thuẫn.
+- **INCOMPLETE** – request đúng nhưng còn thiếu hoặc không chắc một phần để chạy/assert: status cũ đã có quy ước thay thế, setup có điều kiện spec không bảo đảm, hoặc oracle chưa kiểm được.
+- **INVALID** – trùng ngữ nghĩa với case khác (không thêm độ phủ), hoặc case không kiểm được điều nó tuyên bố.
+
+| ID | Nhãn | Lý do (1 dòng) |
+|---|---|---|
+| LG-G1-01 | VALID | Email tồn tại + password đúng → 200 S, khớp A:24–32. |
+| LG-G1-02 | VALID | Email chưa tồn tại → 400 E; status là giả định đã ghi, request chạy được. |
+| LG-G1-03 | VALID | Thiếu @; expected 400 là giả định rõ vì R:44 chỉ nói validation UI. |
+| LG-G1-04 | VALID | Thiếu domain; cùng lớp format không hợp lệ, request cụ thể. |
+| LG-G1-05 | VALID | Khoảng trắng trong email; lớp format không hợp lệ, expected rõ. |
+| LG-G1-06 | VALID | Email rỗng (biên 0 ký tự) → 400 E. |
+| LG-G1-07 | VALID | Thiếu field email; body cụ thể, expected 400. |
+| LG-G1-08 | VALID | Email null → 400; giả định kiểu đã ghi. |
+| LG-G1-09 | VALID | Email kiểu số → 400; giả định kiểu đã ghi. |
+| LG-G1-10 | VALID | Email khác hoa/thường → 200; giả định normalize đã ghi rõ. |
+| LG-G1-11 | VALID | Email có khoảng trắng đầu → 200; giả định trim đã ghi. |
+| LG-G1-12 | VALID | Email có khoảng trắng cuối → 200; giả định trim đã ghi. |
+| LG-G1-13 | VALID | Email 4096 ký tự → 400; ngưỡng không có trong spec nên đã ghi giả định. |
+| LG-G1-14 | INVALID | Trùng D1 với LG-G1-01: cùng request/expected, không thêm độ phủ. |
+| LG-G1-15 | VALID | Password sai 1 ký tự → 400 E; một tham số sai duy nhất. |
+| LG-G1-16 | VALID | Password sai hoa/thường → 400; giả định phân biệt đã ghi. |
+| LG-G1-17 | VALID | Password rỗng (biên 0) → 400 E. |
+| LG-G1-18 | VALID | Thiếu password → 400; body cụ thể. |
+| LG-G1-19 | VALID | Password null → 400; giả định kiểu đã ghi. |
+| LG-G1-20 | VALID | Password kiểu số → 400; giả định kiểu đã ghi. |
+| LG-G1-21 | VALID | Password 4096 ký tự → 400; ngưỡng là giả định đã ghi. |
+| LG-G1-22 | VALID | Body rỗng {} → 400 E. |
+| LG-G1-23 | VALID | JSON sai cú pháp → 400 E; request raw cụ thể. |
+| LG-G1-24 | VALID | Content-Type text/plain → 415; status riêng đã ghi rõ. |
+| LG-G1-25 | VALID | Field thừa → 200; giả định bỏ qua field thừa đã ghi. |
+| LG-G2-01 | VALID | 0→1 và không nhảy counter; chuỗi W, W, C kiểm được. |
+| LG-G2-02 | INVALID | Trùng D3 với LG-G2-01: cùng W, W, C; chỉ chuyển W đầu vào setup. |
+| LG-G2-03 | VALID | 2→K: sai lần thứ ba khóa, 423 giả định đã ghi. |
+| LG-G2-04 | VALID | 0→0 khi đúng; chuỗi C, W, W, C kiểm reset. |
+| LG-G2-05 | VALID | 1→0 khi đúng; chứng minh login đúng xóa chuỗi sai. |
+| LG-G2-06 | VALID | 2→0; chuỗi 1-switch sai-đúng-sai không cộng dồn. |
+| LG-G2-07 | VALID | Trong khóa cả W và C bị từ chối; kiểm thông báo không lộ nguyên nhân. |
+| LG-G2-08 | VALID | T tại trạng thái 0 là no-op; chờ 31 giây rồi W, W, C. |
+| LG-G2-09 | VALID | T tại 1 không xóa counter; W, W, C → 400, 423, 423. |
+| LG-G2-10 | VALID | T tại 2 không xóa counter; W, C → 423, 423. |
+| LG-G2-11 | VALID | Biên 29 giây còn khóa / 31 giây mở; status theo từng mốc. |
+| LG-G2-12 | VALID | Khóa A không ảnh hưởng B; có user B riêng. |
+| LG-G3-01 | VALID | SQL tautology ở email; 400 E và C xác nhận tài khoản còn dùng. |
+| LG-G3-02 | VALID | SQL comment ở email; payload cụ thể, kiểm hậu quả. |
+| LG-G3-03 | VALID | SQL UNION ở email; payload cụ thể, kiểm hậu quả. |
+| LG-G3-04 | VALID | SQL tautology ở password; một tham số tấn công. |
+| LG-G3-05 | VALID | SQL UNION ở password; payload cụ thể. |
+| LG-G3-06 | INVALID | Trùng D2 với LG-G4-03; G4-03 là tập cha có thêm schema 200. |
+| LG-G3-07 | VALID | Chống dò email: so status/message giữa email lạ và password sai. |
+| LG-G3-08 | VALID | JWT 3 phần, payload id/role; decode không cần secret. |
+| LG-G3-09 | VALID | Brute force: 3 sai khóa cả password đúng, mở sau 31 giây. |
+| LG-G3-10 | VALID | Email 10.000 ký tự; kiểm không lỗi CSDL và tài khoản còn nguyên. |
+| LG-G3-11 | VALID | Password 10.000 ký tự; cùng oracle với case 10. |
+| LG-G3-12 | VALID | Ký tự điều khiển trong email; payload cụ thể. |
+| LG-G3-13 | VALID | Ký tự điều khiển trong password; payload cụ thể. |
+| LG-G3-14 | VALID | Object $ne thay email; kiểm từ chối và tài khoản còn nguyên. |
+| LG-G3-15 | VALID | Object $ne thay password; payload cụ thể. |
+| LG-G3-16 | VALID | Array thay email; kiểm từ chối kiểu. |
+| LG-G3-17 | VALID | Array thay password; kiểm từ chối kiểu. |
+| LG-G4-01 | VALID | Status, media type và schema 200; assertion cụ thể. |
+| LG-G4-02 | VALID | Kiểu từng field user; field là quan sát, đã ghi giả định. |
+| LG-G4-03 | VALID | Không lộ password/hash; superset của LG-G3-06. |
+| LG-G4-04 | INCOMPLETE | Status 401 cũ, quy ước G6 đọc thành 400; phải sửa trước Execute. |
+| LG-G4-05 | INCOMPLETE | Status 403 cũ, quy ước G6 đọc thành 423; phải sửa trước Execute. |
+| LG-G4-06 | VALID | Schema lỗi thiếu password → 400 E, assertion cụ thể. |
+| LG-G4-07 | VALID | Thời gian login < 2000 ms; ngưỡng giả định đã ghi. |
+| LG-G6-01 | VALID | Hết khóa reset counter không nhờ login đúng; W, W, W rồi chờ 31 giây. |
+| LG-G6-02 | VALID | Token mới dùng được ở GET /api/users/me; đúng danh tính. |
+| LG-G6-03 | VALID | Chống dò email sau 3–4 lần sai; so từng cặp status/message. |
+| LG-G6-04 | VALID | Bearer sai không chặn login đúng; ME xác nhận token mới dùng được. |
+| LG-G6-05 | VALID | Role admin do client gửi không nâng quyền; kiểm JWT và ME. |
+
+**Tổng: 61 VALID – 2 INCOMPLETE – 3 INVALID / 66 case.**

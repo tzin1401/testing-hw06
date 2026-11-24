@@ -28,7 +28,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > Read-only deliverable: supply complete ready-to-save a–f markdown with accurate line citations for BOTH docs, full constraints and SEC-01..07 mapping per API (explicit indirect/not applicable). No observations invented. Steps 1/3 handled independently, step4 by manager.
 - **AI output:**
   > Tạo report/01_spec_analysis.md: bảng tham số, trạng thái, bảo mật, response contract, điểm mơ hồ và API dựng precondition cho Login, Hủy đơn và từng endpoint Product CRUD. Reset SUT và ghi 9 response happy path localhost thực tế, token chỉ giữ 10 ký tự đầu. Tách quan sát khỏi expected; không đọc code SUT, không kết luận bug. Manager giữ quyền ghi file/log và commit; scout chỉ đọc spec, sonic chỉ thực thi. Dừng sau Bước 0, chưa sinh test case.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đã đọc lại bảng tham số và các response happy path; chấp nhận dùng làm nguồn expected. Phần status/schema lỗi còn mơ hồ giữ nguyên để các bước sau ghi GIẢ ĐỊNH.
 
 ## #2 – 2026-11-24 14:41 (giờ VN)
 - **AI tool:** task LoginG1 – OpenAI Codex (openai-codex/gpt-6.1-terra); Manager kiểm tra và ghi log (openai-codex/gpt-6.1-sol)
@@ -72,7 +72,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > Xong khi: mỗi tham số có bảng lớp và ít nhất 1 test case cho mỗi lớp, tối thiểu 14 test case, ID LG-G1-xx, cột "Nguồn expected" có trích spec hoặc ghi GIẢ ĐỊNH.
 - **AI output:**
   > Tạo report/testcases/API1_login_generated.md với 25 test case LG-G1-01–25: 13 lớp email, 8 lớp password, 4 lớp body; bảng lớp ánh xạ ID trước bảng test 9 cột. Mỗi case đăng ký user riêng bằng email có case ID và UUID. Expected chưa được spec quy định được ghi GIẢ ĐỊNH. Manager yêu cầu bổ sung method/path/header trong từng Request và định nghĩa nguồn R/A. Không đọc implementation, không gọi SUT, không thực hiện bước tiếp theo.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 25 case LG-G1: đủ lớp email/password/body. Đồng ý LG-G1-14 trùng LG-G1-01; các giả định trim, không phân biệt hoa-thường và mốc 4096 là chưa có trong spec nên chỉ dùng để thăm dò.
 
 ## #3 – 2026-11-24 14:51 (giờ VN)
 - **AI tool:** LGG2 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -129,7 +129,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Append G2: 12 case ST LG-G2-01–12; ma trận 4×3 có ID từng ô, ngưỡng 2/3 lần, chờ 29/31 giây, reset/cách ly tài khoản. Manager đọc phần mới và kiểm tra tĩnh đạt; không gọi SUT, các điểm spec chưa rõ ghi GIẢ ĐỊNH.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 12 case LG-G2: ngưỡng 2/3 lần và chờ 29/31 giây đúng FR-02. Đồng ý LG-G2-02 trùng LG-G2-01; chấp nhận giả định không gia hạn khóa để chạy.
 
 ## #4 – 2026-11-24 14:51 (giờ VN)
 - **AI tool:** CNG1 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -183,7 +183,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Tạo API2_cancel_generated.md với 16 case (12 EP, 4 BVA), bảng lớp path/auth/body có ánh xạ; setup đơn riêng và xác minh ID vắng mặt, kiểm tra trạng thái sau request. Manager đọc và kiểm tra 9 cột/ID/request/nguồn đạt; không gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 16 case CN-G1: phủ đủ path id, Authorization và body. Các case 02/05/06 cần xác minh ID vắng qua danh sách admin nên sẽ ghi chú điều kiện khi chạy.
 
 ## #5 – 2026-11-24 14:52 (giờ VN)
 - **AI tool:** PRG1 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -239,7 +239,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Tạo API3_product_generated.md với 46 case EP/BVA, phủ mọi lớp name/price/category/description/imageUrl/path/body và POST/PUT/DELETE. Setup admin, sản phẩm riêng, ID vắng mặt xác minh, snapshot dữ liệu. Manager đọc và kiểm tra tĩnh đạt; không gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 46 case PR-G1: phủ name/price/category/description/imageUrl/path/body. Loại PR-G1-04 vì nhận diện theo tên 'a' dễ pass nhầm; 22/35/39/40 trùng case khác.
 
 ## #6 – 2026-11-24 14:53 (giờ VN)
 - **AI tool:** LGG3 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -294,7 +294,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Append G3: 17 case SEC, gồm SQLi email/password, rò password, chống dò email, JWT, brute force, input 10000 ký tự/control/object/array. Setup riêng và kiểm tra tài khoản sau tấn công. Manager đọc và kiểm tra tĩnh đạt; không request SUT, các diễn giải bảo mật ghi giả định.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 17 case LG-G3: SQLi, JWT, brute force, input dài/điều khiển/object/array đủ. Đồng ý LG-G3-06 trùng LG-G4-03.
 
 ## #7 – 2026-11-24 14:54 (giờ VN)
 - **AI tool:** PRG2 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -349,7 +349,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Append G2: 16 case ST, bảng 3 trạng thái×4 sự kiện gắn ID từng ô; vòng đời đầy đủ, snapshot FR-15 chỉ sửa đích, trùng tên và partial PUT. Manager yêu cầu chuyển bullets thành bảng đúng tiêu chí rồi kiểm tra tĩnh đạt; không gọi SUT, lifecycle/status chưa quy định ghi GIẢ ĐỊNH.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 16 case PR-G2: 12 ô chuyển trạng thái đều có case. 01/07/09 trùng; PR-G2-16 (PUT một phần) sẽ đổi expected sang 400 theo quy ước full PUT.
 
 ## #8 – 2026-11-24 14:54 (giờ VN)
 - **AI tool:** LGG4 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -402,7 +402,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Append G4: 7 case SCH và 2 JSON Schema draft07 (success/error), kiểm tra status/media type/kiểu user/sensitive/error/timing. Chỉ token,user required theo spec; field quan sát tùy chọn, các ràng buộc khác ghi giả định. Manager đọc và kiểm tra parse/meta-schema đạt, không gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 7 case LG-G4: schema 200/lỗi và timing rõ. LG-G4-04/05 phải đọc status 400/423 theo quy ước G6 thay vì 401/403.
 
 ## #9 – 2026-11-24 14:54 (giờ VN)
 - **AI tool:** CNG2 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -455,7 +455,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Append G2: 13 case ST, ma trận 5×5 đủ nguồn/actor/ID từng ô; User cancel từ 5 trạng thái, chuỗi, final states, cách ly hai đơn. Request macros U/A/K được định nghĩa đầy đủ; manager đọc và kiểm tra tĩnh đạt. Shipping Admin/self-transition/status giả định, không gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 13 case CN-G2: ma trận 5×5 có ID từng ô, self-transition ghi giả định. 01/11/12 trùng case khác.
 
 ## #10 – 2026-11-24 14:56 (giờ VN)
 - **AI tool:** PRG3 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -510,7 +510,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Append G3: 22 case SEC; no-token/user-role/profile-escalation/forged-JWT phủ 3 methods; SQLi name/description/path, XSS và mass assignment khi áp dụng. Snapshot và GET kiểm tra dữ liệu sau từng tấn công, không tác động seed trực tiếp; manager đọc và kiểm tra tĩnh đạt, không gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 22 case PR-G3: đủ thiếu token, user thường, token giả, SQLi, XSS và mass assignment. Thiếu alg none đã được bổ sung ở G6.
 
 ## #11 – 2026-11-24 14:56 (giờ VN)
 - **AI tool:** CNG3 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -565,7 +565,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Append G3: 12 case SEC (IDOR pending/confirmed, JWT absent/expired/signature/deleted/forged, 3 SQLi, admin route, enumeration). Setup hai user/hai đơn độc lập, GET sau từng tấn công; điều kiện exp và deleted-user ghi rõ. Manager đọc và kiểm tra tĩnh đạt; không gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 12 case CN-G3: IDOR, token, SQLi và dò ID đủ. 03/05 trùng; 01/02 đổi 403 thành 404 theo quy ước G6.
 
 ## #12 – 2026-11-24 14:57 (giờ VN)
 - **AI tool:** CNG4 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -615,7 +615,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Append G4: 6 case SCH và 3 JSON Schema draft07 cho cancel success/error/order GET; kiểm tra status/media/schema/canceled spelling/error/timing. Phân biệt field message quan sát và field GET chưa quan sát. Manager đọc, parse và Draft7 metaschema đạt; không gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 6 case CN-G4: schema success/error/GET và timing rõ. 03/04 trùng; các case phụ thuộc exp hoặc xóa user sẽ đánh dấu không chạy được nếu setup không đạt.
 
 ## #13 – 2026-11-24 14:57 (giờ VN)
 - **AI tool:** PRG4 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -665,7 +665,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Append G4: 8 case SCH, 4 Draft07 schemas (POST, PUT/DELETE, error, product), price number/round-trip và id chẵn/lẻ từ sản phẩm tự tạo, 4xx và timing. Manager đọc và kiểm tra parse/metaschema đạt, không gọi SUT; response chưa đặc tả ghi giả định.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 8 case PR-G4: schema POST/PUT/DELETE/lỗi và kiểu price. Case 07 phụ thuộc id chẵn-lẻ nên chỉ chạy khi setup đủ.
 
 ## #14 – 2026-11-24 14:59 (giờ VN)
 - **AI tool:** LGG5 (anthropic/claude-sonnet-5-5); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -717,7 +717,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Append G5: tổng thô61, trừ3 nhóm trùng còn58 (EP20/BVA4/ST11/SEC16/SCH7), kết luận ĐỦ≥35; ma trận18×5 và danh sách5 lỗH1–H5. Phát hiện mâu thuẫn giả định statusF1 giữa G1–G3 vàG4 cần thống nhất trước Execute. Manager đọc báo cáo và kiểm tra ID tham chiếu đạt; không Audit hay SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đọc báo cáo G5: đồng ý 58/61 sau khi trừ D1–D3, giữ case trùng để truy vết. F1/F2 chuyển sang G6 xử lý.
 
 ## #15 – 2026-11-24 15:01 (giờ VN)
 - **AI tool:** LGG6 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -765,7 +765,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Append G6: 5 case mới lấp H1–H5 (expiry reset không qua login đúng, Bearer dùng được, anti-enumeration lockout, auth header sai tại login, role injection). Quy tắc hợp nhất status400/423 và error string thay giả định cũ LG-G4-04/05 mà không sửa G1–G5. Manager đọc/check tĩnh đạt; 66 thô, dự kiến63 sau trùng chờ reviewer xác nhận; không gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 5 case LG-G6: lấp đúng H1–H5. Đồng ý cách so sánh lỗi tương đối ở H3 và dùng GET /api/users/me để kiểm token.
 
 ## #16 – 2026-11-24 15:03 (giờ VN)
 - **AI tool:** PRG5 (anthropic/claude-sonnet-5-5); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -817,7 +817,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Append G5: 92 thô, 5 nhóm trùng loại7 còn85; bảng đếm theo kỹ thuật/method, ma trận18×5, format92/92 đủ cột, 10 lỗH1–H10. Thiếu PUT validation/token none, các vấn đề XSS/identity/partialPUT/list/auth-first. Manager đọc và kiểm tra tham chiếu đạt; chuyển G6, không Audit hay gọi SUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đọc G5 của API 3: 92→85 và H1–H10 hợp lý; chấp nhận chuyển toàn bộ lỗ hổng sang G6.
 
 ## #17 – 2026-11-24 15:04 (giờ VN)
 - **AI tool:** CNG5 (anthropic/claude-sonnet-5-5); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -869,7 +869,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Append G5: 47 thô, 5 nhóm trùng loại5 còn42 (EP12/BVA4/ST10/SEC10/SCH6); ma trận User-cancel×5states + FR/SEC/params, 9 lỗH1–H9. Phát hiện403/404 ownership xung đột và error predicates yếu, chuyểnG6 hợp nhất giả định/schema. Manager đọc/check tham chiếu đạt; không SUT/Audit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đọc G5 của API 2: 47→42 và H1–H9 hợp lý; ưu tiên H1–H3, chấp nhận 403/404 là giả định chờ G6 chốt.
 
 ## #18 – 2026-11-24 15:05 (giờ VN)
 - **AI tool:** LGG5R2 (anthropic/claude-sonnet-5-5); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -923,7 +923,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Append bản G5 cuối sau G6:66 thô,3nhómtrùng còn63 (EP21/BVA4/ST12/SEC19/SCH7), H1–H5 vàF1/F2 đóng, không còn thiếu case. Ngoại lệmedia415 nêu rõ trongbảncuối; các status/schema khác là giảđịnh. Manager đọc báo cáo, xácnhận1dòngclarification và kiểmtra thamchiếu đạt; không SUT/Audit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đọc lại G5 API 1: 66→63, F1/F2 đã có quy tắc thay thế. Đồng ý không sửa dòng cũ, chỉ áp quy ước khi Execute.
 
 ## #19 – 2026-11-24 15:07 (giờ VN)
 - **AI tool:** PRG6 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -971,7 +971,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Append G6:35case lấpH1–H10, PUTvalidation, unsigned/malformedJWT cả3methods, XSSdescription/imageUrl/javascript và SQLimageUrl, snapshotname1ký tự, fullPUT policy toànAPI3, list schema, auth-first. Manager yêu cầu rõ precedence và javascriptvector rồi đọc/check9cột/IDs/nguồn đạt; không gọiSUT. Tổng127thô, chờreviewertrừtrùng.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 35 case PR-G6: phủ H1–H10, chọn full PUT và bỏ qua field thừa. Đồng ý D6 thay PR-G1-04 bằng PR-G6-28.
 
 ## #20 – 2026-11-24 15:07 (giờ VN)
 - **AI tool:** CNG6 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -1021,7 +1021,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Append G6:12case lấpH1–H9 (auth-firstmissingID, algnone, Oabc,2147483647, shippingschema, Adminstate,foreignshipping/finals,adminrole,404schema). Hợpnhất error/success predicates,status; Userforeign404, Adminbypassownership làgiảđịnh vẫnstate400. Manager đọc/checktĩnh đạt;59thô chờreviewertrừtrùng; khôngSUT.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Duyệt 12 case CN-G6: phủ H1–H9. Chốt 404 cho đơn người khác, 400/403/401 theo actor; các case cần V(X) sẽ ghi chú điều kiện.
 
 ## #21 – 2026-11-24 15:13 (giờ VN)
 - **AI tool:** PRG5R2 (anthropic/claude-sonnet-5-5); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -1075,7 +1075,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Append G5cuối sauG6:127thô,6nhómtrùng hợp loại8 còn119 (EP40/BVA20/ST13/SEC37/SCH9); H1–H10đóng, khôngcònthiếucase. G6-28thayoracleweakG1-04, fullPUT400 làhiệnhànhchoG2-16. Manager đọc/check ID vàtự tínhhợpnhómtrùng từlabelsthậtđạt; khôngSUT/Audit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đọc lại G5 API 3: 127→119, không còn lỗ hổng thật. Đồng ý giữ D1–D6 để truy vết, không xóa case.
 
 ## #22 – 2026-11-24 15:15 (giờ VN)
 - **AI tool:** CNG5R2 (anthropic/claude-sonnet-5-5); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
@@ -1129,4 +1129,4 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > OWN FILE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Append G5cuối sauG6:59thô,7nhómtrùng hợp loại9 còn50 (EP12/BVA5/ST10/SEC19/SCH4); H1–H9đóng, schema-error dedup phản ánh predicateEtoànfile. Manager đọc và chỉnh4dòngbáocáo: successpredicatehiệnhành, deleteduser tokenvẫn dùngđược làtestfailkhôngskip, phânbiệtFR10specvớigiảđịnh. CheckID/cột vàtự tínhhợpnhómtrùngđạt; không SUT/Audit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đọc lại G5 API 2: 59→50, không còn lỗ hổng thật. Các case điều kiện (exp, xóa user, V(X)) sẽ báo không chạy được thay vì pass.
