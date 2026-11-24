@@ -156,3 +156,80 @@ Setup `F`: tạo JWT HS256 bằng cách base64url không padding UTF-8 của hea
 **Ghi chú của AI:** Status và schema lỗi, GET shape, xử lý field thừa, HTML và malformed id đều không được quy định cụ thể; lựa chọn trong bảng là giả định để audit.
 SEC-04 yêu cầu escape khi hiển thị UI, không bắt buộc API từ chối HTML; kiểm thử API không chứng minh việc render an toàn.
 SEC-05 yêu cầu parameterized query; các phép thử black-box chỉ kiểm tra hậu quả của payload, không chứng minh cơ chế nội bộ.
+
+## G4 – Schema validation
+
+Bốn schema JSON Schema draft-07 dưới đây là mô hình kiểm thử, không phải hợp đồng response được spec bảo đảm. Spec không quy định field response bắt buộc; do đó các field đều tùy chọn trong schema, còn các case yêu cầu hiện diện được ghi rõ là **GIẢ ĐỊNH**. Mục 4.5 của phân tích chỉ quan sát POST có `message` string và `id` integer, PUT/DELETE có `message` string; không coi các quan sát này là yêu cầu. GET product chưa được quan sát.
+
+**S1 — POST thành công:** `message`, `id` là field đã quan sát, nhưng spec không nói.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "message": {"type": "string"},
+    "id": {"type": "integer"}
+  }
+}
+```
+
+**S2 — PUT và DELETE thành công:** `message` đã quan sát, nhưng spec không nói; dùng chung vì hai response quan sát có cùng cấu trúc.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "message": {"type": "string"}
+  }
+}
+```
+
+**S3 — lỗi:** shape `{error: string}` là GIẢ ĐỊNH, chưa được quan sát hoặc đặc tả; case lỗi yêu cầu `error` hiện diện riêng.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "error": {"type": "string"}
+  }
+}
+```
+
+**S4 — object sản phẩm:** toàn bộ field và kiểu response là GIẢ ĐỊNH; API spec 3.3 chỉ đưa ví dụ body input, không định nghĩa response GET. Ràng buộc price dương dựa trên FR-15.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": {"type": "integer"},
+    "name": {"type": "string"},
+    "price": {"type": "number", "exclusiveMinimum": 0},
+    "description": {"type": "string"},
+    "imageUrl": {"type": "string"},
+    "category_id": {"type": "integer"}
+  }
+}
+```
+
+Quy ước G4 độc lập **mỗi dòng**: sinh UUID mới `U`, `K` là ID case nối `-` với `U`. POST `/api/login` không Authorization, header `Content-Type: application/json`, body `{"email":"admin@eshop.com","password":"Admin123!"}`, lấy `token` làm `T`; GET `/api/categories` không body, chọn id danh mục hiện có làm số `C`, nếu không chọn được thì dừng setup. Với mọi request product dùng `Authorization: Bearer {{T}}`; POST/PUT thêm `Content-Type: application/json`, GET/DELETE không body. `B` = `{"name":"{{K}}","price":12345,"description":"Mô tả {{K}}","imageUrl":"https://example.com/initial.png","category_id":{{C}}}`; `B2` = `{"name":"{{K}}-updated","price":23456,"description":"Mô tả mới {{K}}","imageUrl":"https://example.com/updated.png","category_id":{{C}}}`. Thay placeholder bằng giá trị thực, C là JSON number.
+
+Setup `P`: POST `/api/products` với B, sau đó GET `/api/products` tìm duy nhất sản phẩm name K, lấy integer id `P`; dừng nếu không xác định duy nhất hoặc P thuộc 1..5. Setup lấy id theo list và hình dạng list là giả định. Mỗi request chính và GET xác minh trong bảng phải có `Content-Type` response `application/json` (cho phép tham số charset), hoàn tất trong **< 2000 ms** tính riêng từng request, và đúng status trong bảng; các điều kiện này đều là GIẢ ĐỊNH do spec không quy định. Nếu setup thất bại, ghi thất bại setup, không dùng dữ liệu case khác.
+
+| ID | Kỹ thuật | Requirement | Mục đích | Precondition / setup | Request | Expected status | Expected body / kiểm tra | Nguồn expected |
+|---|---|---|---|---|---|---|---|---|
+| PR-G4-01 | SCH | FR-15 | Schema tạo và round-trip price | Quy ước G4; chưa tạo P | POST /api/products; Bearer T; JSON B; GET /api/products lấy P duy nhất theo K, dừng nếu P thuộc 1..5; GET /api/products/{{P}}; Bearer T; không body | 200 → 200 → 200 | POST khớp S1 và có message string, id integer bằng P; GET detail khớp S4, có id P, name K, price kiểu number bằng 12345, description/imageUrl/category_id đúng B | README:193–197; API spec:81,85,88,91–99; GIẢ ĐỊNH status, content-type, timing, response schema, list/GET shape và id |
+| PR-G4-02 | SCH | FR-15 | Schema sửa và kiểm tra giá trị mới | Quy ước G4; P | PUT /api/products/{{P}}; Bearer T; JSON B2; GET /api/products/{{P}}; Bearer T; không body | 200 → 200 | PUT khớp S2, có message string; GET khớp S4, có id P, name K-updated, price number bằng 23456, description/imageUrl/category_id đúng B2 | README:193,196,198; API spec:85,89,91–99; GIẢ ĐỊNH status, content-type, timing, response schema và GET shape |
+| PR-G4-03 | SCH | FR-15 | Schema xóa | Quy ước G4; P | DELETE /api/products/{{P}}; Bearer T; không body; GET /api/products/{{P}}; Bearer T; không body | 200 → 404 | DELETE khớp S2 và có message string; GET khớp S3 và có error string không rỗng | README:193; API spec:85,90; GIẢ ĐỊNH status, content-type, timing, schema lỗi/success và GET sau xóa |
+| PR-G4-04 | SCH | FR-15 | Lỗi tạo thiếu name | Quy ước G4; GET /api/products lưu snapshot S theo id và toàn bộ field | POST /api/products; Bearer T; JSON `{"price":12345,"description":"Mô tả {{K}}","imageUrl":"https://example.com/initial.png","category_id":{{C}}}`; GET /api/products; Bearer T; không body | 400 → 200 | POST khớp S3, có error string không rỗng; list sau bằng S bỏ qua thứ tự | README:195; API spec:81,88,91–99; GIẢ ĐỊNH status, content-type, timing, error schema và GET list shape |
+| PR-G4-05 | SCH | FR-15 | Lỗi sửa price không dương | Quy ước G4; P; GET /api/products lưu snapshot S | PUT /api/products/{{P}}; Bearer T; JSON `{"name":"{{K}}","price":0,"description":"Mô tả {{K}}","imageUrl":"https://example.com/initial.png","category_id":{{C}}}`; GET /api/products; Bearer T; không body | 400 → 200 | PUT khớp S3, có error string không rỗng; list sau bằng S bỏ qua thứ tự | README:196,198; API spec:81,89,91–99; GIẢ ĐỊNH status, content-type, timing, error schema và GET list shape |
+| PR-G4-06 | SCH | FR-15 | Lỗi xóa id không tồn tại | Quy ước G4; GET /api/products chọn integer A lớn hơn 5 và mọi id trong list; GET /api/products/{{A}} xác nhận 404; lưu list làm S | DELETE /api/products/{{A}}; Bearer T; không body; GET /api/products; Bearer T; không body | 404 → 200 | DELETE khớp S3, có error string không rỗng; list sau bằng S bỏ qua thứ tự | API spec:81,85,90; GIẢ ĐỊNH status, content-type, timing, error schema và hành vi id vắng mặt |
+| PR-G4-07 | SCH | FR-15 | Kiểu price trên product id chẵn và lẻ | Quy ước G4; lần lượt POST tối đa 10 sản phẩm bằng B, thay name thành `{{K}}-1` đến `{{K}}-10`, thay price tương ứng 10001 đến 10010; sau mỗi POST GET /api/products tìm id duy nhất theo name, dừng khi có một id chẵn E và một id lẻ O đều >5, lưu price đã gửi là PE, PO; không đủ hai parity thì setup thất bại | GET /api/products/{{E}}; Bearer T; không body; GET /api/products/{{O}}; Bearer T; không body | 200 → 200 | Mỗi body khớp S4 và có id đúng E hoặc O, price là number chứ không phải string và bằng PE hoặc PO tương ứng | README:193,196; API spec:81,85,88,91–99; GIẢ ĐỊNH id integer, phân bổ parity, status, content-type, timing và GET shape |
+| PR-G4-08 | SCH | FR-15 | Kiểm tra GET object đầy đủ | Quy ước G4; P | GET /api/products/{{P}}; Bearer T; không body | 200 | Body khớp S4 và có đủ id, name, price, description, imageUrl, category_id; id P và mọi giá trị còn lại đúng B, price number bằng 12345 | README:193,196; API spec:85,91–99; GIẢ ĐỊNH status, content-type, timing và mọi field/kiểu GET |
+
+**Ghi chú của AI:** Spec không quy định response schema/status, `Content-Type` hay ngưỡng 2000 ms; các kiểm tra tương ứng là giả định để audit, không phải kết quả SUT.
+`message`/`id` chỉ được quan sát ở response POST trước đó; `message` PUT/DELETE cũng chỉ là quan sát. GET product và lỗi chưa được quan sát.
+Parity id không được spec bảo đảm; case 07 dừng setup sau 10 sản phẩm nếu không tạo được cả hai loại, không sửa hay xóa seed.
