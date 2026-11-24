@@ -516,3 +516,74 @@ Các điểm cũ không đổi và vẫn thuộc việc audit của sinh viên, 
 **Ghi chú của AI:** Ranh giới trùng thật và gần trùng là đánh giá của AI. Sinh viên có thể dùng quy tắc khác ở bước Audit; số 50 đổi theo (54 theo quy tắc cũ, 41 nếu gộp cả gần trùng).
 Việc nhập E vào hàng cũ là diễn giải của quy ước G6, không phải sửa ô cũ; Execute phải áp dụng E và quy ước 404 cho CN-G3-01, CN-G3-02 một cách tường minh.
 Các mã HTTP, schema lỗi, thứ tự xác thực/ownership, trạng thái ban đầu sau checkout và việc Admin dùng endpoint User là GIẢ ĐỊNH, không phải response đã quan sát. Năm trạng thái và các ràng buộc chuyển trạng thái FR-10 có nguồn đặc tả, không phải tất cả đều là giả định. Một số ô `∅N` là phán đoán về phạm vi (ví dụ SEC-06 thuộc API hồ sơ).
+
+## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)
+
+Phần này chỉ gắn nhãn, không sửa bảng test phía trên. Nhãn xét theo quy ước hiện hành của chính file (quy tắc hợp nhất ở G6).
+- **VALID** – chạy được ngay theo dòng; expected rõ, có nguồn spec hoặc giả định đã ghi và không mâu thuẫn.
+- **INCOMPLETE** – request đúng nhưng còn thiếu hoặc không chắc một phần để chạy/assert: status cũ đã có quy ước thay thế, setup có điều kiện spec không bảo đảm, hoặc oracle chưa kiểm được.
+- **INVALID** – trùng ngữ nghĩa với case khác (không thêm độ phủ), hoặc case không kiểm được điều nó tuyên bố.
+
+| ID | Nhãn | Lý do (1 dòng) |
+|---|---|---|
+| CN-G1-01 | VALID | User hủy đơn pending của mình → 200, K xác nhận canceled. |
+| CN-G1-02 | INCOMPLETE | ID vắng → 404 nhưng chỉ chạy nếu V(X) xác minh được qua danh sách admin. |
+| CN-G1-03 | VALID | ID 0 → 400; biên dưới giả định đã ghi. |
+| CN-G1-04 | VALID | ID -1 → 400; phía âm của biên. |
+| CN-G1-05 | INCOMPLETE | ID 2147483648: phụ thuộc V(X) qua danh sách admin, spec không bảo đảm. |
+| CN-G1-06 | INCOMPLETE | ID 9999999999: phụ thuộc V(X) qua danh sách admin. |
+| CN-G1-07 | VALID | ID 1.5 → 400; lớp không phải số nguyên. |
+| CN-G1-08 | VALID | ID abc → 400; lớp chữ. |
+| CN-G1-09 | VALID | ID %40 → 400; ký tự đặc biệt. |
+| CN-G1-10 | VALID | ID %20 → 400; khoảng trắng. |
+| CN-G1-11 | VALID | Thiếu Authorization → 401, K xác nhận đơn vẫn pending. |
+| CN-G1-12 | VALID | Bearer rỗng → 401; header cụ thể. |
+| CN-G1-13 | VALID | Scheme Basic với JWT user → 401. |
+| CN-G1-14 | VALID | JWT sai chữ ký → 401; cách tạo Tbad cụ thể. |
+| CN-G1-15 | VALID | Bearer not-a-jwt → 401; token rác. |
+| CN-G1-16 | VALID | Body thừa status=delivered không đổi kết quả; 200 canceled. |
+| CN-G2-01 | INVALID | Trùng D1 với CN-G1-01: cùng request/expected, chỉ khác nhãn ST. |
+| CN-G2-02 | VALID | User hủy đơn confirmed → 200, K canceled. |
+| CN-G2-03 | VALID | User không hủy shipping → 400, K vẫn shipping; đúng R:161. |
+| CN-G2-04 | VALID | User không hủy delivered → 400; trạng thái kết thúc. |
+| CN-G2-05 | VALID | Hủy hai lần: 200 rồi 400, K vẫn canceled. |
+| CN-G2-06 | VALID | 5 cạnh từ pending qua Admin; self-transition ghi giả định. |
+| CN-G2-07 | VALID | 5 cạnh từ confirmed; status từng đích rõ. |
+| CN-G2-08 | VALID | 5 cạnh từ shipping; Admin hủy shipping là giả định, không suy diễn. |
+| CN-G2-09 | VALID | 5 cạnh từ delivered đều 400; K giữ delivered. |
+| CN-G2-10 | VALID | 5 cạnh từ canceled đều 400; K giữ canceled. |
+| CN-G2-11 | INVALID | Trùng D4 với CN-G2-02: cùng đơn confirmed, cùng hủy, cùng 200. |
+| CN-G2-12 | INVALID | Trùng D5 với CN-G2-03: cùng chuỗi tới shipping rồi hủy, cùng 400. |
+| CN-G2-13 | VALID | Hủy không đổi đơn khác O2; kiểm cạnh tác động. |
+| CN-G3-01 | INCOMPLETE | B hủy đơn A pending: request đúng nhưng 403 đã bị G6 thay bằng 404. |
+| CN-G3-02 | INCOMPLETE | B hủy đơn A confirmed: 403 cũ, quy ước G6 là 404. |
+| CN-G3-03 | INVALID | Trùng D2 với CN-G1-11: cùng không Authorization, cùng 401. |
+| CN-G3-04 | INCOMPLETE | JWT hết hạn: phụ thuộc claim exp và thời hạn đủ ngắn, spec không bảo đảm. |
+| CN-G3-05 | INVALID | Trùng D3 với CN-G1-14: cùng cách tạo JWT sai chữ ký, cùng 401. |
+| CN-G3-06 | INCOMPLETE | Token user đã xóa: phụ thuộc hiệu lực xóa user/token, spec không nêu. |
+| CN-G3-07 | VALID | JWT tự ký bằng secret đoán → 401; claim và cách ký cụ thể. |
+| CN-G3-08 | VALID | SQL OR ở path → 400, không lộ lỗi SQL; K giữ hai đơn. |
+| CN-G3-09 | VALID | SQL DROP ở path → 400; payload cụ thể. |
+| CN-G3-10 | VALID | SQL comment ở path → 400; payload cụ thể. |
+| CN-G3-11 | VALID | Admin dùng endpoint User hủy pending → 200; giả định đã ghi. |
+| CN-G3-12 | INCOMPLETE | Dò ID cần V(X) và giả định O1/O2 liên tiếp; 404 thống nhất là giả định. |
+| CN-G4-01 | VALID | Schema success hủy pending; assertion cụ thể. |
+| CN-G4-02 | VALID | Schema GET sau hủy và spelling canceled. |
+| CN-G4-03 | INVALID | Trùng D7 với CN-G2-05: cùng hủy rồi hủy lại, 200 rồi 400. |
+| CN-G4-04 | INVALID | Trùng D2 với CN-G1-11; schema lỗi nằm trong predicate E của G6. |
+| CN-G4-05 | VALID | Thời gian hủy < 2000 ms; ngưỡng giả định đã ghi. |
+| CN-G4-06 | VALID | Thời gian GET sau hủy < 2000 ms. |
+| CN-G6-01 | INCOMPLETE | Không token trên ID vắng: cần V(X) qua danh sách admin. |
+| CN-G6-02 | VALID | JWT alg none chữ ký rỗng → 401; token dựng cụ thể. |
+| CN-G6-03 | VALID | ID thật + hậu tố abc → 400, chứng minh không parse lỏng. |
+| CN-G6-04 | INCOMPLETE | ID 2147483647: cần V(X) qua danh sách admin. |
+| CN-G6-05 | INVALID | Trùng D5 với CN-G2-03; E và S-error đã nằm trong predicate G6. |
+| CN-G6-06 | VALID | Admin endpoint User trên delivered → 400; K giữ delivered. |
+| CN-G6-07 | VALID | Admin endpoint User trên shipping → 400; quyền Admin là giả định đã ghi. |
+| CN-G6-08 | VALID | B hủy đơn A shipping → 404; ownership trước state là giả định. |
+| CN-G6-09 | VALID | B hủy đơn A delivered → 404; cùng lớp ownership. |
+| CN-G6-10 | VALID | B hủy đơn A canceled → 404; cùng lớp ownership. |
+| CN-G6-11 | VALID | User gọi API Admin → 403; kiểm schema lỗi và dữ liệu không đổi. |
+| CN-G6-12 | INVALID | Trùng D6 với CN-G1-02; chỉ khác nhãn SCH và thêm đơn thứ hai trong K. |
+
+**Tổng: 40 VALID – 10 INCOMPLETE – 9 INVALID / 59 case.**
