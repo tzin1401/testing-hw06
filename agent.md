@@ -38,6 +38,7 @@ Quy tắc cho AI agent khi hỗ trợ làm HW06. Nguồn: `2026.HW06.API Testing
 - Mọi request mang header `X-Student-Id: {{studentId}}` qua **pre-request script cấp collection**, có `console.log` để chụp màn hình.
 - Reset SUT bằng `scripts/reset_sut.sh` trước mỗi lần chạy đầy đủ.
 - Mỗi bước của mỗi API là **một commit** (generate, audit, extend, execute).
+- Commit message **không** ghi tên AI: không `Co-Authored-By`, không "Generated with …", không nhắc Claude/GPT/agent.
 
 ## 3. Quy ước tên file
 
