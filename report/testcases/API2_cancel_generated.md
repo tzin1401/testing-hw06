@@ -122,3 +122,66 @@ Mã HTTP, schema lỗi, schema GET/checkout và trạng thái ban đầu checkou
 **Ghi chú của AI:** FR-11 chỉ quy định xem đơn; ownership khi hủy, quyền Admin tại endpoint User và chính sách chống dò ID là giả định cần audit.
 Spec không nêu status, schema lỗi/GET, thời hạn JWT, hành vi xóa user hoặc khả năng giữ đơn sau xóa; các setup phụ thuộc điều kiện kiểm chứng được.
 Kiểm tra hai đơn chỉ chứng minh hai đơn đó không đổi; API black-box không tự chứng minh mọi truy vấn đều parameterized.
+
+## G4 – Schema validation
+
+Ba schema draft-07 dưới đây là ứng viên để audit, không phải contract JSON được spec định nghĩa. Cho phép field bổ sung; `properties` không tự yêu cầu field phải hiện diện.
+
+**Schema S-success — response hủy thành công:** `message` là quan sát, spec không nói (báo cáo 01 mục 4.4); kiểu object và kiểu string nếu có `message` là GIẢ ĐỊNH, không bắt buộc field này.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "message": { "type": "string" }
+  }
+}
+```
+
+**Schema S-error — response lỗi:** GIẢ ĐỊNH object có `error` kiểu string vì spec chỉ yêu cầu thông báo phù hợp, không quy định cấu trúc lỗi.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "error": { "type": "string" }
+  },
+  "required": ["error"]
+}
+```
+
+**Schema S-order — object đơn từ GET:** các tên field và kiểu đều là GIẢ ĐỊNH, không quan sát GET; enum dựa trên README FR-10 dòng 143–155. Không field nào bắt buộc trong schema vì spec không định nghĩa schema GET. Các case dưới đây kiểm tra riêng `status` hiện diện và bằng giá trị yêu cầu.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "user_id": { "type": "integer" },
+    "total_amount": { "type": "number" },
+    "status": { "type": "string", "enum": ["pending", "confirmed", "shipping", "delivered", "canceled"] },
+    "shipping_address": { "type": "string" },
+    "created_at": { "type": "string" }
+  }
+}
+```
+
+**Setup S4 độc lập:** Mỗi case tạo UUID mới, email `cn_<ID>_<UUID>@test.com` (thay dấu `-` trong ID bằng `_`); `POST /api/register`, `Content-Type: application/json`, body `{"name":"CN User","email":"<email>","password":"Test1234!"}`; `POST /api/login` cùng content type, body `{"email":"<email>","password":"Test1234!"}`, lưu `token` là `T`. `GET /api/products/1`, không Authorization, không body, lấy tên `N`, giá `P`; `POST /api/cart`, `Authorization: Bearer <T>`, `Content-Type: application/json`, body `{"id":1,"name":"<N>","price":<P>,"quantity":1}`; `POST /api/checkout` cùng headers, body `{"total_amount":<P>,"shipping_address":"123 Le Loi, TP.HCM"}`, lấy `orderId` là `O`. `GET /api/orders/<O>`, `Authorization: Bearer <T>`, không body, xác nhận `status` là `pending`, nếu không thì dừng. GIẢ ĐỊNH tên field lấy từ response và trạng thái ban đầu; GET chưa có schema đặc tả.
+
+**Quy ước:** `U` là `PUT /api/orders/<O>/cancel`, `Authorization: Bearer <T>`, không body. `K` là `GET /api/orders/<O>`, `Authorization: Bearer <T>`, không body. Đo thời gian từ lúc gửi đến lúc nhận toàn bộ response, không tính setup; `< 2000 ms` là GIẢ ĐỊNH tiêu chí hiệu năng, spec không quy định. Content-Type JSON nghĩa là media type `application/json`, cho phép tham số charset. Các status HTTP và Content-Type là GIẢ ĐỊNH vì spec không quy định.
+
+| ID | Kỹ thuật | Requirement | Mục đích | Precondition / setup | Request | Expected status | Expected body / kiểm tra | Nguồn expected |
+|---|---|---|---|---|---|---|---|---|
+| CN-G4-01 | SCH | FR-10 | Status, JSON và schema response hủy pending | S4 | U | 200 | Content-Type JSON; body parse JSON và khớp S-success; K: HTTP 200, body `status` bằng `canceled` | API spec 145–147; README 150–155; GIẢ ĐỊNH status, JSON và schema response |
+| CN-G4-02 | SCH | FR-10, FR-11 | Schema GET sau hủy và spelling trạng thái | S4; U, giả định HTTP 200 | K | 200 | Content-Type JSON; body parse JSON khớp S-order, có `status` đúng `canceled` | API spec 143,147; README 143–155,167; GIẢ ĐỊNH status, JSON và schema GET |
+| CN-G4-03 | SCH | FR-10 | Schema lỗi chuyển đổi sau hủy | S4; U, giả định HTTP 200; K xác nhận `canceled` | U | 400 | Content-Type JSON; body parse JSON khớp S-error với `error` là string; K: HTTP 200, `status` vẫn `canceled` | README 160–162; GIẢ ĐỊNH từ chối tự chuyển, 400, JSON và schema lỗi |
+| CN-G4-04 | SCH | SEC-02 | Schema lỗi 4xx khi thiếu token | S4 | `PUT /api/orders/<O>/cancel`; không Authorization; không body | 401 | Content-Type JSON; body parse JSON khớp S-error với `error` là string; K: HTTP 200, `status` vẫn `pending` | README SEC-02 279; API spec 112; GIẢ ĐỊNH 401, JSON và schema lỗi |
+| CN-G4-05 | SCH | FR-10 | Thời gian hủy thành công | S4 | U | 200 | Response nhận đầy đủ trong < 2000 ms; Content-Type JSON, body khớp S-success; K: HTTP 200, `status` bằng `canceled` | API spec 145–147; GIẢ ĐỊNH 200, JSON, schema và ngưỡng thời gian vì spec không nêu |
+| CN-G4-06 | SCH | FR-10, FR-11 | Thời gian GET sau hủy | S4; U, giả định HTTP 200 | K | 200 | Response nhận đầy đủ trong < 2000 ms; Content-Type JSON, body khớp S-order, `status` bằng `canceled` | API spec 143,147; README 167; GIẢ ĐỊNH 200, JSON, schema và ngưỡng thời gian vì spec không nêu |
+
+**Ghi chú của AI:** Response hủy từng quan sát có `message`, nhưng spec không bắt buộc field đó; S-success chỉ kiểm tra kiểu nếu có.
+Schema lỗi, kiểu/tên field GET, mã HTTP, JSON và thời gian phản hồi là giả định cần audit, không phải response đã quan sát.
+GET chi tiết chưa được quan sát trong báo cáo bước 0; enum là yêu cầu nghiệp vụ, còn tên field `status` trong JSON là giả định.
