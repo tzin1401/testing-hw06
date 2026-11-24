@@ -353,3 +353,166 @@ Mọi status trong gợi ý H1–H9 là GIẢ ĐỊNH và cần audit; spec khô
 **Ghi chú của AI:** G6 ánh xạ H1→01, H2→02, H3→03, H4→04, H5→05, H6→06–07, H7→08–10, H8→11, H9→12; schema 403 được kiểm ở 11. G5 đếm 42 ID sau trừ trùng, thêm 12 biến thể với input, actor, trạng thái hoặc oracle riêng thành 54 theo cách đếm G5, vượt 35.
 Mã HTTP, JSON, schema và thứ tự xác thực/ownership/state đều là giả định; FR-11 chỉ quy định quyền xem, không quy định trực tiếp quyền hủy. Admin hủy shipping còn mơ hồ giữa sơ đồ và prose.
 CN-G3-04 hết hạn và CN-G3-06 user bị xóa vẫn có điều kiện như G3, không giả làm luôn thực thi được; không gọi SUT trong bước này.
+
+## G5 – Tổng hợp độ phủ (reviewer)
+
+**Bản rà lại sau G6, là kết luận hiện hành của API 2.** Mục `## G5` đứng trước G6 (42 ID) và toàn bộ G1–G4, G6 được giữ nguyên để trace. Mục này chỉ báo cáo: không sửa hay thêm test, không gán nhãn VALID/INVALID/INCOMPLETE, không gửi request tới SUT, không chạy script kiểm thử (đếm bằng đọc bảng; số cột đã đối chiếu bằng tìm kiếm văn bản trên chính file này). Nguồn đối chiếu: README FR-10 (141–162), FR-11 (164–167), FR-12 (172–179), FR-20 (233–236), SEC-01 đến SEC-07 (277–284), API spec 4.5–4.6 (139–147) và 6.2 (179–182), `report/01_spec_analysis.md` mục 2.
+
+Ký hiệu ma trận: `∅N` ô trống vì không áp dụng, có lý do. `∅?` ô trống ưu tiên thấp, có ID gần nhất. `∅!` ô trống quan trọng (sau G6 không còn ô nào). `(đk)` là case có điều kiện thực thi mà spec không bảo đảm, xem 5.6B. Hàng cũ ghi 403 hoặc "biểu thị lỗi" được đọc theo quy ước hợp nhất của G6 (5.4).
+
+### 5.1 Bảng đếm
+
+**Quy tắc trừ trùng (hiện hành):** một nhóm trùng thật là các ID có cùng trạng thái đơn ban đầu, cùng request (cùng actor, cùng loại ID), cùng status kỳ vọng và cùng phép kiểm tra sau request. Sau G6, mọi cụm "biểu thị lỗi" ở G1–G5 được hiểu là predicate E của G6 (JSON, `error` là string không rỗng, không chứa JWT), nên hàng cũ có oracle yếu và hàng G4 hoặc G6 có oracle E hoặc S-error được coi là cùng oracle. Khác nhãn kỹ thuật, khác cách viết setup, hoặc thêm đơn thứ hai trong K chỉ là setup và assertion dùng chung, không làm hai case khác nhau. Case có thêm assertion độc lập (ngưỡng thời gian, schema thành công, schema GET) hoặc khác actor, ID, trạng thái là gần trùng và không bị trừ. Đếm theo nhóm (hợp các ID, không trừ theo từng cặp), mỗi nhóm giữ ID nhỏ nhất.
+
+| Kỹ thuật | ID trước khi trừ | ID bị trừ (trùng thật) | Còn lại |
+|---|---|---|---|
+| EP | 12 (CN-G1-01, 02, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16) | 0 | 12 |
+| BVA | 5 (CN-G1-03, 04, 05, 06, CN-G6-04) | 0 | 5 |
+| ST | 13 (CN-G2-01 đến CN-G2-13) | 3 (CN-G2-01, CN-G2-11, CN-G2-12) | 10 |
+| SEC | 21 (CN-G3-01 đến 12; CN-G6-01, 02, 03, 06, 07, 08, 09, 10, 11) | 2 (CN-G3-03, CN-G3-05) | 19 |
+| SCH | 8 (CN-G4-01 đến 06; CN-G6-05, CN-G6-12) | 4 (CN-G4-03, CN-G4-04, CN-G6-05, CN-G6-12) | 4 |
+| **Tổng** | **59** | **9 (7 nhóm trùng thật)** | **50** |
+
+| Khối | G1 | G2 | G3 | G4 | G6 | Tổng |
+|---|---|---|---|---|---|---|
+| ID trước khi trừ | 16 | 13 | 12 | 6 | 12 | 59 |
+| ID sau khi trừ trùng | 16 | 10 | 10 | 4 | 10 | 50 |
+
+- **Số khác theo quy tắc khác (chỉ để đối chiếu):** theo quy tắc cũ của G5 trước G6 (oracle theo chữ của từng hàng, 5 nhóm D1 đến D5 cũ) là 54, khớp ghi chú cuối G6. Nếu gộp luôn các nhóm gần trùng N1 đến N5 ở 5.2 thì còn 41. Các nhóm N6 đến N10 không gộp vì khác request, actor hoặc trạng thái.
+- Số phép thử thực tế lớn hơn số ID: CN-G2-06 đến CN-G2-10 mỗi ID gồm 5 phép thử (25 phép thử), CN-G3-12 gồm 3 request, CN-G2-05 gồm 2 lần hủy. Bảng đếm tính theo ID.
+- SCH chỉ còn 4 ID vì 4 hàng schema lỗi bị gộp vào hàng giữ lại, không phải vì mất kiểm tra schema. Các hàng bị trừ không bị xóa. Nếu sinh viên không áp dụng E cho hàng cũ khi Execute thì chính CN-G4-03, CN-G4-04, CN-G6-05, CN-G6-12 là hàng duy nhất viết rõ assertion schema lỗi, nên không nên bỏ chúng khỏi collection.
+- **Kết luận số lượng: ĐỦ ≥ 35** (50 ID sau trừ trùng thật; thấp nhất theo mọi cách đếm ở trên là 41, vẫn ≥ 35).
+
+### 5.2 Danh sách trùng
+
+**Trùng thật (đã trừ ở 5.1, không xóa khỏi file):**
+
+| Nhóm | ID | Lý do | Giữ / trừ |
+|---|---|---|---|
+| D1 | CN-G1-01, CN-G2-01 | Cùng đơn pending của chủ đơn, cùng `PUT /api/orders/<O>/cancel` Bearer T không body, cùng 200, cùng kiểm tra đơn `canceled`. Chỉ khác nhãn EP và ST | Giữ CN-G1-01, trừ CN-G2-01 |
+| D2 | CN-G1-11, CN-G3-03, CN-G4-04 | Cùng request không Authorization trên đơn pending, cùng 401, cùng K pending. CN-G3-03 chỉ thêm đơn thứ hai trong K. Oracle S-error của CN-G4-04 (JSON, `error` string) nằm trong E | Giữ CN-G1-11, trừ CN-G3-03 và CN-G4-04 |
+| D3 | CN-G1-14, CN-G3-05 | Cùng cách tạo JWT sai chữ ký (đổi ký tự base64url đầu của chữ ký), cùng request, 401, K pending | Giữ CN-G1-14, trừ CN-G3-05 |
+| D4 | CN-G2-02, CN-G2-11 | Cùng đơn confirmed dựng bằng Admin, cùng User hủy, 200, K canceled. CN-G2-11 chỉ viết rõ chuỗi dựng | Giữ CN-G2-02, trừ CN-G2-11 |
+| D5 | CN-G2-03, CN-G2-12, CN-G6-05 | Cùng đơn shipping, cùng chủ đơn hủy bằng endpoint User, 400, K shipping. CN-G2-12 chỉ viết rõ chuỗi dựng; CN-G6-05 viết rõ E và S-error, đã là oracle của hàng cũ sau G6 | Giữ CN-G2-03, trừ CN-G2-12 và CN-G6-05 |
+| D6 | CN-G1-02, CN-G6-12 | Cùng chủ đơn (token user có đơn) hủy ID dương đã xác minh vắng, 404, K pending, cùng E. CN-G6-12 chỉ khác nhãn SCH và có thêm đơn thứ hai trong K | Giữ CN-G1-02, trừ CN-G6-12 |
+| D7 | CN-G2-05, CN-G4-03 | Cùng chuỗi hủy pending rồi hủy lại, 200 rồi 400, K canceled. S-error của CN-G4-03 nằm trong E | Giữ CN-G2-05, trừ CN-G4-03 |
+
+**Gần trùng (không trừ):**
+
+| Nhóm | ID | Điểm giống | Điểm khác làm cho không bị trừ |
+|---|---|---|---|
+| N1 | CN-G1-03, CN-G1-04 | Cùng lớp ID không dương, 400 | 0 là biên, -1 là phía âm |
+| N2 | CN-G1-05, CN-G1-06, CN-G6-04 | Cùng lớp ID lớn vắng mặt, 404 | Ba giá trị biên khác nhau: 2147483648, 9999999999, 2147483647 |
+| N3 | CN-G1-07, 08, 09, 10 | Cùng lớp ID không phải số nguyên, 400 | Khác ký tự (thập phân, chữ, `@`, dấu cách) |
+| N4 | CN-G1-01 (nhóm D1), CN-G4-01, CN-G4-05 | Cùng request hủy đơn pending, 200; ô cũ CN-G1-01 không ràng buộc body, nhưng hiện áp predicate success của G6 (JSON object, `message` string không rỗng) | CN-G4-01 thêm kiểm tra header Content-Type JSON và S-success; CN-G4-05 thêm ngưỡng thời gian |
+| N5 | CN-G4-02, CN-G4-06 | Cùng GET sau hủy | CN-G4-06 thêm ngưỡng thời gian |
+| N6 | CN-G3-12 với CN-G3-01, CN-G1-02, CN-G6-12 | Request 1 của CN-G3-12 giống CN-G3-01 (B hủy đơn pending của A, 404 theo G6); request 3 cùng lớp ID vắng với CN-G1-02 | CN-G3-12 là case hợp 3 request cộng oracle "body giống nhau sau khi bỏ ID phản chiếu"; request 3 dùng token TB, không phải token chủ đơn |
+| N7 | CN-G1-14 (nhóm D3), CN-G1-15, CN-G3-07, CN-G6-02 | Cùng lớp JWT không hợp lệ, 401 | Cách tạo khác nhau: sửa chữ ký, chuỗi rác, tự ký HS256 bằng secret đoán, `alg: none` |
+| N8 | CN-G2-03 (nhóm D5), CN-G6-07, CN-G6-08, CN-G6-11 | Cùng đơn shipping, đều bị từ chối | Khác actor hoặc endpoint: chủ đơn, Admin ở endpoint User, B ở endpoint User, User ở endpoint Admin; status 400, 400, 404, 403 |
+| N9 | CN-G2-04, CN-G6-06, CN-G6-09 | Cùng đơn delivered, đều bị từ chối | Khác actor: chủ đơn, Admin, B; status 400, 400, 404 |
+| N10 | CN-G3-11, CN-G6-06, CN-G6-07 | Admin dùng endpoint User trên đơn của A | Khác trạng thái đơn: pending cho 200, delivered và shipping cho 400 |
+
+**G6 không trùng với hàng cũ:** CN-G6-01 với CN-G1-11 (ID vắng mặt, không phải đơn tồn tại); CN-G6-03 với CN-G1-08 (hậu tố chữ gắn vào ID đơn thật `<O1>abc`, không phải chuỗi chữ thuần); CN-G6-04 với CN-G1-05 (giá trị 2147483647 khác 2147483648); CN-G6-08 đến CN-G6-10 với CN-G3-01, CN-G3-02 (khác trạng thái đơn); CN-G6-11 với CN-G2-08 (khác actor và endpoint).
+
+### 5.3 Ma trận độ phủ
+
+#### 5.3a Các ô bảng 5×5 FR-10 liên quan tới User hủy (cột đích `canceled`)
+
+Endpoint hủy chỉ tạo cạnh tới `canceled`, nên 5 ô cột `canceled` là các ô liên quan. Hai mươi ô còn lại chỉ do Admin qua `PUT /api/admin/orders/:id/status` và nằm ngoài phạm vi User hủy (CN-G2-06 đến CN-G2-10 dựng và kiểm tra chúng). Cạnh Admin hủy trong cùng cột được đưa vào cột ST, cạnh Admin hoặc người khác đi qua endpoint User được đưa vào cột SEC.
+
+| Ô (nguồn → canceled) | EP | BVA | ST | SEC | SCH |
+|---|---|---|---|---|---|
+| pending → canceled (R:151) | CN-G1-01, CN-G1-16 | ∅N: ô là enum trạng thái rời rạc, biên số của `:id` ở 5.3c | CN-G2-01 (trùng D1), CN-G2-06 (Admin qua status), CN-G2-13 | CN-G3-01 (404 theo G6), CN-G3-03 đến CN-G3-10 (tấn công trên đơn pending, K pending), CN-G3-11 (Admin), CN-G3-12, CN-G6-02, CN-G6-03 | CN-G4-01, CN-G4-02, CN-G4-04, CN-G4-05, CN-G4-06 |
+| confirmed → canceled (R:151) | ∅?: lớp hợp lệ chỉ có ở ST, gần nhất CN-G2-02 | ∅N: như trên | CN-G2-02, CN-G2-07 (Admin), CN-G2-11 (trùng D4) | CN-G3-02 (404 theo G6) | ∅?: schema thành công chỉ thử trên pending, gần nhất CN-G4-01; schema lỗi theo E |
+| shipping → canceled (User bị cấm, R:161) | ∅?: lớp này kiểm bằng ST và SCH, gần nhất CN-G2-03, CN-G6-05 | ∅N: như trên | CN-G2-03, CN-G2-08 (Admin, GIẢ ĐỊNH), CN-G2-12 (trùng D5) | CN-G6-07 (Admin qua endpoint User, GIẢ ĐỊNH), CN-G6-08 (B), CN-G6-11 (User gọi API Admin, 403) | CN-G6-05 (nhóm D5), CN-G6-11 (schema 403) |
+| delivered → canceled (R:160) | ∅?: gần nhất CN-G2-04 | ∅N: như trên | CN-G2-04, CN-G2-09 | CN-G6-06 (Admin), CN-G6-09 (B) | ∅?: cùng đường lỗi với CN-G6-05 và E của CN-G2-04, gần nhất CN-G4-03 |
+| canceled → canceled (R:160) | ∅?: gần nhất CN-G2-05 | ∅N: như trên | CN-G2-05, CN-G2-10 | CN-G6-10 (B); ∅?: Admin qua endpoint User trên đơn canceled, gần nhất CN-G6-06 | CN-G4-03 (trùng D7) |
+
+#### 5.3b Theo yêu cầu (FR và SEC)
+
+| Yêu cầu | EP | BVA | ST | SEC | SCH |
+|---|---|---|---|---|---|
+| FR-10 R:150–155 hủy hợp lệ pending hoặc confirmed | CN-G1-01, CN-G1-16 | ∅N: không có giá trị số trong quy tắc | CN-G2-01, CN-G2-02, CN-G2-06, CN-G2-07, CN-G2-11, CN-G2-13 | CN-G3-11 (Admin, GIẢ ĐỊNH) | CN-G4-01, CN-G4-05 |
+| FR-10 R:160 trạng thái kết thúc | ∅N: kiểm tra bằng ST | ∅N | CN-G2-04, CN-G2-05, CN-G2-09, CN-G2-10 | CN-G6-06, CN-G6-09, CN-G6-10 | CN-G4-03 |
+| FR-10 R:161 shipping chỉ Admin thao tác | ∅N: kiểm tra bằng ST | ∅N | CN-G2-03, CN-G2-08, CN-G2-12 | CN-G6-07, CN-G6-08, CN-G6-11 | CN-G6-05 |
+| FR-10 R:162 chuyển đổi không hợp lệ phải có thông báo lỗi | ∅N: kiểm tra bằng ST | ∅N | CN-G2-03 đến CN-G2-10, CN-G2-12 | ∅N: không phải yêu cầu bảo mật | CN-G4-03, CN-G6-05, CN-G6-11 và E của mọi hàng lỗi |
+| FR-11 R:166 chỉ xem đơn của mình (ownership khi hủy là GIẢ ĐỊNH) | CN-G1-01 (lớp chủ đơn) | ∅N | ∅N: quyền sở hữu không phải cạnh trạng thái; tổ hợp người khác và trạng thái nằm ở cột SEC | CN-G3-01, CN-G3-02, CN-G3-12, CN-G6-08, CN-G6-09, CN-G6-10 | CN-G6-08 (E, schema lỗi 404 của B) |
+| FR-11 R:167 và API spec 143: GET đối chiếu trạng thái | ∅N: GET chỉ là công cụ kiểm tra | ∅N | K trong CN-G2-01 đến CN-G2-13 và G6 | ∅N | CN-G4-02, CN-G4-06 |
+| FR-12 R:174–179 API Admin cần JWT và role admin | ∅N: cancel không phải API Admin | ∅N | ∅N: CN-G2-06 đến CN-G2-10 dùng token Admin hợp lệ làm setup, không kiểm role | CN-G6-11 (User gọi API Admin); CN-G3-11 (gián tiếp: Admin dùng endpoint User) | CN-G6-11 (schema 403) |
+| FR-20 R:236 chỉ hủy khi pending hoặc confirmed | CN-G1-01 | ∅N | CN-G2-01, CN-G2-02, CN-G2-03, CN-G2-04, CN-G2-05 | ∅N: yêu cầu giao diện Mobile, API đã kiểm qua FR-10 | ∅N: không có schema riêng |
+| API spec A:147 "chưa giao" (rộng hơn R:161, mơ hồ) | ∅N | ∅N | CN-G2-03, CN-G2-04 | CN-G6-07 (Admin trên shipping, GIẢ ĐỊNH) | ∅N |
+| SEC-01 mật khẩu không plaintext | ∅N: cancel không nhận hay trả mật khẩu; cách lưu mật khẩu không quan sát được qua API này | ∅N | ∅N | ∅N: E của G6 chỉ kiểm không lộ JWT, không kiểm mật khẩu | ∅N |
+| SEC-02 API bảo mật cần JWT hợp lệ | CN-G1-11, CN-G1-12, CN-G1-13, CN-G1-14, CN-G1-15 | ∅N: biên thời gian hết hạn thuộc CN-G3-04 (đk) | CN-G3-04 (hết hạn, đk), CN-G3-06 (user bị xóa, đk) | CN-G3-03, CN-G3-04 (đk), CN-G3-05, CN-G3-06 (đk), CN-G3-07, CN-G6-01, CN-G6-02 | CN-G4-04, E của CN-G6-01 và CN-G6-02 |
+| SEC-03 API Admin kiểm tra role | ∅N: cancel không phải API Admin, spec không yêu cầu role admin cho cancel | ∅N | ∅N: setup Admin dùng token đúng role | CN-G6-11, CN-G3-11 | CN-G6-11 |
+| SEC-04 escape khi hiển thị UI | ∅N: response cancel là JSON, việc escape ở giao diện không kiểm được bằng API này | ∅N | ∅N | ∅N: gián tiếp, CN-G3-12 chỉ so sánh body sau khi bỏ ID phản chiếu | ∅N |
+| SEC-05 parameterized query | CN-G1-07, CN-G1-08, CN-G1-09, CN-G1-10 (ID lạ, không phải payload SQL) | ∅N: spec không có giá trị biên cho tấn công SQL | ∅N | CN-G3-08, CN-G3-09, CN-G3-10, CN-G6-03 | ∅N: không có schema riêng; E áp dụng cho CN-G3-08 đến 10 và CN-G6-03 |
+| SEC-06 không đổi `role` qua hồ sơ | ∅N: thuộc API hồ sơ, không có trong cancel | ∅N | ∅N | ∅N: gián tiếp, CN-G3-07 giả mạo claim `role` trong token là tấn công token, không phải API hồ sơ | ∅N |
+| SEC-07 OTP đặt lại mật khẩu | ∅N: không có OTP trong cancel | ∅N | ∅N | ∅N | ∅N |
+
+#### 5.3c Theo tham số
+
+| Tham số | EP | BVA | ST | SEC | SCH |
+|---|---|---|---|---|---|
+| `:id` (path) | CN-G1-01, CN-G1-02, CN-G1-07, CN-G1-08, CN-G1-09, CN-G1-10 | CN-G1-03, CN-G1-04, CN-G1-05, CN-G1-06, CN-G6-04 | ∅N: trạng thái đơn mà ID trỏ tới nằm ở 5.3a | CN-G3-08, CN-G3-09, CN-G3-10, CN-G3-12, CN-G6-01, CN-G6-03 | CN-G6-12 (nhóm D6, schema 404), CN-G6-05 |
+| Authorization (header, gồm role của token) | CN-G1-01, CN-G1-11, CN-G1-12, CN-G1-13, CN-G1-14, CN-G1-15 | ∅N: biên thời gian hết hạn thuộc CN-G3-04 (đk) | CN-G3-04 (đk), CN-G3-06 (đk) | CN-G3-03, CN-G3-04 (đk), CN-G3-05, CN-G3-06 (đk), CN-G3-07, CN-G6-01, CN-G6-02; theo role: CN-G3-11, CN-G6-06, CN-G6-07, CN-G6-11 | CN-G4-04, CN-G6-11 |
+| Body | CN-G1-01 (không body), CN-G1-16 (body thừa) | ∅N: spec không mô tả body | ∅N | CN-G1-16 (gán `status` từ client, nhãn EP); ∅?: body thừa trên đơn shipping, gần nhất CN-G1-16 | ∅N: không có contract body |
+| Response (đầu ra) | ∅N | CN-G4-05, CN-G4-06 (ngưỡng thời gian, GIẢ ĐỊNH) | ∅N | CN-G3-08, CN-G3-09, CN-G3-10 (không lộ SQL); E của G6 (không lộ JWT) | CN-G4-01 đến CN-G4-06, CN-G6-05, CN-G6-11, CN-G6-12 |
+
+### 5.4 Ánh xạ H1–H9 và các phát hiện cũ sang G6
+
+| Mã cũ | Case mới | Ô hoặc hàng đóng | Ghi chú còn lại |
+|---|---|---|---|
+| H1 không token trên ID vắng | CN-G6-01 | SEC-02 × `:id`; Authorization SEC | Phụ thuộc V(X) xác minh vắng mặt (5.6B) |
+| H2 JWT `alg: none` | CN-G6-02 | SEC-02 SEC; Authorization SEC | Token tạo từ payload TA, không cần secret |
+| H3 chuẩn hóa ID lỏng trên đơn thật | CN-G6-03 | `:id` SEC; SEC-05 SEC | Không còn ∅ ở `:id` |
+| H4 biên số trên | CN-G6-04 | `:id` BVA | Cặp với CN-G1-05 (2147483648) |
+| H5 schema lỗi User hủy shipping | CN-G6-05 | shipping → canceled SCH; R:161 SCH | Thuộc nhóm D5 nên không tăng số đếm |
+| H6 Admin trên endpoint User, delivered và shipping | CN-G6-06, CN-G6-07 | delivered và shipping → canceled SEC; R:160, R:161 SEC | CN-G6-07 là GIẢ ĐỊNH, không suy luận quyền Admin hủy shipping |
+| H7 B hủy đơn shipping, delivered, canceled | CN-G6-08, CN-G6-09, CN-G6-10 | FR-11 R:166 SEC; ba ô → canceled SEC | Thứ tự xác thực, ownership, trạng thái là GIẢ ĐỊNH |
+| H8 User gọi API Admin để vượt R:161 | CN-G6-11 | SEC-03 SEC; FR-12 SEC; shipping → canceled SEC | Có thể thuộc API khác, vẫn có trong API 2 |
+| H9 schema lỗi 404 và 403 | CN-G6-12 (404), CN-G6-11 (403) | `:id` SCH | CN-G6-12 thuộc nhóm D6 |
+| Mâu thuẫn 403 và 404 (5.4 cũ) | Quy ước G6; CN-G3-12, CN-G6-08 đến 10 | FR-11 R:166 SEC | Hiệu lực: User không phải chủ đơn nhận 404. Hàng CN-G3-01 và CN-G3-02 còn ghi 403, đã bị thay thế bởi 404 và giữ nguyên để trace; CN-G3-12 (ba 404) đúng, không cần đổi |
+| Oracle lỗi yếu "biểu thị lỗi" (5.4 cũ) | Predicate E của G6 | 34 hàng cũ (CN-G1-02 đến 15, CN-G2-03 đến 10, CN-G2-12, CN-G3-01 đến 10, CN-G3-12) | E áp dụng cho các hàng này khi Execute: JSON, `error` string không rỗng, không chứa JWT; 12 hàng G6 và S-error của G4 đã viết rõ |
+
+Các điểm cũ không đổi và vẫn thuộc việc audit của sinh viên, không phải lỗ hổng: CN-G1-03 và CN-G1-04 kỳ vọng 400 còn CN-G1-05, CN-G1-06, CN-G6-04 kỳ vọng 404 (0 và -1 có thể cũng là ID hợp lệ chưa tồn tại); ký hiệu `A` trong G1 chỉ ID vắng còn G2 và G3 dùng cho Admin hoặc user A; setup coi mọi bước thành công là 200.
+
+### 5.5 Kiểm tra định dạng (59 hàng)
+
+| Tiêu chí | Kết quả (đối chiếu bằng đọc và tìm kiếm văn bản, không chạy script, không gửi request) |
+|---|---|
+| Đủ 9 cột | 59/59 hàng bắt đầu bằng `CN-Gx-yy` có đúng 9 ô (tìm các hàng không có đúng 9 ô trả về 0 hàng); tiêu đề giống mẫu. Lệch nhẹ so với "một bảng": G1 có thêm bảng phân hoạch phụ, G2 có thêm ma trận 5×5 |
+| ID duy nhất | 16 + 13 + 12 + 6 + 12 = 59 ID, không trùng |
+| Precondition dựng được trạng thái | Đạt có điều kiện. S, S3, S4, S6, D(s), V(x), K(s) đều được định nghĩa trong cùng bước, Admin chỉ đi cạnh hợp lệ pending → confirmed → shipping → delivered hoặc hủy. Phụ thuộc không có trong spec đã ghi GIẢ ĐỊNH: `orderId` trong response checkout, GET trả `status`, đơn mới là pending. Điều kiện không bảo đảm được thực thi: xem 5.6B |
+| Expected cụ thể | Status cụ thể ở 59/59 (CN-G2-06 đến 10 liệt kê status theo từng đích). Body: 34 hàng lỗi cũ nay đọc theo E; 12 hàng G6 dẫn E; 6 hàng G4 có schema rõ. Bảy hàng success cũ (CN-G1-01, 16, CN-G2-01, 02, 11, 13, CN-G3-11) nay áp predicate success của G6: JSON object, `message` string không rỗng, đơn đích `canceled`. Các quy ước hợp nhất nằm trong phần chữ G6, không được chép lại vào từng ô cũ |
+| Có Nguồn expected | 59/59 có cột nguồn, phần spec không nêu đều ghi GIẢ ĐỊNH. Số dòng đối chiếu với README và API spec: README 158–162, 166, 167, 236, 279, 280, 282; API spec 112, 143, 145–147, 179–182 là khớp với nội dung được trích |
+| Request đủ để chuyển thành request | Đạt: method, path, header, body tường minh hoặc là macro (U, A(s), K, S, S3, S4, S6, D(s), V(x), E) có định nghĩa đầy đủ trong cùng bước. Chưa kiểm được bằng cách chạy; chỉ đọc |
+| Hàng cũ lệch quy ước G6 | CN-G3-01 và CN-G3-02 ghi 403, hiệu lực 404 theo G6. Nếu sinh viên chuyển thẳng ô cũ sang Postman thì sẽ assert 403 và mâu thuẫn với CN-G3-12 và CN-G6-08 đến 10; đây là rủi ro khi chuyển đổi, đã được ghi ở 5.4 |
+
+### 5.6 Lỗ hổng còn lại và điều kiện thực thi
+
+**A. Lỗ hổng độ phủ.** Không còn ô `∅!` và không còn lỗ hổng thật cần G7: H1 đến H9 đều đã có case (5.4). Các ô `∅?` dưới đây vẫn trống ở ma trận 5.3, ưu tiên thấp, đều đã có hàng gần nhất; liệt kê để sinh viên quyết định, không đề xuất bắt buộc.
+
+| Mã | Yêu cầu hoặc ô | Vì sao có thể quan trọng | Gợi ý 1 test (nếu sinh viên muốn) |
+|---|---|---|---|
+| L1 | canceled → canceled, SEC, Admin qua endpoint User | R:160 cấm chuyển từ canceled với mọi actor; CN-G6-06 chỉ thử Admin trên delivered | `PUT /api/orders/<O1>/cancel` với Bearer TM trên D(canceled); kỳ vọng 400 (GIẢ ĐỊNH), E, K(canceled) |
+| L2 | Body thừa trên đơn shipping, cột SEC | CN-G1-16 chỉ thử gán `status` trên đơn pending | `PUT /api/orders/<O1>/cancel` với Bearer TA, body `{"status":"canceled"}` trên D(shipping); kỳ vọng 400 (GIẢ ĐỊNH), E, K(shipping) |
+| L3 | confirmed → canceled, SCH thành công | S-success chỉ kiểm trên pending (CN-G4-01) | Như CN-G4-01 nhưng setup đơn confirmed; kỳ vọng 200, khớp S-success, K(canceled) |
+
+**B. Điều kiện thực thi do spec không nêu (không phải thiếu case, và không được coi là đã chạy được).**
+
+| Case | Điều kiện spec không bảo đảm | Hệ quả khi Execute |
+|---|---|---|
+| CN-G3-04 | JWT có claim `exp` và thời hạn đủ ngắn để chờ; spec không nêu | Case tồn tại nhưng có thể không thực thi được; không có case thay thế, nên phải ghi là chưa chạy được thay vì pass |
+| CN-G3-06 | README FR-19 R:227 chỉ nói Admin xóa user; không nêu hiệu lực token và số phận đơn sau khi xóa | Setup chỉ dừng nếu A chưa được xóa hoặc hai đơn không còn để đối chiếu. Sau khi xác nhận setup, token cũ vẫn hủy được đơn là thất bại của test, không phải lý do bỏ qua; kỳ vọng 401 vẫn là GIẢ ĐỊNH |
+| V(x) trong CN-G1-02, 05, 06, CN-G3-12, CN-G6-01, CN-G6-04, CN-G6-12 | `GET /api/admin/orders` liệt kê toàn bộ đơn: API spec 6.2 dòng 179 ghi "Toàn hệ thống" và README R:220 ghi Admin xem toàn bộ đơn, nhưng phân trang hoặc giới hạn không được nêu | Các case dừng nếu không xác minh được ID vắng mặt trong toàn bộ danh sách |
+| CN-G3-11, CN-G6-06, CN-G6-07 | README R:151 chỉ nói "User/Admin hủy"; không nói Admin dùng endpoint User hay bỏ qua ownership | Kỳ vọng 200 và 400 là GIẢ ĐỊNH; riêng shipping do Admin ở CN-G6-07 và CN-G2-08 không suy luận quyền hủy |
+| CN-G6-01 | Thứ tự xác thực trước tra cứu đơn | Kỳ vọng 401 trên ID vắng là GIẢ ĐỊNH |
+
+### 5.7 Kết luận hiện hành
+
+- **Số lượng: ĐỦ ≥ 35.** 59 ID tổng, 50 ID sau khi trừ 7 nhóm trùng thật: EP 12, BVA 5, ST 10, SEC 19, SCH 4 (G1 16, G2 10, G3 10, G4 4, G6 10).
+- **Lỗ hổng thật còn lại: không.** Ba ô `∅?` L1 đến L3 là tùy chọn. Năm điều kiện thực thi ở 5.6B cần sinh viên xử lý khi Execute và không được báo là pass nếu không chạy được.
+
+**Ghi chú của AI:** Ranh giới trùng thật và gần trùng là đánh giá của AI. Sinh viên có thể dùng quy tắc khác ở bước Audit; số 50 đổi theo (54 theo quy tắc cũ, 41 nếu gộp cả gần trùng).
+Việc nhập E vào hàng cũ là diễn giải của quy ước G6, không phải sửa ô cũ; Execute phải áp dụng E và quy ước 404 cho CN-G3-01, CN-G3-02 một cách tường minh.
+Các mã HTTP, schema lỗi, thứ tự xác thực/ownership, trạng thái ban đầu sau checkout và việc Admin dùng endpoint User là GIẢ ĐỊNH, không phải response đã quan sát. Năm trạng thái và các ràng buộc chuyển trạng thái FR-10 có nguồn đặc tả, không phải tất cả đều là giả định. Một số ô `∅N` là phán đoán về phạm vi (ví dụ SEC-06 thuộc API hồ sơ).
