@@ -313,3 +313,96 @@ Các đề xuất dưới đây là đề xuất của AI; trạng thái kỳ v�
 - H1 giả định counter reset khi hết khóa; H3 diễn giải yêu cầu không lộ nguyên nhân thành so sánh lỗi và giả định tài khoản vắng mặt cũng có chính sách khóa tương đương.
 - H4 chọn bỏ qua Bearer sai; H5 chọn thành công và bỏ qua `role` thừa, không khẳng định spec quy định các lựa chọn này. Decode JWT không tự xác minh chữ ký; ME kiểm tra token được API bảo mật chấp nhận.
 - G5 tính 58 case sau trừ ba nhóm trùng; năm case G6 có chuỗi/assertion mới, nâng tổng lên **63**, vượt 35. Chưa thực thi SUT; các status/schema và field chưa đặc tả cần audit.
+
+## G5 – Tổng hợp độ phủ (reviewer)
+
+**Bản rà lại sau G6 — đây là kết luận hiện hành.** Mục G5 phía trên (đợt rà đầu, 61 → 58 case, H1–H5) được giữ nguyên để truy vết; số liệu dưới đây thay thế nó. Phạm vi đọc: `API1_login_generated.md` (G1–G4, G5 cũ, G6), `report/01_spec_analysis.md`, `eshop-sut/README.md` (FR-02, SEC-01..07), `eshop-sut/api_specification.md`. Không gửi request, không sửa G1–G6, không gán nhãn VALID/INVALID/INCOMPLETE. Nguồn: **R** = README, **A** = api_specification.
+
+### 1. Kiểm tra định dạng (đã đếm lại bằng cách đọc từng dòng và đếm ký tự `|`)
+
+- 66 dòng `LG-Gx-nn`, mỗi dòng đúng 9 cột, không trùng ID, không ô Request hoặc Nguồn expected để trống: G1 = 25, G2 = 12, G3 = 17, G4 = 7, G6 = 5. Năm dòng G6 đều có method, path, header, body (macro `W`, `WA`, `C`, `ME`, `t0`, `absentEmail` được định nghĩa trong cùng mục G6), status cụ thể từng bước, predicate body cụ thể và nguồn có R/A hoặc GIẢ ĐỊNH kèm lý do.
+- Request G6 chuyển thẳng được thành Postman: chuỗi tuần tự, `token` lấy từ login ngay trước `ME`, mốc chờ `t0` + 31 giây đã định nghĩa. Không dòng nào dùng "trả lỗi" chung chung.
+- **F1 (mâu thuẫn 400/401 và 423/403): đã lấp bằng quy tắc, không phải bằng case mới.** Quy tắc hợp nhất ở đầu G6: sai credentials hoặc input = 400, đang khóa = 423, và LG-G4-04 (401), LG-G4-05 (403) không áp dụng khi chuyển sang Execute. Mâu thuẫn trong tài liệu được loại; hai ô status cũ vẫn ghi 401/403 vì G4 được giữ nguyên. Hệ quả: khi dựng collection, LG-G4-04 phải đọc là 400 và LG-G4-05 là 423.
+- **F2 (E chỉ "có thông báo" so với schema lỗi G4): đã lấp bằng quy tắc.** G6 áp `error` là string không rỗng, không `token`, cho mọi E/L. Đây vẫn là GIẢ ĐỊNH về tên field và kiểu, do R:42 không định nghĩa schema lỗi.
+- **F3:** G1/G2 vẫn dùng ký hiệu S/E/L thay predicate từng dòng; chấp nhận được vì ký hiệu được định nghĩa trong mục, script Postman phải cài S/E/L cho từng mục.
+- **Thứ tự ưu tiên status (GIẢ ĐỊNH chọn cho nhất quán, không phải quy định spec):** 400 hợp nhất áp dụng cho credentials sai và body/input không hợp lệ; LG-G1-24 (Content-Type `text/plain`, media type không được hỗ trợ) là ngoại lệ riêng, giữ 415 như G1 đã nêu "status trong từng dòng được ưu tiên". Spec không quy định status nào; Audit có thể phản biện lựa chọn này.
+- Không phát hiện dòng thiếu cột, thiếu nguồn hoặc thiếu request.
+
+### 2. Danh sách trùng (không xóa)
+
+Chỉ tính **nhóm trùng ngữ nghĩa thật** (cùng chuỗi request, cùng điều kiện expected, một case là tập con hoàn toàn của case kia). Setup đăng ký chung và assertion thành công chung không tính. Tính theo hợp nhóm, các nhóm rời nhau nên không trừ chồng. Năm case G6 không tạo nhóm trùng mới.
+
+| Nhóm | Cặp ID | Lý do | ID loại khỏi tổng (đề xuất của AI, sinh viên quyết định) |
+|---|---|---|---|
+| D1 | LG-G1-01 và LG-G1-14 | Cùng request (login đúng email đã đăng ký với `Test1234!`), cùng status 200, cùng S, cùng nguồn; chỉ khác tên mục đích. | LG-G1-14 |
+| D2 | LG-G3-06 và LG-G4-03 | Cùng request C, cùng kiểm tra đệ quy không có key `password`, `passwd`, `hash`, không có giá trị `Test1234!`, cùng nguồn R:278 và A:32; G4-03 là tập cha (thêm schema 200 và `reset_token`). | LG-G3-06 |
+| D3 | LG-G2-01 và LG-G2-02 | Chuỗi request quan sát hoàn toàn trùng (W, W, C → 400, 400, 200; G2-02 chỉ chuyển lần W đầu vào Setup), cùng kết luận kiểm tra; khác nhau chỉ ở nhãn cạnh ST. | LG-G2-02 |
+
+**Gần trùng, KHÔNG tính vào số trùng** (khác chuỗi request hoặc khác assertion): LG-G1-13 ~ LG-G3-10 (email 4096 và 10.000 ký tự); LG-G1-21 ~ LG-G3-11 (password 4096 và 10.000); LG-G1-18 ~ LG-G4-06 (G4-06 thêm Content-Type và schema lỗi); LG-G1-01/14 ~ LG-G4-01 ~ LG-G4-02 ~ LG-G4-07 (cùng C → 200, assertion khác); LG-G2-03 ~ LG-G4-05; LG-G2-07 ~ LG-G3-09; LG-G1-15 ~ LG-G4-04 (cùng lớp "password sai", assertion khác, nay cùng 400 theo quy tắc G6). Cặp mới do G6: LG-G3-07 ~ LG-G6-03 (assertion so sánh lỗi email vắng mặt và password sai của G3-07 nằm trong lần so sánh đầu của G6-03, nhưng G6-03 là chuỗi khác: 4 lần sai mỗi tài khoản, khóa, chờ, C và ME; không phải cùng chuỗi request, nên không tính; nếu sinh viên coi là tập con thì tổng thành 62); LG-G6-01 ~ LG-G2-11 và LG-G3-09 (cùng dựng khóa nhưng G6-01 kiểm hết khóa không bằng login đúng); LG-G6-02 ~ LG-G6-04 ~ LG-G6-05 (cùng đuôi `ME`, khác điều kiện đầu vào và assertion); LG-G6-05 ~ LG-G1-25 (field thừa `role` so với `extra`, assertion JWT/role khác); LG-G6-04 ~ LG-G1-01 (G6-04 gửi Bearer sai và kiểm ME).
+
+### 3. Ma trận độ phủ (cập nhật có G6)
+
+Cột = nhãn "Kỹ thuật" ghi trong từng test. `∅ (nhãn)` = biên/lớp được phủ ngữ nghĩa bởi test mang nhãn khác (ID ghi kèm), không phải lỗ hổng. `N/A` = không áp dụng kèm lý do. † = ID bị loại ở mục 2 (vẫn liệt kê để dò vết). **Không còn ô trống quan trọng.** Ánh xạ bullet FR-02 (R:40–44): nhập email/password → M01, M02; bộ đếm +1 → M05; ≥3 lần sai liên tiếp, khóa 30 giây, thông báo không lộ nguyên nhân → M06, M07, M08; JWT và Bearer → M09, M10; `type="email"` → M11.
+
+| # | Yêu cầu / tham số | EP | BVA | ST | SEC | SCH |
+|---|---|---|---|---|---|---|
+| M01 | Tham số `email` (R:40; A:25–31) | LG-G1-01, 02, 03, 04, 05, 07, 08, 09, 10, 11, 12 | LG-G1-06, 13 | LG-G2-12 (khóa A không ảnh hưởng B); mọi case G2 dùng email riêng | LG-G3-01, 02, 03, 07, 10, 12, 14, 16; LG-G6-03 (email vắng mặt) | ∅ (nhãn): không có SCH riêng cho email lỗi; schema lỗi dùng chung đã kiểm ở LG-G4-04, 05, 06 |
+| M02 | Tham số `password` (R:40; A:25–31) | LG-G1-14†, 15, 16, 18, 19, 20 | LG-G1-17, 21 | LG-G2-01, LG-G2-04 | LG-G3-04, 05, 11, 13, 15, 17 | LG-G4-04, 06 |
+| M03 | Body tổng thể và Content-Type (A:25) | LG-G1-22, 23, 24, 25; LG-G6-05 (field thừa `role`) | N/A: spec không có biên kích thước/số lượng body | N/A: không có trạng thái | LG-G6-05 | LG-G4-06 |
+| M04 | Header Authorization (R:43 không yêu cầu cho login) | LG-G6-04 (Bearer sai khi login đúng) | N/A: không có biên | N/A: không có trạng thái | ∅ (nhãn): ngữ nghĩa phủ bởi LG-G6-04 (Requirement có SEC-02, nhãn EP) | N/A: không có schema riêng cho case này |
+| M05 | Bộ đếm tăng đúng 1 sau mỗi lần sai (R:41) | LG-G1-15, 16 | ∅ (nhãn): biên 1, 2 lần sai phủ bởi LG-G2-01, 02†, 03 | LG-G2-01, 02†, 03, 04, 05, 06, 08, 09, 10; LG-G6-01 | LG-G3-09 | N/A: bộ đếm không nằm trong response theo spec |
+| M06 | Sai ≥ 3 lần liên tiếp thì khóa (R:42) | ∅ (nhãn): phủ bởi ST (LG-G2-03) | ∅ (nhãn): 2 chưa khóa, 3 khóa, 4 trong khóa phủ bởi LG-G2-02†, 03, 07 và LG-G6-03 | LG-G2-03, 05, 06 (sai–đúng–sai không cộng dồn), 07, 09, 10, 12; LG-G6-01, 03 | LG-G3-09; LG-G6-03 | LG-G4-05 (423 theo quy tắc G6) |
+| M07 | Khóa 30 giây rồi mở (R:42) | ∅ (nhãn): phủ bởi ST | ∅ (nhãn): ~29 giây còn khóa, ~31 giây mở: LG-G2-11 | LG-G2-07, 11; **LG-G6-01** (hết khóa, ba lần sai mới, không login đúng trước, lấp H1) | LG-G3-09; LG-G6-03 | N/A: thời gian khóa không nằm trong response |
+| M08 | Thông báo lỗi phù hợp, không lộ nguyên nhân (R:42) | LG-G1-02, 15, 16 | N/A: không có biên | LG-G2-03, 07 | LG-G3-07, 09; **LG-G6-03** (lỗi khóa và lỗi sai password giống hệt giữa email có và không đăng ký, lấp H3) | LG-G4-04, 05, 06 |
+| M09 | Login đúng trả JWT (R:43; A:32) | LG-G1-01, 10, 11, 12, 14†, 25; LG-G6-04 | N/A: login đúng không có biên | LG-G2-04, 05, 06, 07, 11, 12; LG-G6-03 (C sau khóa) | LG-G3-08; LG-G6-02, 05 | LG-G4-01, 02, 07 |
+| M10 | Token dùng Bearer ở request có xác thực (R:43; A:59, 62) | LG-G6-04 (token mới dùng được `ME`) | N/A: không có biên | N/A: spec không nêu vòng đời/hạn token, không có sự kiện trạng thái để kiểm | **LG-G6-02**, LG-G6-03, LG-G6-05 (lấp H2) | N/A: spec không định nghĩa schema response `GET /api/users/me` |
+| M11 | `type="email"` HTML5 (R:44) | LG-G1-03, 04, 05 (chỉ giả định backend từ chối; R:44 là UI) | N/A | N/A | N/A | N/A (cả hàng: yêu cầu UI, API không có contract) |
+| M12 | SEC-01 không lưu plaintext (R:278) | N/A: không kiểm được storage qua API | N/A | N/A | LG-G3-06† (suy luận: response không lộ password/hash) | LG-G4-03 |
+| M13 | SEC-02 JWT hợp lệ cho API bảo mật (R:279) | LG-G6-04 | N/A | N/A | LG-G3-08 (payload); **LG-G6-02**, LG-G6-03 (token vừa cấp được `ME` chấp nhận). Phần token sai/hết hạn gửi vào API bảo mật là việc test của từng API đó, không thuộc login | N/A |
+| M14 | SEC-03 role admin (R:280): login không phải API Admin | N/A | N/A | N/A | Gián tiếp: LG-G3-08 (role user), **LG-G6-05** (role do client gửi không nâng quyền, lấp H5) | N/A |
+| M15 | SEC-04 escape khi hiển thị UI (R:281) | N/A: escape là việc UI; spec không có contract JSON cho login | N/A | N/A | N/A (không áp dụng ở mức API) | N/A |
+| M16 | SEC-05 parameterized query (R:282) | N/A | N/A | N/A | LG-G3-01, 02, 03, 04, 05, 14, 15 | N/A |
+| M17 | SEC-06 không đổi `role` từ client (R:283): thuộc API profile | N/A | N/A | N/A | Gián tiếp: LG-G3-08, LG-G6-05 | N/A |
+| M18 | SEC-07 OTP đặt lại mật khẩu (R:284) | N/A: login không có OTP | N/A | N/A | N/A | N/A |
+
+### 4. Bảng đếm
+
+Đếm theo nhãn "Kỹ thuật" của từng test, sau khi trừ D1, D2, D3 (mỗi nhóm trừ đúng một ID). G6 gồm: EP 1 (LG-G6-04), ST 1 (LG-G6-01), SEC 3 (LG-G6-02, 03, 05).
+
+| Kỹ thuật | G1 | G2 | G3 | G4 | G6 | Tổng thô | ID loại (trùng) | Tổng sau trừ trùng |
+|---|---|---|---|---|---|---|---|---|
+| EP | 21 | 0 | 0 | 0 | 1 | 22 | LG-G1-14 | 21 |
+| BVA | 4 | 0 | 0 | 0 | 0 | 4 | không | 4 |
+| ST | 0 | 12 | 0 | 0 | 1 | 13 | LG-G2-02 | 12 |
+| SEC | 0 | 0 | 17 | 0 | 3 | 20 | LG-G3-06 | 19 |
+| SCH | 0 | 0 | 0 | 7 | 0 | 7 | không | 7 |
+| **Tổng** | 25 | 12 | 17 | 7 | 5 | **66** | 3 | **63** |
+
+**Kết luận: ĐỦ ≥ 35** (63 sau trừ ba nhóm trùng; 66 theo tổng thô; vượt ngưỡng 35 thêm 28). Không "THIẾU n case". Cả năm kỹ thuật EP, BVA, ST, SEC, SCH đều có case.
+
+### 5. Đối chiếu H1–H5 và F1/F2 của G5 cũ
+
+| Mục | Lấp bởi | Còn giới hạn gì |
+|---|---|---|
+| H1 (hết khóa reset counter không nhờ login đúng) | LG-G6-01: W, W, W; chờ `t0` + 31 giây; W, W, W, C → 400, 400, 423, 423 giả định; không login đúng trước ba lần sai sau chờ. Khớp đúng case G5 đề xuất. | Giới hạn spec: R:41–42 không nói reset khi hết khóa, đã ghi GIẢ ĐỊNH. Không phải thiếu case. |
+| H2 (token vừa cấp dùng được ở API bảo mật) | LG-G6-02 (C, lưu token, `ME`); thêm LG-G6-03, 04, 05 kết thúc bằng `ME`. | Status 200, tên field `email`/`id` của `ME` là GIẢ ĐỊNH (A:62 không nêu response). Không phải thiếu case. |
+| H3 (khóa không lộ email nào đã đăng ký) | LG-G6-03: bốn lần sai cho cả tài khoản có và không đăng ký, so sánh từng cặp status và `error`, rồi C và `ME` cho tài khoản thật. | Giả định email vắng mặt có cùng chính sách khóa và namespace UUID chưa tồn tại; đã ghi GIẢ ĐỊNH. Không phải thiếu case. |
+| H4 (Authorization sai khi login) | LG-G6-04 (Bearer `invalid.token.value`, body C → 200, rồi `ME`). | Giả định login bỏ qua Bearer đầu vào; R:43 không nói rõ. Không phải thiếu case. |
+| H5 (role do client gửi) | LG-G6-05 (body thêm `"role":"admin"`; payload JWT và `user.role` phải là `user`; `ME` đúng danh tính). | Giả định bỏ qua field thừa (nhất quán LG-G1-25), role mặc định `user`, tên claim `role`. Không phải thiếu case. |
+| F1 (400/401, 423/403) | Quy tắc hợp nhất đầu G6 (400 cho sai credentials/input, 423 cho khóa). | Hai ô status cũ ở LG-G4-04/05 chưa sửa trong bảng (G4 giữ nguyên); khi Execute phải dùng 400/423. |
+| F2 (E yếu hơn schema G4) | Quy tắc hợp nhất đầu G6 (`error` string không rỗng, không `token`). | Tên và kiểu `error` vẫn là GIẢ ĐỊNH vì R:42 không định nghĩa schema lỗi. |
+
+### 6. Lỗ hổng độ phủ còn lại
+
+**Không còn lỗ hổng về số case** trong phạm vi EP, BVA, ST, SEC, SCH đã giao; không cần G6 bổ sung. Các điểm còn lại là giới hạn của spec, không phải thiếu case:
+
+- Reset counter khi login đúng hoặc khi hết khóa, hành vi gia hạn khóa khi thử trong lúc khóa: spec không nêu (R:41–43), đã ghi GIẢ ĐỊNH ở LG-G2-04…11 và LG-G6-01.
+- Status lỗi, schema lỗi, schema `user`, JWT claims, hạn dùng token, normalize email, giới hạn độ dài, field thừa: spec không nêu, đã ghi GIẢ ĐỊNH.
+- R:44 (`type="email"`) và SEC-04 là yêu cầu UI, SEC-01 không kiểm được storage qua API, SEC-07 không thuộc login: xử lý bằng `N/A` hoặc suy luận gián tiếp ở ma trận.
+- Chưa thực thi SUT; mọi expected là suy ra từ spec và GIẢ ĐỊNH, chưa phải kết quả quan sát.
+
+**Ghi chú của AI (reviewer):**
+- Tổng 63 phụ thuộc quyết định của sinh viên về D1–D3; cặp LG-G3-07 ~ LG-G6-03 là chỗ có thể tranh luận (nếu coi là tập con thì 62).
+- Ma trận dựa trên nhãn "Kỹ thuật" từng dòng; biên được phủ bằng ST thay vì BVA ghi `∅ (nhãn)` kèm ID, không coi là lỗ hổng.
+- F1/F2 được lấp bằng quy tắc văn bản, không bằng sửa dòng cũ; cần giữ quy tắc này khi chuyển sang Execute.
+- Không ghi nhãn VALID/INVALID/INCOMPLETE; số liệu là kết quả đọc và đếm tài liệu, không có lần chạy SUT.
