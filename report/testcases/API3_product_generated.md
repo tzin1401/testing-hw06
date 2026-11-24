@@ -420,3 +420,155 @@ Token `N`: base64url không padding UTF-8 header `{"alg":"none","typ":"JWT"}` + 
 **Ghi chú của AI:** Full PUT, thứ tự auth/validation, status, error schema, response GET và chấp nhận literal là giả định cần audit, không phải hành vi quan sát.
 S4 chỉ kiểm kiểu các field có mặt; case 29 yêu cầu riêng đủ field cho sản phẩm tự tạo, không áp đặt seed hoặc field bắt buộc cho mọi item.
 SEC-04 là yêu cầu escape ở UI; kiểm tra API không chứng minh UI an toàn. SEC-05 black-box không chứng minh cơ chế parameterized query.
+
+## G5 – Tổng hợp độ phủ (reviewer)
+
+Mục này là kết luận **hiện hành** sau khi đọc cả G1–G4 và G6; số liệu của mục G5 trước (85 case) được thay bằng số liệu bên dưới, mục cũ giữ nguyên để truy vết. Chỉ đọc file này, `report/01_spec_analysis.md`, `eshop-sut/README.md` (FR-05, FR-12, FR-15, SEC-01..07) và `eshop-sut/api_specification.md`; không gửi request tới SUT, không sửa hay xóa case nào, không gán nhãn audit. ID viết tắt bỏ tiền tố `PR-` (ví dụ `G6-28` là `PR-G6-28`). Quy tắc hiện hành cho cả file: **full PUT** của G6 (thiếu `name`, `price` hoặc `category_id` thì 400 và dữ liệu không đổi) là GIẢ ĐỊNH, không phải sự thật đặc tả; vì vậy G2-16 được đếm với expected hiện hành **400 và không đổi**, dòng 200 cũ của G2-16 chỉ để truy vết. Mọi status, JSON lỗi và hình dạng GET đều là GIẢ ĐỊNH vì spec không quy định.
+
+### 5.A Bảng đếm
+
+Tổng thô **127** case (G1 46, G2 16, G3 22, G4 8, G6 35). Có 6 nhóm trùng thật (mục 5.B1), hợp các nhóm có 8 thành viên thừa, còn **119** case độc lập. Sau trừ trùng theo mục: G1 41, G2 13, G3 22, G4 8, G6 35. So với G5 cũ: 85 + 35 case G6 − 1 nhóm trùng mới (D6) = 119.
+
+| Kỹ thuật | G1 | G2 | G3 | G4 | G6 | Thô | Trừ trùng | Sau trừ trùng |
+|---|---|---|---|---|---|---|---|---|
+| EP | 32 | 0 | 0 | 0 | 12 | 44 | 4 (G1-22, G1-35, G1-39, G1-40) | 40 |
+| BVA | 14 | 0 | 0 | 0 | 7 | 21 | 1 (G1-04) | 20 |
+| ST | 0 | 16 | 0 | 0 | 0 | 16 | 3 (G2-01, G2-07, G2-09) | 13 |
+| SEC | 0 | 0 | 22 | 0 | 15 | 37 | 0 | 37 |
+| SCH | 0 | 0 | 0 | 8 | 1 | 9 | 0 | 9 |
+| **Tổng** | 46 | 16 | 22 | 8 | 35 | **127** | **8** | **119** |
+
+Đếm theo method của request chính được kiểm thử (request đầu tiên của case; GET xác minh sau request chính không tính; G2-13 là chuỗi POST, GET, PUT, GET, DELETE, GET nên tính riêng):
+
+| Method | G1 | G2 | G3 | G4 | G6 | Thô | Trừ trùng | Sau trừ trùng |
+|---|---|---|---|---|---|---|---|---|
+| POST /api/products | 36 | 4 | 8 | 2 | 8 | 58 | 4 (G1-04, G1-22, G2-01, G2-09) | 54 |
+| PUT /api/products/:id | 5 | 5 | 9 | 2 | 24 | 45 | 2 (G1-35, G2-07) | 43 |
+| DELETE /api/products/:id | 5 | 3 | 5 | 2 | 2 | 17 | 2 (G1-39, G1-40) | 15 |
+| GET (quan sát, không phải mutation) | 0 | 3 | 0 | 2 | 1 | 6 | 0 | 6 |
+| Chuỗi nhiều method (G2-13) | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 1 |
+| **Tổng** | 46 | 16 | 22 | 8 | 35 | **127** | **8** | **119** |
+
+Số liệu thô G1–G4 khớp mục G5 cũ (92); G6 đếm từ file: 35 dòng, EP 12, BVA 7, SEC 15, SCH 1; POST 8, PUT 24, DELETE 2, GET 1.
+
+### 5.B Test trùng và gần trùng (không xóa)
+
+**5.B1 Nhóm trùng thật.** Tiêu chí: cùng method, cùng lớp input, cùng lớp trạng thái đích, cùng status, phần kiểm tra nghiệp vụ giống nhau hoặc là tập con của nhau. Thêm kiểm tra schema, header hay thời gian là khẳng định khác nên không phải trùng. Mỗi nhóm đếm một lần theo hợp của nhóm: chỉ trừ số thành viên thừa so với đại diện.
+
+| Nhóm | ID trong nhóm | Lý do trùng | Đại diện giữ | Số trừ |
+|---|---|---|---|---|
+| D1 | G1-22, G2-01, G2-05, G2-09 | Cùng `POST /api/products` với body hợp lệ, cùng 200, cùng kiểm tra "đúng một sản phẩm mới, các sản phẩm khác không đổi"; POST là tạo trên collection nên trạng thái của P hay id A trong precondition không phải input của request | G2-05 | 3 |
+| D2 | G2-07, G2-14 | Cùng PUT sản phẩm đang tồn tại với body đầy đủ, cùng 200, cùng "P đổi, mọi id khác bằng S"; G2-14 chỉ thêm sản phẩm Q | G2-14 | 1 |
+| D3 | G1-35, G2-03 | Cùng PUT id số chưa từng tồn tại, body đầy đủ, 404, "error không rỗng, list không đổi" | G2-03 | 1 |
+| D4 | G1-40, G2-04 | Cùng DELETE id số chưa từng tồn tại, 404, "error không rỗng, list không đổi" | G2-04 | 1 |
+| D5 | G1-39, G2-08 | Cùng DELETE sản phẩm đang tồn tại, 200, "P không còn trong list, id khác không đổi"; G2-08 chỉ thêm GET P trả 404 | G2-08 | 1 |
+| D6 (mới) | G1-04, G6-28 | Cùng POST, cùng lớp name 1 ký tự `a`, cùng 200; kiểm tra của G1-04 ("có sản phẩm name `a` và các field còn lại đúng") là tập con của G6-28, vốn thêm snapshot delta (đúng một id mới ngoài S, nhận diện theo id chứ không theo name). Giá trị price và description khác nhau không tạo lớp input khác. G6-28 thay thế G1-04 trong tính đếm; G1-04 chỉ giữ để truy vết, pass của G1-04 không được dùng làm bằng chứng do có thể khớp nhầm sản phẩm tên `a` khác | G6-28 | 1 |
+
+Tổng trừ: 3 + 1 + 1 + 1 + 1 + 1 = **8**.
+
+**5.B2 Gần trùng (không trừ).**
+
+| Nhóm | Giống | Khác | Vì sao giữ |
+|---|---|---|---|
+| G1-01, G1-40, G2-04, G4-06, G1-39, G2-08, G4-03, G2-07, G2-14, G4-02, G1-22, G2-05, G4-01, G2-06, G4-08 | Cùng request với case chức năng ở nhóm D | G4 thêm schema S1 đến S4, Content-Type, thời gian; G2-06 thêm list bằng S | Có khẳng định SCH hoặc ST riêng |
+| G1-34 với G2-07, G2-14 | PUT tồn tại, id khác không đổi | G1-34 chỉ đổi price thành 1 | Input khác |
+| G2-02/G2-10, G2-03/G2-11, G2-04/G2-12 | Cùng 404, list không đổi | Chưa từng tồn tại so với đã xóa | Hai ô ST khác nhau |
+| G1-38/G3-17, G1-43/G3-18 | PUT hoặc DELETE id không phải số, 400 | G3 dùng payload `1 OR 1=1` | Khác mục đích EP và SEC-05 |
+| G1-46 với G3-21 | POST kèm `id` thừa | G3-21 dùng id của Q đang tồn tại cùng field lạ | Kịch bản ghi đè khác |
+| G2-13, G1-44, G2-15 | Bao gồm hoặc gần các case khác | Chuỗi liên tục; thiếu đồng thời nhiều field; tên trùng | Composite hoặc khẳng định riêng |
+| G2-16 với G6-01, G6-11, G6-15 | PUT thiếu field bắt buộc, 400 theo full PUT, không đổi | G2-16 chỉ gửi price (thiếu 4 field); mỗi case G6 thiếu đúng một field | Composite so với từng lớp thiếu, giống G1-44 |
+| G6-03, G6-33, G6-34 (name số, array, boolean) và G6-08, G6-09, G6-35 (price chuỗi, null, boolean) | Cùng PUT, cùng field, cùng 400, cùng "không đổi" | Kiểu JSON khác nhau | Theo quy ước G1-09, G1-10, G1-17..20; mỗi kiểu có thể đi nhánh kiểm tra khác |
+| G6-12, G6-13, G6-14 với G1-23, G1-24, G1-25 | Category 99999, 0, -1, 400 | PUT so với POST | Khác method |
+| G6-04, G6-05, G6-07, G6-10 với G1-06, G1-07, G1-13, G1-14 | Cùng giá trị biên name hoặc price | PUT so với POST | Khác method |
+| G6-16/G3-10, G6-17/G3-11, G6-18/G3-12 | Token admin giả bị từ chối, 401 | alg none (không chữ ký) so với HS256 sai secret | Khác lớp token |
+| G6-19 với G6-32 | POST với chuỗi không phải JWT, 401 | `not.a.jwt` có 3 đoạn, `not-a-jwt` không có dấu chấm | Khác lớp cấu trúc |
+| G6-30, G6-31 với G3-01, G3-02 | Không token, 401 | G6 gửi body `{}` để kiểm tra auth trước validation | Khác mục đích |
+| G6-22..27 với G3-13..20 | Cùng loại payload SQL hoặc XSS | Field description, imageUrl so với name | Khác field |
+| G6-29 với G2-06, G4-08 | GET dữ liệu sản phẩm | List mảng so với detail | Khác endpoint |
+
+Cận dưới bảo thủ: loại thêm toàn bộ thành viên phụ của 5.B2 (G1-34, G1-44, G2-10, G2-11, G2-12, G2-13, G2-15, G2-16, G3-17, G3-18, G3-21, G4-01, G4-02, G4-03, G4-04, G4-06, G4-08, G6-09, G6-13, G6-14, G6-32, G6-33, G6-34, G6-35: 24 ID, không có ID nào đã bị trừ ở D1..D6) thì còn ít nhất **95**, vẫn vượt 35. Nếu sinh viên coi G2-01 và G2-09 là ô ST độc lập (D1 chỉ trừ G1-22) thì tổng là 121.
+
+### 5.C Ma trận độ phủ
+
+Mỗi ô liệt kê mọi ID có hiệu lực kiểm tra trực tiếp, tính trước khi trừ trùng. Cột là nhãn kỹ thuật của chính case, ngoại lệ ghi rõ. `TRỐNG (thấp)` là ô trống ưu tiên thấp, giải thích ở 5.F; `N/A` kèm lý do. Không còn ô `TRỐNG` quan trọng.
+
+| Hàng | EP | BVA | ST | SEC | SCH |
+|---|---|---|---|---|---|
+| FR-15 name, POST (R:195) | G1-01, 02, 03, 08, 09, 10, 44 | G1-04, 05, 06, 07 (1, 254, 255, 256 ký tự), G6-28 (1 ký tự có snapshot delta) | G2-01, 05, 09, 15 | G3-13 (SQL), G3-19 (XSS) | G4-01, G4-04 (thiếu name) |
+| FR-15 name, PUT | Lớp hợp lệ G1-34; lớp không hợp lệ G6-01 (thiếu), 02 (rỗng), 03 (số), 06 (null), 33 (array), 34 (boolean) | G6-04 (255), G6-05 (256) | G2-07, 14, 13; G2-16 (full PUT, thiếu name trong số các field thiếu: 400) | G3-15 (SQL), G3-20 (XSS) | G4-02 |
+| FR-15 price, POST (R:196) | G1-11, 16, 17, 18, 19, 20 | G1-12, 13, 14, 15 (0, âm, 0.01, 1) | G2-01, 05, 09, 13 | TRỐNG (thấp) | G4-01, 07, 08 (price kiểu number) |
+| FR-15 price, PUT | Lớp hợp lệ G1-34; lớp không hợp lệ G6-08 (chuỗi), 09 (null), 35 (boolean), 15 (thiếu) | G6-07 (-1), G6-10 (0.01), G4-05 (0, nhãn SCH) | G2-07, 14, 13; G2-16 | TRỐNG (thấp) | G4-02, G4-05 |
+| FR-15 category, POST (R:197) | G1-21, 22, 23, 26, 44 | G1-24, 25 (0, -1) | G2-01, 05, 09, 13 | TRỐNG (thấp) | G4-01, G4-08 |
+| FR-15 category, PUT | Lớp hợp lệ G1-34; lớp không hợp lệ G6-11 (thiếu), G6-12 (99999 vắng) | G6-13 (0), G6-14 (-1) | G2-07, 14, 13; G2-16 | TRỐNG (thấp) | G4-02 |
+| FR-15 chỉ sửa 1 sản phẩm (R:198) | G1-34 | N/A: quan hệ "một so với phần còn lại" không có biên số trong spec | G2-07, 14, 13; G2-16 (PUT bị từ chối không đổi gì); G1-34 | PUT thành công, list khác không đổi: G3-15, 16, 20, 22, G6-23, 25, 27. PUT bị từ chối, không đổi: G3-02, 05, 08, 11, 17, G6-17, 20, 31 | G4-02 (sản phẩm đích); list bằng S kiểm bằng G6-29 (GET, không có PUT) |
+| Body chung và mass assignment (A:91–99) | G1-44, 45, 46 | N/A: không có biên số trên cấu trúc body | G2-15 (tên trùng); G2-16 (full PUT) | G3-21 (POST), G3-22 (PUT) | G4-04, G4-05 |
+| FR-12 và SEC-02: JWT hợp lệ (R:177–179, 279) | Lớp token (nhãn kỹ thuật các case này là SEC): thiếu G3-01..03; HS256 sai secret G3-10..12; alg none G6-16..18; sai cấu trúc G6-19..21, 32 | N/A: spec không nêu hạn hay độ dài token | N/A: spec không định nghĩa trạng thái token | POST: G3-01, 10, G6-16, 19, 30, 32. PUT: G3-02, 11, G6-17, 20, 31. DELETE: G3-03, 12, G6-18, 21 (auth-first không áp dụng: DELETE không có body) | TRỐNG (thấp) |
+| FR-12 và SEC-03: role admin (R:280) | G3-04, 05, 06 (user thường) | N/A: role không có biên | G3-07, 08, 09 (nâng role rồi gọi) | G3-04..09; token admin giả cũng bị chặn ở G3-10..12, G6-16..18 | TRỐNG (thấp) |
+| SEC-04: escape khi hiển thị (R:281) | Lớp input chứa HTML hoặc JS theo field (nhãn SEC): name G3-19, 20; description G6-22, 23; imageUrl G6-24, 25 | N/A: không có biên | N/A: spec không có trạng thái cho escape | POST: G3-19, G6-22, 24. PUT: G3-20, G6-23, 25. DELETE: N/A, không có body, chỉ gián tiếp qua UI (spec_analysis 3.4) | N/A: escape xảy ra ở UI, API không có schema escape; không chứng minh UI an toàn |
+| SEC-05: parameterized query (R:282) | G1-38, G1-43 (id không phải số); G3-17, G3-18 (payload ở path) | G1-36, 37, 41, 42 (id biên, không payload) | N/A: không có trạng thái | POST: G3-13, 14, G6-26. PUT: G3-15, 16, 17, G6-27. DELETE: G3-18 | N/A: black-box không chứng minh cơ chế |
+| SEC-06: không đổi role qua profile (R:283) | N/A: chuỗi tấn công, không có lớp input riêng | N/A | G3-07, 08, 09 (PUT /api/users/me rồi đăng nhập lại rồi gọi product) | G3-07 (POST), G3-08 (PUT), G3-09 (DELETE) | N/A |
+| SEC-01 (R:278) | N/A: product API không xử lý password, login chỉ là setup | N/A | N/A | N/A | N/A |
+| SEC-07 (R:284) | N/A: product API không có OTP | N/A | N/A | N/A | N/A |
+| Method POST | G1-01..03, 08..11, 16..23, 26..33, 44..46 | G1-04..07, 12..15, 24, 25, G6-28 | G2-01, 05, 09, 15 | G3-01, 04, 07, 10, 13, 14, 19, 21, G6-16, 19, 22, 24, 26, 30, 32 | G4-01, 04 |
+| Method PUT | G1-34, 35, 38, G6-01, 02, 03, 06, 08, 09, 11, 12, 15, 33, 34, 35 | G1-36, 37, G6-04, 05, 07, 10, 13, 14 | G2-03, 07, 11, 14, 16 | G3-02, 05, 08, 11, 15, 16, 17, 20, 22, G6-17, 20, 23, 25, 27, 31 | G4-02, 05 |
+| Method DELETE | G1-39, 40, 43 | G1-41, 42 | G2-04, 08, 12 | G3-03, 06, 09, 12, 18, G6-18, 21 | G4-03, 06 |
+| GET quan sát (R:193 "Xem") | N/A: không phải mutation | N/A | G2-02, 06, 10, 13 | N/A | G4-07, 08, G6-29 (list, mỗi phần tử khớp S4) |
+
+Hàng ST cho 12 ô trạng thái (3 trạng thái × 4 sự kiện) của G2 đều có case trực tiếp: POST G2-01, 05, 09; GET G2-02, 06, 10; PUT G2-03, 07, 11; DELETE G2-04, 08, 12.
+
+### 5.D Kiểm tra định dạng
+
+Kết quả đếm bằng grep/awk trên file (chỉ đọc), tính cho toàn bộ 127 dòng case.
+
+| Tiêu chí | Kết quả |
+|---|---|
+| Đủ 9 cột | 127/127 dòng có đúng 9 ô, không ô trống, không dấu gạch đứng thừa (G1 46, G2 16, G3 22, G4 8, G6 35) |
+| ID duy nhất, đúng mẫu `PR-G<n>-<2 chữ số>` | 127 ID duy nhất; G1 01–46, G2 01–16, G3 01–22, G4 01–08, G6 01–35 |
+| Request ghi rõ method | 127/127 bắt đầu bằng POST, PUT, DELETE hoặc GET (G2-13 và case G4 nhiều bước liệt kê method từng bước); body dùng macro B, B2, Bnew, V, N, M, M2 được định nghĩa trong cùng mục của case |
+| Expected status cụ thể | 127/127 có mã số cụ thể (chuỗi mã cho case nhiều bước) |
+| Expected body cụ thể | 127/127 có predicate dữ liệu; 78 dòng nêu `error` không rỗng (regex trên cột Expected body) |
+| Nguồn expected | 127/127 trích README hoặc API spec kèm số dòng; 127/127 có "GIẢ ĐỊNH" (spec không quy định status) |
+| Nhãn audit | Không có nhãn audit nào trong file |
+
+Khả năng thực thi, đánh giá trên văn bản:
+- Điểm yếu đã nêu ở G5 cũ nay đã được xử lý bằng case hoặc quy tắc: G1-04 false-pass qua G6-28 (D6); token không chữ ký qua G6-16..18; xung đột G2-16 với G1-01 qua full PUT (G2-16 hiện hành 400, dòng 200 cũ chỉ truy vết, khi chuyển sang Postman phải dùng 400).
+- Còn lại là lưu ý, không phải thiếu case: G2-13 cần thêm bước tra P theo K bằng GET list ngoài chuỗi status; G6-29 dùng S4 của G4 (không định nghĩa schema mới), và S4 không có `required` nên "khớp S4" cho phần tử seed chỉ kiểm kiểu field có mặt, còn sự hiện diện đủ field chỉ được khẳng định cho sản phẩm tự tạo P; đây là hệ quả của việc spec không bảo đảm field response, đã ghi giả định.
+- Các token N, M, M2, snapshot S, detail D và setup P đều có định nghĩa đủ trong mục G6 để dựng request Postman; chưa gửi request nào.
+
+### 5.E Ánh xạ H1..H10 sang G6
+
+| Hạng mục | Case G6 | Ghi nhận |
+|---|---|---|
+| H1 name khi Sửa | G6-01 (thiếu), 02 (rỗng), 03 (số), 04 (255), 05 (256), 06 (null), 33 (array), 34 (boolean) | Gợi ý gốc PUT name 256 là G6-05 |
+| H2 price khi Sửa | G6-07 (-1), 08 (chuỗi), 09 (null), 10 (0.01), 35 (boolean) | Giá trị 0 giữ ở G4-05 |
+| H3 category khi Sửa | G6-11 (thiếu), 12 (99999 vắng), 13 (0), 14 (-1) | Setup xác nhận id vắng qua GET /api/categories |
+| H4 token không chữ ký | G6-16 (POST), 17 (PUT), 18 (DELETE) | Đủ 3 method; token N có chữ ký rỗng, phân biệt với token sai chữ ký G3-10..12 |
+| H5 token sai định dạng | G6-19 (POST), 20 (PUT), 21 (DELETE), 32 (POST, không dấu chấm) | `not.a.jwt` khác `not-a-jwt`: hai lớp cấu trúc khác nhau |
+| H6 description và imageUrl | G6-22, 23 (XSS description POST, PUT), 24, 25 (`javascript:alert(1)` ở imageUrl POST, PUT), 26, 27 (SQL imageUrl POST, PUT) | Chỉ kiểm tra lưu và đọc lại literal, không chứng minh UI an toàn; gợi ý gốc dùng `<img onerror>`, G6 dùng `<script>` cho description, cùng lớp HTML/JS |
+| H7 G1-04 executability | G6-28 | Snapshot delta thay nhận diện theo name; D6 |
+| H8 full/partial PUT | Quy tắc full PUT của G6; G6-01, 11, 15; G2-16 hiện hành 400 | Giả định hiện hành cho cả file, cần audit; không còn mâu thuẫn với G1-01 |
+| H9 schema list | G6-29 | Dùng S4 của G4 cho từng phần tử, không tạo schema riêng |
+| H10 auth trước validation | G6-30 (POST), 31 (PUT) | DELETE không có body nên không có phép thử tương ứng |
+
+Cả 35 case G6 đều được ánh xạ (01–06 H1, 07–10 H2, 11–14 H3, 15 H8, 16–18 H4, 19–21 H5, 22–27 H6, 28 H7, 29 H9, 30–31 H10, 32 H5, 33–34 H1, 35 H2). Không có case G6 nào mồ côi.
+
+### 5.F Kết luận và lỗ hổng
+
+Sau trừ trùng còn **119 case**, vượt ngưỡng 35 → **ĐỦ ≥ 35** (THIẾU 0 case). Phân bố: EP 40, BVA 20, ST 13, SEC 37, SCH 9; POST 54, PUT 43, DELETE 15, GET 6, chuỗi 1. Mỗi hàng ràng buộc FR-15 (name, price, category, chỉ sửa 1 sản phẩm) có case ở cả POST và PUT, ba method đều có EP, BVA hoặc SEC, SEC-02..06 đều có case cho từng method áp dụng, 12 ô ST đều có case.
+
+**Lỗ hổng thật còn lại: không có.** Không cần vòng G6 tiếp theo.
+
+Các điểm sau không tính là thiếu case vì là giới hạn của spec đã ghi giả định hoặc nằm ngoài phạm vi yêu cầu G1–G4; ghi để sinh viên cân nhắc ở bước Audit:
+
+| Điểm | Vì sao không tính là lỗ hổng |
+|---|---|
+| Status, JSON lỗi, id cấp mới, hình dạng GET list và detail, Content-Type, 2000 ms | Spec không quy định; thêm case không giải quyết được, cần audit giả định |
+| Token hết hạn hoặc bị thu hồi | Spec không nêu thời hạn token; không thể dựng token hợp lệ đã hết hạn nếu không biết secret |
+| SQL injection qua price và category_id | G3 gốc chỉ yêu cầu name, description và path id (G6 đã thêm imageUrl); lớp "không phải số" và "không thuộc danh sách" đã có G1-17, 18, 26 và G6-08, 12, 13, 14, nên thêm payload là mở rộng phạm vi |
+| Độ dài name tính theo ký tự đa byte | Các case BVA 255 và 256 dùng ký tự ASCII; spec nói "255 ký tự" nhưng không nêu mã hóa; chỉ là ý tưởng tùy chọn, không thuộc yêu cầu G1–G4 |
+| Auth trước validation cho DELETE | DELETE không có body contract nên không có phép thử body sai |
+| Schema S3 và Content-Type cho 401 và 403 | Shape lỗi là giả định; G3 và G6 đã kiểm `error` không rỗng cho mọi case từ chối |
+
+**Ghi chú của AI:** Việc chọn nhóm trùng phụ thuộc tiêu chí ở 5.B1; D6 coi G6-28 thay thế G1-04, còn nếu giữ ô ST độc lập thì tổng là 121, kết luận ĐỦ không đổi.
+Full PUT là giả định hiện hành, không phải đặc tả; nếu audit chọn PUT một phần thì G2-16, G6-01, 11, 15 và các case G6 PUT thiếu field phải đổi expected cùng lúc.
+Mọi status, JSON lỗi, GET shape và việc chấp nhận literal HTML hoặc SQL đều là GIẢ ĐỊNH; độ phủ ở đây là độ phủ tình huống, chưa xác nhận hành vi SUT. Chưa gửi request nào.
