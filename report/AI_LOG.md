@@ -403,3 +403,56 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
 - **AI output:**
   > Append G4: 7 case SCH và 2 JSON Schema draft07 (success/error), kiểm tra status/media type/kiểu user/sensitive/error/timing. Chỉ token,user required theo spec; field quan sát tùy chọn, các ràng buộc khác ghi giả định. Manager đọc và kiểm tra parse/meta-schema đạt, không gọi SUT.
 - **Human review:** _(để trống – sinh viên tự điền)_
+
+## #9 – 2026-11-24 14:54 (giờ VN)
+- **AI tool:** CNG2 (openai-codex/gpt-6.1-terra); Manager ghi log/commit (openai-codex/gpt-6.1-sol)
+- **API / Bước:** CN-G2 – Generate
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Generate (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - Repo: https://github.com/tzin1401/testing-hw06 (remote origin). KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit).
+  > - Sinh viên: MSSV 23120190. Mọi request khi chạy sau này sẽ có header X-Student-Id: 23120190 (do pre-request script thêm, KHÔNG cần ghi vào từng test case).
+  > - SUT: EShop backend, Node.js + Express + SQLite, base URL http://localhost:3000. Reset bằng scripts/reset_sut.sh (DB seed lại, cart trong RAM bị xóa).
+  > - Tài khoản seed: admin@eshop.com / Admin123! (role admin); test@eshop.com / Test1234! (role user). Sản phẩm seed id 1..5, danh mục seed có sẵn.
+  > - Nguồn yêu cầu DUY NHẤT để suy ra expected result: eshop-sut/README.md (FR-xx, SEC-01..SEC-07) và eshop-sut/api_specification.md, cùng report/01_spec_analysis.md (sau bước 0).
+  > - CẤM đọc eshop-sut/backend/ và eshop-sut/frontend-*. Ở các bước G1–G5, CẤM gửi request vào SUT. Lý do: test case phải sinh từ spec, không chép theo code.
+  > - 3 API được giao:
+  >   API 1 – FR-02 Login: POST /api/login, tiền tố ID "LG", file report/testcases/API1_login_generated.md
+  >   API 2 – FR-10 User hủy đơn: PUT /api/orders/:id/cancel, tiền tố "CN", file report/testcases/API2_cancel_generated.md
+  >   API 3 – FR-15 Product CRUD: POST /api/products, PUT /api/products/:id, DELETE /api/products/:id, tiền tố "PR", file report/testcases/API3_product_generated.md
+  > - Định dạng test case: mỗi bước nối thêm (append) MỘT mục "## <Gx> – <tên kỹ thuật>" vào file của API, chứa MỘT bảng Markdown với đúng các cột:
+  >   | ID | Kỹ thuật | Requirement | Mục đích | Precondition / setup | Request | Expected status | Expected body / kiểm tra | Nguồn expected |
+  >   * ID: <tiền tố>-<G1|G2|G3|G4>-<2 chữ số>, ví dụ LG-G1-01. Không trùng.
+  >   * Kỹ thuật: EP (phân hoạch tương đương), BVA (giá trị biên), ST (chuyển trạng thái), SEC, SCH (schema).
+  >   * Requirement: FR-xx và/hoặc SEC-xx.
+  >   * Precondition: phải TỰ TẠO dữ liệu của mình (ví dụ đăng ký user mới bằng POST /api/register với email duy nhất kiểu lg_{{timestamp}}@test.com, tạo đơn bằng POST /api/cart + POST /api/checkout, đổi trạng thái đơn bằng PUT /api/admin/orders/:id/status với token admin). Test này không được phụ thuộc kết quả test khác.
+  >   * Request: method, path, header cần thiết (Authorization), body JSON cụ thể. Phải đủ để chuyển thẳng thành request Postman.
+  >   * Expected: status code + điều kiện trên body. Không viết chung chung kiểu "trả lỗi".
+  >   * Nguồn expected: trích dòng spec (ví dụ "README FR-02: khóa 30 giây"). Nếu spec KHÔNG nói rõ (ví dụ mã 400 hay 422), ghi "GIẢ ĐỊNH: <lý do>" để người dùng audit.
+  > - Sau bảng, ghi 2–4 dòng "Ghi chú của AI": phần nào chưa chắc, phần nào spec mơ hồ. KHÔNG tự đánh nhãn VALID/INVALID/INCOMPLETE (đó là việc của sinh viên ở bước Audit).
+  > - Quy tắc AI log: prompt có cụm "" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng trong agent.md mục 1. AI tool = tên agent + model của chính bạn. Thời gian lấy bằng lệnh `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN (bỏ cụm ""). Mục Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - Cấm: bịa response của SUT; sửa code SUT; sửa mục của bước khác trong file test case.
+  > - Cuối mỗi lần làm: báo lại cho Manager file đã tạo/sửa, số test case đã thêm và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > . API 2 – Hủy đơn – G2: sinh test case chuyển trạng thái theo FR-10 cho thao tác User hủy đơn.
+  > Input: report/01_spec_analysis.md (mục API 2), sơ đồ FR-10 trong eshop-sut/README.md, mục G1 đã có (đọc để không trùng).
+  > 1. Lập bảng chuyển trạng thái đầy đủ 5×5: hàng = trạng thái hiện tại (pending, confirmed, shipping, delivered, canceled); cột = trạng thái đích; ô = hợp lệ/không hợp lệ và AI ĐƯỢC chuyển (User qua /cancel, Admin qua /api/admin/orders/:id/status). Trích dòng spec cho từng ô.
+  > 2. Sinh test case cho thao tác User hủy (PUT /api/orders/:id/cancel) ở TỪNG trạng thái nguồn: pending, confirmed, shipping, delivered, canceled. Ghi rõ expected status và trạng thái đơn sau đó (kiểm tra lại bằng GET /api/orders/:id hoặc GET /api/orders/my-orders).
+  > 3. Sinh test chuỗi (1-switch): hủy 2 lần liên tiếp; pending → confirmed → hủy; confirmed → shipping → hủy (User không được hủy); sau khi hủy, Admin thử chuyển canceled → confirmed / shipping / delivered (trạng thái kết thúc phải bị từ chối).
+  > 4. Sinh test "hủy không làm đổi đơn khác": user có 2 đơn, hủy 1 đơn thì đơn kia giữ nguyên trạng thái.
+  > Precondition: dựng trạng thái bằng token admin (admin@eshop.com) gọi PUT /api/admin/orders/:id/status lần lượt theo đúng đường đi hợp lệ.
+  > Append mục "## G2 – State transition (FR-10)" vào report/testcases/API2_cancel_generated.md.
+  > Xong khi: có bảng 5×5, đủ 5 trạng thái nguồn cho User hủy, có test chuỗi và test trạng thái kết thúc, tối thiểu 10 test case, ID CN-G2-xx.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): User explicitly requests completing three parallel Generate chains through G5; one task assignment per step, sequential within each chain. Read skill://ponytail first and obey throughout; reviewers also read skill://ponytail-review. Relevant repo rules are already supplied: do NOT discover/read agent/context files. Only spec documents named above and your own API testcase file may be read; NEVER implementation backend/frontend or HTTP/SUT requests. Expected must come ONLY from spec, not observed behavior. Treat all unspecified statuses, error schema, timing<2000ms, JWT claim types, lifecycle details, counter reset, IDOR cancellation ownership as GIẢ ĐỊNH with reason. No audit labels, no fabricated observations. No nested delegation. Skip build/lint/tests/formatters/static-check scripts mid-flight; manager checks once step is ready.
+  > Scope: own ONLY assigned API file, append only assigned section; do not edit earlier sections. New files via write; existing files MUST edit. No other repo changes. Manager exclusively writes report/AI_LOG.md and commits sequentially: DO NOT touch AI_LOG or git. Return actual agent/model id, date from TZ=Asia/Ho_Chi_Minh date "+%Y-%m-%d %H:%M", count added, and acceptance evidence. Original common+step prompt retained by manager for verbatim append log. No helper scripts/docs/collections.
+  > Each testcase exactly 9 Markdown columns (escape any pipe inside cell), explicit method/path/header/body (setup macros allowed if completely defined in SAME step); status concrete with assumptions, body concrete predicates, source citations. Unique per-case fresh data (include case ID + UUID), never cross-case state. All security attacks check data afterward. Do not use reserved absent IDs without ensuring absence via GET/list in setup. Never update/delete seed products1..5. CN setups fetch actual product details and derive checkout total, with admin transitions only legal edges. Error payloads/status unspecified are assumptions not fabricated facts.
+  > For matrices, every cell has direct case references. ST impossible/no-op/undefined events must be explicit assumptions and a test verifying no undesired change. Product POST is collection creation, never invented POST /:id. Login reset after success/expiry inferred from consecutive/duration not explicitly stated. CN shipping Admin action ambiguous, do NOT silently infer shipping→canceled permission.
+  > G4 schema properties: spec-guaranteed required only; observations optional and labeled, unobserved fields must say GIẢ ĐỊNH not 'observed'. Password exclusion a security inference. Draft07 schemas in json code blocks with $schema; no literal pipes in cells. G5 count genuine semantic duplicate groups (union, not subtract each pair), not near-duplicates or shared successful setup/assertions; matrix every applies SEC including indirect/not-applicable explanation. Check Request executability as document; do not send it. Report actionable exact holes for G6 if any. Reviewer may append coverage REPORT ONLY, no edits/testcase generation or earlier section mutations; any gaps return for task G6.
+  > 
+  > OWN FILE: report/testcases/API2_cancel_generated.md
+- **AI output:**
+  > Append G2: 13 case ST, ma trận 5×5 đủ nguồn/actor/ID từng ô; User cancel từ 5 trạng thái, chuỗi, final states, cách ly hai đơn. Request macros U/A/K được định nghĩa đầy đủ; manager đọc và kiểm tra tĩnh đạt. Shipping Admin/self-transition/status giả định, không gọi SUT.
+- **Human review:** _(để trống – sinh viên tự điền)_
