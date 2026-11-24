@@ -150,3 +150,62 @@ Nguồn: **R** = `eshop-sut/README.md`; **A** = `eshop-sut/api_specification.md`
 - Không thể xác nhận mọi hash mật khẩu tùy ý hoặc phương pháp lưu qua API black-box; kiểm tra key nhạy cảm và plaintext chỉ phát hiện phần rò rỉ tương ứng.
 - So sánh lỗi chống dò email và không lộ lỗi CSDL thô là diễn giải bảo mật; email vắng mặt dựa vào namespace UUID giả định.
 - Kiểm tra sau tấn công xác nhận tài khoản riêng vẫn đăng nhập được, không chứng minh toàn bộ dữ liệu CSDL không đổi; lockout có sai số thời gian mạng.
+
+## G4 – Schema validation
+
+Schema 200 dưới đây chỉ bắt buộc `token` và `user` theo A:32. `message`, `user.id`, `user.name`, `user.email`, `user.role` là **quan sát, spec không nói** (phân tích 4.1–4.2); kiểu và enum được kiểm tra nếu xuất hiện là **GIẢ ĐỊNH**. `user` là object và token không rỗng là **GIẢ ĐỊNH** từ mô tả thông tin user/JWT. Cấm `password` tại root và trong user là suy luận bảo mật, không phải hợp đồng response tường minh của SEC-01. Các field khác không bị cấm bởi schema; kiểm tra nhạy cảm đệ quy ở bảng bổ sung phạm vi này.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["token", "user"],
+  "not": {"required": ["password"]},
+  "properties": {
+    "message": {"type": "string"},
+    "token": {"type": "string", "minLength": 1},
+    "user": {
+      "type": "object",
+      "not": {"required": ["password"]},
+      "properties": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "email": {"type": "string"},
+        "role": {"type": "string", "enum": ["user", "admin"]}
+      }
+    }
+  }
+}
+```
+
+Schema lỗi dưới đây là **GIẢ ĐỊNH**: R:42 chỉ yêu cầu thông báo phù hợp không lộ nguyên nhân, không quy định object hay tên và kiểu `error`. Áp dụng cùng schema cho các status lỗi giả định 400, 401, 403.
+
+```json
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["error"],
+  "properties": {
+    "error": {"type": "string", "minLength": 1}
+  }
+}
+```
+
+**Setup độc lập cho từng dòng:** tạo UUID v4 mới bằng `pm.variables.replaceIn('{{$guid}}')`, đặt `email` = ID dòng viết thường + `-` + UUID + `@test.com`. Gửi `POST /api/register`, `Content-Type: application/json`, không Authorization, body `{"name":"LG Schema","email":"{{email}}","password":"Test1234!"}`; yêu cầu HTTP 200 trước khi tiếp tục, nếu không thì setup thất bại. Không dùng dữ liệu case khác.
+
+**Quy ước riêng G4:** `C` = `POST /api/login`, `Content-Type: application/json`, không Authorization, body `{"email":"{{email}}","password":"Test1234!"}`; `W` = cùng method/path/header với body `{"email":"{{email}}","password":"Wrong123!"}`; `M` = cùng method/path/header với body `{"email":"{{email}}"}`. Schema 200 và schema lỗi là hai khối JSON ngay trên; trong Postman dùng `pm.response.to.have.jsonSchema(schema)` tương ứng. Content-Type kiểm tra media type không phân biệt hoa thường, cho phép tham số charset. Thời gian dùng `pm.response.responseTime`.
+
+| ID | Kỹ thuật | Requirement | Mục đích | Precondition / setup | Request | Expected status | Expected body / kiểm tra | Nguồn expected |
+|---|---|---|---|---|---|---|---|---|
+|LG-G4-01|SCH|FR-02|Status, media type và schema thành công|Setup độc lập|C|200|Content-Type media type `application/json`; parse JSON và khớp schema 200; `token` là string không rỗng, có `user`|A:25–32; GIẢ ĐỊNH response Content-Type, object user và các ràng buộc schema chưa nêu|
+|LG-G4-02|SCH|FR-02|Kiểu từng field user|Setup độc lập|C|200|Schema 200 khớp; `user.id` tồn tại và là integer, `user.name` và `user.email` tồn tại và là string; `user.role` tồn tại và thuộc `user`, `admin`; `token` là string không rỗng|A:32; phân tích 4.1–4.2: field quan sát, spec không nói; GIẢ ĐỊNH các field bắt buộc và kiểu/enum|
+|LG-G4-03|SCH|SEC-01, FR-02|Không lộ field nhạy cảm|Setup độc lập|C|200|Schema 200 khớp; duyệt đệ quy object/array, không key chứa `password`, `passwd`, `hash` hoặc `reset_token` không phân biệt hoa thường; không giá trị bằng `Test1234!`|R:278; A:32; GIẢ ĐỊNH không tiết lộ dữ liệu này là suy luận bảo mật; không chứng minh cách lưu|
+|LG-G4-04|SCH|FR-02|Schema lỗi sai mật khẩu|Setup độc lập|W|401 giả định|Content-Type `application/json`; parse JSON khớp schema lỗi; `error` string không rỗng, không `token`|R:40–42; GIẢ ĐỊNH 401, JSON, schema lỗi và không cấp token|
+|LG-G4-05|SCH|FR-02|Schema lỗi tài khoản khóa|Setup độc lập; gửi W ba lần liên tiếp ngay trước request, giả định lần ba bắt đầu khóa|C ngay trong 30 giây|403 giả định|Content-Type `application/json`; parse JSON khớp schema lỗi; `error` string không rỗng, không `token`, không tiết lộ nguyên nhân chi tiết|R:41–42; GIẢ ĐỊNH 403, JSON, schema lỗi và chặn login đúng trong khóa|
+|LG-G4-06|SCH|FR-02|Schema lỗi thiếu password|Setup độc lập|M|400 giả định|Content-Type `application/json`; parse JSON khớp schema lỗi; `error` string không rỗng, không `token`|A:25–31; R:40; GIẢ ĐỊNH thiếu password bị từ chối với 400, JSON và schema lỗi|
+|LG-G4-07|SCH|FR-02|Thời gian phản hồi login thành công|Setup độc lập|C|200|Schema 200 khớp; `pm.response.responseTime < 2000` ms|A:32; GIẢ ĐỊNH ngưỡng 2000 ms vì spec không nêu SLA|
+
+**Ghi chú của AI:**
+- Các status lỗi, Content-Type response, schema lỗi và ngưỡng thời gian là giả định cần audit; không phải kết quả thực thi.
+- Các field user được quan sát không phải yêu cầu bắt buộc theo spec; riêng LG-G4-02 chủ động giả định chúng có mặt để kiểm tra kiểu.
+- Quan sát tại phân tích 4.1–4.2 có `user.password`; schema loại field này theo suy luận bảo mật, không khẳng định SUT đã đáp ứng.
