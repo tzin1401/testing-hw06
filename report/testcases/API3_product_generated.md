@@ -711,3 +711,26 @@ Phần này chỉ gắn nhãn, không sửa bảng test phía trên. Nhãn xét 
 | PR-G6-35 | VALID | Price boolean PUT → 400. |
 
 **Tổng: 117 VALID – 2 INCOMPLETE – 8 INVALID / 127 case.**
+
+## Extend – Human
+
+Sinh sau khi Generate đã xong và được phép đọc `eshop-sut/backend/server.js`; mỗi case dưới đây chỉ dùng `POST/PUT/DELETE /api/products` (GET chỉ làm oracle) và nhắm một hành vi code khác spec mà bộ case AI chưa kiểm. Expected lấy từ spec; chỗ spec không nói ghi GIẢ ĐỊNH. Bảng giữ đúng 9 cột như bảng gốc.
+
+Quy ước: dùng lại G3 — login `admin@eshop.com` / `Admin123!` lấy `T`; `GET /api/categories` lấy `C`; `GET /api/products` lưu snapshot `S` trước mỗi request; setup `P` bằng POST `B` rồi xác định `P` theo name `K` như G3.
+
+| ID | Kỹ thuật | Requirement | Mục đích | Precondition / setup | Request | Expected status | Expected body / kiểm tra | Nguồn expected |
+|---|---|---|---|---|---|---|---|---|
+| PR-EX-01 | EP | FR-15, API spec:89 | ID có dấu `+` không được sửa sản phẩm | Setup P; snapshot S | `PUT /api/products/%2B{{P}}`; Bearer T; JSON `V` | 400 | JSON `error` không rỗng; GET `P` giữ nguyên B, list bằng S | FR-15; GIẢ ĐỊNH ID nguyên không dấu, như PR-G1-38 dùng `abc` |
+| PR-EX-02 | EP | FR-15 | ID dạng `P.0` không được sửa sản phẩm | Setup P; snapshot S | `PUT /api/products/{{P}}.0`; Bearer T; JSON `V` | 400 | JSON `error` không rỗng; GET `P` giữ nguyên B, list bằng S | FR-15; GIẢ ĐỊNH ID nguyên, như PR-G1-38 dùng `abc` |
+| PR-EX-03 | BVA | FR-15 | Price vượt giới hạn double phải bị từ chối | Snapshot S | `POST /api/products`; Bearer T; JSON `B[price]=1e309` | 400 | JSON `error` không rỗng; list bằng S | FR-15 "price là số dương"; GIẢ ĐỊNH 1e309 không phải số hữu hạn hợp lệ |
+| PR-EX-04 | BVA | FR-15 | Price `-0` phải bị từ chối | Snapshot S | `POST /api/products`; Bearer T; JSON `B[price]=-0` | 400 | JSON `error` không rỗng; list bằng S | FR-15; GIẢ ĐỊNH `-0` không phải số dương vì bằng 0 |
+| PR-EX-05 | EP | FR-15, API spec:89–90 | ID không nguyên không được xóa sản phẩm | S; xác nhận product id 2 tồn tại; chạy trên DB reset riêng và reset lại ngay sau case vì đây là seed | `DELETE /api/products/2.0`; Bearer T; không body | 400 | JSON `error` không rỗng; list vẫn có id 2 và bằng S | FR-15; GIẢ ĐỊNH ID nguyên, như PR-G1-43 dùng `abc` |
+| PR-EX-06 | EP | FR-15, API spec:89–90 | ID có dấu `+` không được xóa sản phẩm | Setup P; snapshot S | `DELETE /api/products/%2B{{P}}`; Bearer T; không body | 400 | JSON `error` không rỗng; list vẫn có P, bằng S | FR-15; GIẢ ĐỊNH ID nguyên không dấu |
+
+**Vì sao AI bỏ sót**
+- **PR-EX-01:** AI chỉ thử `abc` cho path PUT; không biết SQLite tự ép `+P` thành số nguyên nên request vẫn sửa được P.
+- **PR-EX-02:** AI chỉ thử id `0`, âm, `abc` và id vắng; không thử số thực khớp số nguyên.
+- **PR-EX-03:** AI chỉ thử price `0`, âm, `null`, boolean, chuỗi; không thử tràn double `1e309` (JSON vẫn hợp lệ) nên không thấy dữ liệu bị `null`.
+- **PR-EX-04:** AI chỉ thử biên `0`; không thử `-0`, giá trị bằng 0 nhưng khác dấu.
+- **PR-EX-05:** AI chỉ kiểm `abc` cho path; PR-G4-07 chỉ kiểm kiểu price nên không thấy `2.0` xóa được seed.
+- **PR-EX-06:** AI chỉ thử `abc`, `%40`, `%20`; không biết SQLite ép `+P` nên không thấy DELETE vẫn xóa P.
