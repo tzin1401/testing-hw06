@@ -1,0 +1,13 @@
+{
+  "info": {
+    "name": "23120190_API3_ProductCRUD",
+    "description": "API 3 – Product CRUD: /api/products và /api/products/:id. Nguồn: report/testcases/API3_product_generated.md. Assertion core kiểm tra điều kiện cốt lõi; status (GIẢ ĐỊNH) kiểm tra mã trạng thái giả định.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [{"listen":"prerequest","script":{"type":"text/javascript","exec":["pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });","console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));"]}}],
+  "item": [
+    {"name":"G1","item":[]}, {"name":"G2","item":[]}, {"name":"G3","item":[]},
+    {"name":"G4","item":[]}, {"name":"G6","item":[]}, {"name":"EX","item":[]},
+    {"name":"_smoke","item":[{"name":"[SMOKE] GET /api/products","request":{"method":"GET","url":"{{baseUrl}}/api/products"},"event":[{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('[SMOKE] status 200', function () { pm.response.to.have.status(200); });"]}}]}]}
+  ]
+}

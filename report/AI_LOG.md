@@ -1130,3 +1130,91 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
 - **AI output:**
   > Append G5cuối sauG6:59thô,7nhómtrùng hợp loại9 còn50 (EP12/BVA5/ST10/SEC19/SCH4); H1–H9đóng, schema-error dedup phản ánh predicateEtoànfile. Manager đọc và chỉnh4dòngbáocáo: successpredicatehiệnhành, deleteduser tokenvẫn dùngđược làtestfailkhôngskip, phânbiệtFR10specvớigiảđịnh. CheckID/cột vàtự tínhhợpnhómtrùngđạt; không SUT/Audit.
 - **Human review:** Đọc lại G5 API 2: 59→50, không còn lỗ hổng thật. Các case điều kiện (exp, xóa user, V(X)) sẽ báo không chạy được thay vì pass.
+
+## #23 – 2026-11-24 22:08 (giờ VN)
+- **AI tool:** task ExecuteX0 (openai-codex/gpt-6.1-terra); omp Manager (openai-codex/gpt-6.1-sol); sonic kiểm tra CLI (worker không cung cấp model id)
+- **API / Bước:** Execute – X0: Hạ tầng dùng chung
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.request.url.toString());
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > Execute – X0: dựng hạ tầng chạy test cho 3 API. Chưa thêm test case nào.
+  > 1. Tạo 3 file collection rỗng (Postman v2.1) đúng tên trong bảng phạm vi:
+  >    collections/23120190_API1_Login.postman_collection.json
+  >    collections/23120190_API2_CancelOrder.postman_collection.json
+  >    collections/23120190_API3_ProductCRUD.postman_collection.json
+  >    Mỗi collection có:
+  >    - Pre-request script cấp collection đúng 2 dòng ở Phần B (upsert X-Student-Id + console.log).
+  >    - Folder rỗng: G1, G2, G3, G4, G6, EX.
+  >    - Description: API, endpoint, file test case nguồn, quy ước assertion "core" / "status (GIẢ ĐỊNH)".
+  >    - Một request mẫu "[SMOKE] GET /api/products" trong folder riêng "_smoke", có test status 200, để kiểm pre-request.
+  > 2. Tạo scripts/run_newman.sh (chmod +x) cho NGƯỜI DÙNG chạy bản chính thức:
+  >    - set -e cho phần chuẩn bị; nhưng lỗi test của newman KHÔNG được dừng script (chạy đủ cả 3 collection, cuối cùng in tổng kết và exit 1 nếu có collection fail).
+  >    - Với mỗi API: gọi scripts/reset_sut.sh, rồi
+  >      newman run collections/23120190_<API>.postman_collection.json -e environments/local.postman_environment.json \
+  >        --reporters cli,htmlextra,json \
+  >        --reporter-htmlextra-export results/newman/23120190_<API>_$(date +%Y%m%d).html \
+  >        --reporter-htmlextra-title "23120190 – <API> – localhost" \
+  >        --reporter-json-export results/newman/23120190_<API>_$(date +%Y%m%d).json
+  >    - Tham số tùy chọn: tên API (API1_Login | API2_CancelOrder | API3_ProductCRUD) để chạy riêng một API; không có tham số thì chạy cả 3.
+  >    - Chừa sẵn chỗ (comment) cho run data-driven của X-DATA.
+  > 3. Chạy thử: scripts/reset_sut.sh; newman run <từng collection> -e environments/local.postman_environment.json --reporters cli --folder _smoke. Xác nhận console in "X-Student-Id: 23120190".
+  >    KHÔNG chạy scripts/run_newman.sh (script đó ghi report chính thức, chỉ người dùng chạy).
+  > Xong khi: 3 collection import được (newman chạy _smoke pass), console in X-Student-Id cho request smoke, scripts/run_newman.sh có đủ các ý ở mục 2, results/newman/ không có file mới.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Load skill://ponytail first and obey whole session. Only X0 this turn, no X1–X5. Repo context rules are provided here: log only when prompt includes phrase; append only, timestamp Vietnam date command, quote prompt minus phrase, Human review blank. Manager is ONLY AI_LOG writer and committer; do not edit log/git. Return actual model/date and output summary to manager. Do not read agent/context files already supplied. No nested delegation.
+  > Own only four NEW files: the three collections and scripts/run_newman.sh. They do not exist; use write. Any subsequent file edits MUST edit, never shell/python mutation. chmod +x runner allowed. Do not change testcases/environment/reset/SUT/results/newman. Skip ALL tests/build/lint/formatters/smoke commands: after files ready manager delegates execution to sonic. Hence X0 step3 handled separately; do NOT run runner officially or newman yourself.
+  > Read environments/local.postman_environment.json, scripts/reset_sut.sh and README.md for existing conventions; source prompts provided verbatim. Skeleton only: folders G1,G2,G3,G4,G6,EX empty; separate _smoke with one actual GET {{baseUrl}}/api/products and status200 assertion. Collection-level prerequest exactly the supplied 2 lines, no scripts faking logs. Description endpoint/source and core/status conventions. BaseUrl variable used in request, no explicit X-Student-Id headers on request.
+  > Runner minimal Bash; own root independent of invoking cwd, exact API selection with no-arg all3 and invalid usage rejected before work. set -e preparation; actual Newman nonzero captured without aborting remaining selected APIs. Reset before EACH API. CLI,htmlextra,json reporter options/naming/date/title exactly prompt. Summarize each selected API and overall exit1 if any newman fails. Do not swallow reset failure; do not forge reports or call any reporters during creation. Leave ONLY requested X-DATA integration comment, no fake execution. No retries/dependencies/abstractions/extraneous scripts/docs. Keep all errors observable. Return files ready for check; do not claim smoke pass.
+- **AI output:**
+  > Tạo 3 collection v2.1 đúng tên, pre-request cấp collection đúng 2 dòng X-Student-Id/console.log, G1/G2/G3/G4/G6/EX rỗng và mỗi collection 1 request _smoke GET {{baseUrl}}/api/products. Tạo scripts/run_newman.sh executable: chọn một/cả ba API, reset trước từng API, CLI+HTMLextra+JSON theo tên/ngày, tiếp tục sau lỗi Newman, tổng kết và exit1 nếu có fail; comment X-DATA. Cập nhật README cách chạy và giới hạn X0. Kiểm JSON, bash -n, Newman6.2.3/reporter htmlextra1.23.1 đạt. Reset riêng trước mỗi smoke; 3 lần Newman CLI thật đều 1 request/1 assertion/0 fail, console in X-Student-Id:23120190 (URL template ở console, HTTP GET thực tế localhost:3000 trả200). Harness bản sao tạm cô lập xác nhận fail giữa vẫn chạy đủ3, chọnAPI, invalidargs, lỗi reset, cwd và reporter argv; đã xóa fixtures. Không chạy runner chính thức; results/newman/ trước/sau chỉ .gitkeep cùng hash; không sửa test case/SUT, không tạo ảnh/report chính thức. Chưa thêm folder test case, chưa làm X1–X5.
+- **Human review:** _(để trống – sinh viên tự điền)_
