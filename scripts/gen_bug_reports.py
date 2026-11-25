@@ -126,8 +126,10 @@ def body(b, issue_mode=False):
          f"Chạy `./scripts/repro_bugs.sh {bid}` (hoặc gửi lần lượt các request trong transcript bên dưới bằng Postman/curl).",
          "Đọc status và body của request cuối."], 1))
     link = (lambda p: f"[{p}]({REPO}/{p})") if issue_mode else (lambda p: f"`{p}`")
-    shot = (f"![{bid}](https://raw.githubusercontent.com/tzin1401/testing-hw06/main/evidence/issues/{bid}.png)"
-            if issue_mode and (ROOT / f"evidence/issues/{bid}.png").exists() else f"_Ảnh chụp Postman: `evidence/issues/{bid}.png` (sinh viên chụp và đính kèm)._")
+    has_png = (ROOT / f"evidence/issues/{bid}.png").exists()
+    shot = (f"_Ảnh chụp Postman: `evidence/issues/{bid}.png` (sinh viên chụp và đính kèm)._" if not has_png
+            else f"![{bid}](https://raw.githubusercontent.com/tzin1401/testing-hw06/main/evidence/issues/{bid}.png)" if issue_mode
+            else f"![{bid}](../../evidence/issues/{bid}.png)")
     return f"""- **ID:** {bid} | **API:** `{api}` | **Test case:** {cases}
 - **Phát hiện bởi:** {found}
 - **Labels:** {", ".join(f"`{l}`" for l in labels(b))} _(severity/priority: đề xuất của AI, sinh viên review)_

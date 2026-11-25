@@ -33,7 +33,7 @@ Căn cứ: README FR-10: `delivered` và `canceled` là trạng thái kết thú
 ## Evidence
 - Newman: `results/newman/23120190_API2_CancelOrder_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-10_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-10.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-10](../../evidence/issues/BUG-10.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

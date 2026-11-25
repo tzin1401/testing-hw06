@@ -33,7 +33,7 @@ Căn cứ: README FR-02 (R:42): sai từ 3 lần liên tiếp thì tạm khóa 3
 ## Evidence
 - Newman: `results/newman/23120190_API1_Login_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-02_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-02.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-02](../../evidence/issues/BUG-02.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

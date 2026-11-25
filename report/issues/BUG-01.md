@@ -33,7 +33,7 @@ Căn cứ: README FR-02 (R:41): "Sau mỗi lần đăng nhập sai, hệ thống
 ## Evidence
 - Newman: `results/newman/23120190_API1_Login_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-01_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-01.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-01](../../evidence/issues/BUG-01.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

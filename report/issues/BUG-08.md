@@ -33,7 +33,7 @@ Căn cứ: README FR-02 (R:43): token gửi qua header `Authorization: Bearer <t
 ## Evidence
 - Newman: `results/newman/23120190_API2_CancelOrder_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-08_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-08.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-08](../../evidence/issues/BUG-08.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

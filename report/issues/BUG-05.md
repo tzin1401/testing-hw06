@@ -33,7 +33,7 @@ Căn cứ: README FR-02 (R:42): "Hệ thống trả về thông báo lỗi phù 
 ## Evidence
 - Newman: `results/newman/23120190_API1_Login_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-05_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-05.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-05](../../evidence/issues/BUG-05.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

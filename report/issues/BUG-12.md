@@ -33,7 +33,7 @@ Căn cứ: README FR-12: POST/PUT/DELETE `/api/products` phải yêu cầu JWT h
 ## Evidence
 - Newman: `results/newman/23120190_API3_ProductCRUD_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-12_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-12.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-12](../../evidence/issues/BUG-12.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

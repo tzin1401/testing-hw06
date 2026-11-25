@@ -33,7 +33,7 @@ Căn cứ: README SEC-01: mật khẩu không được lưu dạng plaintext. FR
 ## Evidence
 - Newman: `results/newman/23120190_API1_Login_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-03_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-03.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-03](../../evidence/issues/BUG-03.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

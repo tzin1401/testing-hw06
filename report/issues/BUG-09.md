@@ -33,7 +33,7 @@ Căn cứ: README FR-10: "Khi đơn hàng đã ở trạng thái shipping, User 
 ## Evidence
 - Newman: `results/newman/23120190_API2_CancelOrder_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-09_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-09.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-09](../../evidence/issues/BUG-09.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

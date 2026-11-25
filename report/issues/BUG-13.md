@@ -33,7 +33,7 @@ Căn cứ: README FR-15: tên bắt buộc, tối đa 255 ký tự; giá bắt b
 ## Evidence
 - Newman: `results/newman/23120190_API3_ProductCRUD_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-13_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-13.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-13](../../evidence/issues/BUG-13.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 

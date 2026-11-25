@@ -33,7 +33,7 @@ Căn cứ: README FR-15: giá bắt buộc là số dương. Server không đư�
 ## Evidence
 - Newman: `results/newman/23120190_API3_ProductCRUD_20261125.html` (tìm theo test case ID ở trên)
 - Transcript curl thật: `evidence/issues/BUG-14_curl.txt`
-- Screenshot: _Ảnh chụp Postman: `evidence/issues/BUG-14.png` (sinh viên chụp và đính kèm)._
+- Screenshot: ![BUG-14](../../evidence/issues/BUG-14.png)
 
 <details><summary>Transcript tái hiện (nguyên văn, JWT đã che)</summary>
 
