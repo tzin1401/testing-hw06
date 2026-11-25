@@ -8,6 +8,7 @@ API1_Login|[LG-G3-08] JWT đúng cấu trúc và danh tính user
 API1_Login|[LG-G6-02] Token mới được API bảo mật chấp nhận
 API1_Login|[LG-G6-04] Bearer sai không chặn login
 API1_Login|[LG-G6-05] Role client không nâng quyền
+API1_Login|[LG-EX-03] JWT có hạn dùng
 API2_CancelOrder|[CN-G1-01] Hủy pending
 API2_CancelOrder|[CN-G1-02] ID dương vắng
 API2_CancelOrder|[CN-G1-05] ID vượt 32 bit
