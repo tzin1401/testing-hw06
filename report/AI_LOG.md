@@ -1218,3 +1218,809 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
 - **AI output:**
   > Tạo 3 collection v2.1 đúng tên, pre-request cấp collection đúng 2 dòng X-Student-Id/console.log, G1/G2/G3/G4/G6/EX rỗng và mỗi collection 1 request _smoke GET {{baseUrl}}/api/products. Tạo scripts/run_newman.sh executable: chọn một/cả ba API, reset trước từng API, CLI+HTMLextra+JSON theo tên/ngày, tiếp tục sau lỗi Newman, tổng kết và exit1 nếu có fail; comment X-DATA. Cập nhật README cách chạy và giới hạn X0. Kiểm JSON, bash -n, Newman6.2.3/reporter htmlextra1.23.1 đạt. Reset riêng trước mỗi smoke; 3 lần Newman CLI thật đều 1 request/1 assertion/0 fail, console in X-Student-Id:23120190 (URL template ở console, HTTP GET thực tế localhost:3000 trả200). Harness bản sao tạm cô lập xác nhận fail giữa vẫn chạy đủ3, chọnAPI, invalidargs, lỗi reset, cwd và reporter argv; đã xóa fixtures. Không chạy runner chính thức; results/newman/ trước/sau chỉ .gitkeep cùng hash; không sửa test case/SUT, không tạo ảnh/report chính thức. Chưa thêm folder test case, chưa làm X1–X5.
 - **Human review:** _(để trống – sinh viên tự điền)_
+
+## #24 – 2026-11-24 22:32 (giờ VN)
+- **AI tool:** CN-X1 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** CN-X1 – Execute
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 2 – Execute – CN-X1: chuyển các case CN-G1-xx và CN-G2-xx thành request trong collections/23120190_API2_CancelOrder.postman_collection.json, folder G1 và G2.
+  > Input: report/testcases/API2_cancel_generated.md (mục G1, G2, Audit). Tuân thủ Phần B.
+  > Chú ý riêng:
+  > - Setup đơn hàng: đăng ký user mới → login → POST /api/cart → POST /api/checkout → lấy order id từ response. Đổi trạng thái đơn bằng PUT /api/admin/orders/:id/status với token admin (login admin trong setup của từng case).
+  > - Các macro trong file (S, S6, D(<trạng thái>), K(O), U, A[...]) phải được dịch thành request cụ thể đúng như định nghĩa trong file.
+  > - G2 kiểm từng cạnh của máy trạng thái FR-10: mỗi đích trong A[...] là một case con riêng với đơn MỚI (đúng "D(...) riêng cho từng đích").
+  > - Path dạng %2B, 1.5, %20 gửi nguyên văn, không để Postman tự chuẩn hóa.
+  > Chạy thử: reset SUT, newman ... --reporters cli --folder G1, rồi --folder G2. Chỉ sửa lỗi kỹ thuật.
+  > Xong khi: mọi case VALID/INCOMPLETE của G1, G2 có folder; mỗi cạnh của G2 có request và assertion riêng; chạy cli không lỗi script; báo số pass/fail.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X1: modify only G1/G2 items and info.description. Existing G3/G4/G6/EX empty remain unchanged. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API2_CancelOrder.postman_collection.json
+  > SOURCE: report/testcases/API2_cancel_generated.md
+- **AI output:**
+  > Chuyển26foldercase G1=16/G2=10,493request,25cạnhAdmin G2 mỗiđích có register/checkout mới. BỏCN-G2-01/11/12 INVALID,3caseG1 INCOMPLETE ghidescription. Hookmới giữnguyên; pathencoded cấpitem. Debug CLI serialized: G1 requests135/assert183 pass172 fail11; G2 requests358/assert493 pass487 fail6; tổng659pass17fail. Khônglỗi script/biếnURLchưathay; failassertgiữtheofile, khôngđổiexpected. Khôngreportchínhthức/commit.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #25 – 2026-11-24 22:32 (giờ VN)
+- **AI tool:** LG-X1 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** LG-X1 – Execute
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 1 – Execute – LG-X1: chuyển các case LG-G1-xx và LG-G2-xx thành request trong collections/23120190_API1_Login.postman_collection.json, folder G1 và G2.
+  > Input: report/testcases/API1_login_generated.md (mục G1, G2, bảng Audit). Tuân thủ Phần B (đặc biệt: bỏ INVALID, quy ước assertion core/status, không sửa expected).
+  > Chú ý riêng:
+  > - G1 dùng "Quy ước setup độc lập" trong file (đăng ký user lg-<id>-<guid>@test.com, password Test1234!). Các biến upperEmail, spaceLead, longEmail... tạo trong pre-request của request chính.
+  > - LG-G1-23 (JSON sai cú pháp) và LG-G1-24 (text/plain) dùng body raw, gửi nguyên văn.
+  > - G2 có chuỗi nhiều request (W, W, C, chờ 29/31 giây). Mỗi bước trong chuỗi là một request riêng trong folder case; assertion nằm ở đúng request của bước đó. Chờ bằng setTimeout đúng số giây trong file.
+  > Chạy thử: scripts/reset_sut.sh rồi newman ... --reporters cli --folder G1, sau đó --folder G2. Sửa lỗi kỹ thuật cho đến khi mọi request chạy được (không có lỗi script, không có biến chưa định nghĩa). Test fail do SUT trả khác expected là BÌNH THƯỜNG, giữ nguyên.
+  > Xong khi: mọi case VALID/INCOMPLETE của G1, G2 có folder riêng; ID INVALID được liệt kê trong description collection; chạy cli không còn lỗi script; báo số assertion pass/fail của lần chạy thử (chỉ báo, không ghi file).
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X1: modify only G1/G2 items and info.description. Existing G3/G4/G6/EX empty remain unchanged. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API1_Login.postman_collection.json
+  > SOURCE: report/testcases/API1_login_generated.md
+- **AI output:**
+  > Chuyển35foldercase G1=24/G2=11,112request; bỏLG-G1-14/LG-G2-02 INVALID. Đổi biến dẫnxuấtG1 sangcollectionVariables cóprefixID, hookmớigiữnguyên; rawmalformedJSON/textplain vàtimer29/31 giữtheofile. Debug correctedG1:48requests/72assert pass46fail26/1.932s; unchangedG2:64requests/119assert pass61fail58/2m36.4s. Tổng107pass84fail, khônglỗiscriptchưabắt/unresolvedvars. JSONErrortrongpm.test làbodyassertfail, khôngnớiexpected. Khôngreportchínhthức/commit.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #26 – 2026-11-24 22:37 (giờ VN)
+- **AI tool:** PR-X1 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** PR-X1 – Execute
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 3 – Execute – PR-X1: chuyển các case PR-G1-xx và PR-G2-xx thành request trong collections/23120190_API3_ProductCRUD.postman_collection.json, folder G1 và G2.
+  > Input: report/testcases/API3_product_generated.md (mục G1, G2, Audit). Tuân thủ Phần B.
+  > Chú ý riêng:
+  > - Token admin T và token user V lấy trong setup của từng case (login admin/user seed bằng biến environment).
+  > - Snapshot S = GET /api/products trước request chính; kiểm "list không đổi" bằng so sánh với S trong test script.
+  > - Các body macro (B, B2, B[field]=giá trị) dịch đúng như định nghĩa trong file; tên sản phẩm duy nhất theo {{$guid}}.
+  > - PR-G2-16 có nhãn INCOMPLETE: dùng expected hiện hành theo lý do audit (quy ước full PUT của G6), ghi rõ trong description.
+  > Chạy thử: reset SUT, newman ... --folder G1, rồi --folder G2. Chỉ sửa lỗi kỹ thuật.
+  > Xong khi: mọi case VALID/INCOMPLETE của G1, G2 có folder; chạy cli không lỗi script; báo số pass/fail.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X1: modify only G1/G2 items and info.description. Existing G3/G4/G6/EX empty remain unchanged. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API3_ProductCRUD.postman_collection.json
+  > SOURCE: report/testcases/API3_product_generated.md
+- **AI output:**
+  > Chuyển54foldercase/312requests: G1=41,G2=13; bỏ8IDINVALID theoaudit, G2-16INCOMPLETE ghi fullPUT400+unchanged. Sửa kỹthuật bindingdata xungđột sandbox vàthiếu) tạiG2-05, parseerrorbody trongcorecallback, khôngđổiexpected/hook. FinalCLI G1:208requests/271assert201pass70fail/6.2s; finalG2:104requests/123assert95pass28fail/2.4s; tổng296pass98fail. Khônglỗi scriptchưabắt/unresolvedvars/requesterrors ởfinalruns. Initialruns kỹthuật lỗikhôngdùnglàkếtquảbug. Khôngreportchínhthức/commit.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #27 – 2026-11-24 22:42 (giờ VN)
+- **AI tool:** LG-X2 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** LG-X2 – Execute
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 1 – Execute – LG-X2: chuyển các case LG-G3-xx và LG-G4-xx thành request trong collection API 1, folder G3 và G4.
+  > Input: report/testcases/API1_login_generated.md (mục G3, G4, Audit). Tuân thủ Phần B.
+  > Chú ý riêng:
+  > - G3: payload SQLi, object/array thay field, ký tự điều khiển (\u0000) phải gửi đúng nguyên văn trong body raw JSON. Case "duyệt đệ quy không lộ password" viết hàm duyệt trong test script.
+  > - G4: dán NGUYÊN schema JSON trong file vào pm.response.to.have.jsonSchema(...). Không chỉnh schema.
+  > Chạy thử: reset SUT, newman ... --reporters cli --folder G3, rồi --folder G4. Chỉ sửa lỗi kỹ thuật.
+  > Xong khi: mọi case VALID/INCOMPLETE của G3, G4 có folder; schema dán đúng nguyên văn (đối chiếu từng schema với file); chạy cli không lỗi script; báo số pass/fail.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X2: modify only G3/G4 items and info.description; preserve all G1/G2/_smoke and protected collection hook. G6/EX remain empty. G4 schemas must be exact original JSON schema. Expired/deleted-user INCOMPLETE cases: do not invent exp/expired token or fake a pass; implement the feasible portion and describe exact missing prerequisite per audit. No skip swallowing failures; absent exp cannot be presented as actual expired-token exercise. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API1_Login.postman_collection.json
+  > SOURCE: report/testcases/API1_login_generated.md
+- **AI output:**
+  > Thêm23folderG3=16/G4=7,68requests, bỏLG-G3-06INVALID; 2schemaunique khớpnguồn. SửatechnicalapplyAST/escape vàURL LG-G3-07 nhầmsangregister vìlabelchứa đăngký, naysanglogin. CLI G3trướcsửaURL:51req104assert81pass23fail/32.4s; G4:17req45assert34pass11fail/608ms. Rerunchỉcase07đãsửa:4req9assert7pass2fail/191ms;2failstatus400so401, coreequivalencepass. KhôngclaimtổngG3cuốitừrunold; fullcollectionX3sẽđếmlại. Khônglỗiscriptchưabắt; hookmới vàschema/status400/423theoauditgiữnguyên. Khôngreportchínhthức/commit.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #28 – 2026-11-24 22:47 (giờ VN)
+- **AI tool:** PR-X2 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** PR-X2 – Execute
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 3 – Execute – PR-X2: chuyển các case PR-G3-xx và PR-G4-xx thành request trong collection API 3, folder G3 và G4.
+  > Input: report/testcases/API3_product_generated.md (mục G3, G4, Audit). Tuân thủ Phần B.
+  > Chú ý riêng:
+  > - Case thiếu token / user thường / JWT tự ký: mỗi case kiểm cả status VÀ "S không đổi" (GET list sau request).
+  > - Case tự nâng role (PR-G3-07..09) gọi PUT /api/users/me trong setup đúng như file.
+  > - Payload XSS/SQLi gửi nguyên văn; kiểm giá trị lưu là literal đúng như cột Expected.
+  > - G4: dán NGUYÊN schema trong file vào jsonSchema.
+  > Chạy thử: reset SUT, newman ... --folder G3, rồi --folder G4. Chỉ sửa lỗi kỹ thuật.
+  > Xong khi: mọi case VALID/INCOMPLETE của G3, G4 có folder; schema đúng nguyên văn; chạy cli không lỗi script; báo số pass/fail.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X2: modify only G3/G4 items and info.description; preserve all G1/G2/_smoke and protected collection hook. G6/EX remain empty. G4 schemas must be exact original JSON schema. Expired/deleted-user INCOMPLETE cases: do not invent exp/expired token or fake a pass; implement the feasible portion and describe exact missing prerequisite per audit. No skip swallowing failures; absent exp cannot be presented as actual expired-token exercise. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API3_ProductCRUD.postman_collection.json
+  > SOURCE: report/testcases/API3_product_generated.md
+- **AI output:**
+  > Thêm30folderG3=22/G4=8,321requestkhaitriển; khôngINVALIDở2nhóm. G4-07source-definedparityjump bằngstableID, max10, dừngsaukhiE/Ocómặt, giữmọimainassert; actualchỉ2POST+GETpairs. Exact4schemasS1–S4 với12occurrenceskhớpnguồn. CLI G3:257req268assert201pass67fail/8.1s; G4:48req95assert80pass15fail/1.301s; tổng281pass82fail/305requeststhựcthi. Khônglỗiscriptchưabắt/unresolvedvars; hookmớigiữnguyên, failauth/state/schema giữtheofile. Khôngreportchínhthức/commit.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #29 – 2026-11-24 22:50 (giờ VN)
+- **AI tool:** task CNX2 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** API 2 – Execute – CN-X2
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 2 – Execute – CN-X2: chuyển các case CN-G3-xx và CN-G4-xx thành request trong collection API 2, folder G3 và G4.
+  > Input: report/testcases/API2_cancel_generated.md (mục G3, G4, Audit). Tuân thủ Phần B.
+  > Chú ý riêng:
+  > - Case hai user A/B (IDOR): mỗi case tự đăng ký cả A và B.
+  > - Case JWT tự ký / alg none / sai cấu trúc: dựng token trong pre-request bằng CryptoJS, đúng header/payload/secret ghi trong file.
+  > - CN-G3-06 (user đã bị xóa) gọi DELETE /api/admin/users/:id bằng token admin trong setup.
+  > - G4: dán NGUYÊN schema trong file vào jsonSchema.
+  > Chạy thử: reset SUT, newman ... --reporters cli --folder G3, rồi --folder G4. Chỉ sửa lỗi kỹ thuật.
+  > Xong khi: mọi case VALID/INCOMPLETE của G3, G4 có folder; schema dán đúng nguyên văn; chạy cli không lỗi script; báo số pass/fail.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X2: modify only G3/G4 items and info.description; preserve all G1/G2/_smoke and protected collection hook. G6/EX remain empty. G4 schemas must be exact original JSON schema. Expired/deleted-user INCOMPLETE cases: do not invent exp/expired token or fake a pass; implement the feasible portion and describe exact missing prerequisite per audit. No skip swallowing failures; absent exp cannot be presented as actual expired-token exercise. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API2_CancelOrder.postman_collection.json
+  > SOURCE: report/testcases/API2_cancel_generated.md
+- **AI output:**
+  > Thêm14folderG3=10/G4=4,192requestkhaitriển; bỏCN-G3-03/05,G4-03/04INVALID. Schemaunique khớpnguồn, owner404theoG6. CN-G3-04INCOMPLETE chỉkiểmexp thiếu, khônggiảtokenhếthạn. SửaguardG3-06: failedsetupassertvẫnghi, chưađủđiềukiệnđơnsaudelete thìjumpstableIDcase07; khitiềnđềđạt vẫnattack401. FinalcoherentG3CLI:158req205assert196pass9fail/3.8s, case07vàsaurunsvẫntiếptục; G4:32req46assert46pass0fail/903ms. Tổng242pass9fail, khônglỗiscriptchưabắt; guardcasekhôngđượcgiảpass/hayclaimđãchạyattack. Hookmớigiữnguyên, khôngreportchínhthức/commit.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #30 – 2026-11-24 22:57 (giờ VN)
+- **AI tool:** task LGX3 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** API 1 – Execute – LG-X3
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 1 – Execute – LG-X3: chuyển các case LG-G6-xx và LG-EX-xx thành request trong collection API 1, folder G6 và EX.
+  > Input: report/testcases/API1_login_generated.md (mục G6, Extend – Human, Audit). Tuân thủ Phần B.
+  > Chú ý riêng:
+  > - LG-EX-03 decode base64url payload JWT trong test script (atob sau khi đổi -_ thành +/ và thêm padding), kiểm `exp`.
+  > - LG-EX-04 đi qua POST /api/forgot-password và POST /api/reset-password; lấy resetToken từ response forgot-password như cột Precondition ghi.
+  > - LG-EX-05 ký JWT HS256 bằng CryptoJS (có sẵn trong sandbox Postman): CryptoJS.HmacSHA256(header.payload, secret), chuyển base64url.
+  > - Folder EX đặt sau G6.
+  > Chạy thử: reset SUT, newman ... --reporters cli --folder G6, rồi --folder EX; sau đó chạy toàn collection một lần để chắc không có case nào phụ thuộc nhau. Chỉ sửa lỗi kỹ thuật.
+  > Xong khi: mọi case G6 VALID/INCOMPLETE và đủ 5 case LG-EX có folder; chạy toàn collection không lỗi script; báo tổng số assertion pass/fail và thời gian chạy.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Never derive an endpoint from display-label substrings: earlier label contains "chưa đăng ký" wrongly mapped login to register; construct explicit method/path. Avoid top-level identifier data because Newman sandbox injects legacy data binding; use a case-specific/scoped response variable. For large one-line JSON, ast_edit exact folder node then resolve proposal; a staged or failed edit is NOT applied. Verify tool operation result before claiming ready (no runtime tests while coding). Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X3: modify only G6/EX and API3 EX-last ordering; preserve earlier completed G1/G2/G3/G4 folders and protected hook. EX-last containing PR-EX-05 must be last after _smoke; only its own verification requests may follow seed delete. Audit+Human Extend are authoritative. No expected changes. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API1_Login.postman_collection.json
+  > SOURCE: report/testcases/API1_login_generated.md
+- **AI output:**
+  > Thêm10caseG6/EX5mỗi nhóm,49requests. Sửa11GUIDcallsdobuilderfstringmấtbrace; khôngđổi payload/expected/timert0+31/hook. G6debugtrướcfreshnessfix28req65assert44pass21fail; EX21req43assert30pass13fail; oldfullkhôngdùnglàprooffinal. FinalfullcorrectedCLI:230requests449assert299pass150fail/4m17.1s, zeroScriptErrors/requesterrors và properUUIDthật,localhost/XStudentId. Schema/status/corefailgiữnguyênfile, khôngofficialreport/commit. Đủ5EX, hmac/forgot/reset/exp theoHumanExtend.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #31 – 2026-11-24 23:03 (giờ VN)
+- **AI tool:** task PRX3 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** API 3 – Execute – PR-X3
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 3 – Execute – PR-X3: chuyển các case PR-G6-xx và PR-EX-xx thành request trong collection API 3, folder G6 và EX.
+  > Input: report/testcases/API3_product_generated.md (mục G6, Extend – Human, Audit). Tuân thủ Phần B.
+  > Chú ý riêng:
+  > - PR-EX-01/02/06: path %2B{{P}}, {{P}}.0 gửi nguyên văn; sau request kiểm GET /api/products/{{P}} và list bằng S.
+  > - PR-EX-03 gửi body raw `"price": 1e309` đúng nguyên văn (không để script tính ra Infinity rồi stringify).
+  > - PR-EX-04 gửi body raw `"price": -0`.
+  > - PR-EX-05 xóa product seed id 2: đặt request này ở CUỐI CÙNG của collection (folder "EX-last" sau EX), description ghi "chạy cuối vì xóa dữ liệu seed".
+  > Chạy thử: reset SUT, newman ... --folder G6, --folder EX, --folder EX-last, rồi toàn collection. Chỉ sửa lỗi kỹ thuật.
+  > Xong khi: mọi case G6 VALID/INCOMPLETE và đủ 6 case PR-EX có folder; PR-EX-05 là request cuối; toàn collection chạy không lỗi script; báo tổng pass/fail và thời gian chạy.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Never derive an endpoint from display-label substrings: earlier label contains "chưa đăng ký" wrongly mapped login to register; construct explicit method/path. Avoid top-level identifier data because Newman sandbox injects legacy data binding; use a case-specific/scoped response variable. For large one-line JSON, ast_edit exact folder node then resolve proposal; a staged or failed edit is NOT applied. Verify tool operation result before claiming ready (no runtime tests while coding). Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X3: modify only G6/EX and API3 EX-last ordering; preserve earlier completed G1/G2/G3/G4 folders and protected hook. EX-last containing PR-EX-05 must be last after _smoke; only its own verification requests may follow seed delete. Audit+Human Extend are authoritative. No expected changes. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API3_ProductCRUD.postman_collection.json
+  > SOURCE: report/testcases/API3_product_generated.md
+- **AI output:**
+  > Thêm41caseG6=35/EX=6,361requests; xóaemptyduplicateG6/EX, EX-lastchứaPR-EX-05sau_smoke vàrequestdescriptionriskreset. Literal1e309/-0 vàencodedpaths giữđúng. DebugG6:322requestattempts242requesterrors,351assert83pass268fail/6.8s; SUTchếtkhicaseG6-09price:nullđượcchấpnhậnrồiGETserializertoString(null). EXriêng34req47assert29pass18fail/856ms; EX-last5req7assert4pass3fail/221ms. Full:979attempts77requesterrors,1233assert892pass341fail/1m34.5s,51testscriptfailuresdoserverunavailable. server.logxácnhậnbackend/server.js:162TypeError, khôngorchestrationreset. TIÊUCHÍruntimecleanCHƯAĐẠTdoSUTcrash; oraclesphầnsaukhôngđượckiểmđầyđủ. KhôngváSUT/đổi expected/bỏcase/retryđểchecrash; X4mappingghirõgiớihạn, khôngreportchínhthức/commit.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #32 – 2026-11-24 23:05 (giờ VN)
+- **AI tool:** task CNX3 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
+- **API / Bước:** API 2 – Execute – CN-X3
+- **Prompt:**
+  > BỐI CẢNH CHUNG – HW06 API Testing, bước Execute (đọc kỹ trước khi làm)
+  > - Thư mục làm việc: /home/zinn/zinn/testing/hw06. Đề: "2026.HW06.API Testing_En.pdf". Quy tắc: agent.md (BẮT BUỘC đọc và tuân theo).
+  > - KHÔNG push, KHÔNG tạo issue, KHÔNG commit (Manager tự commit ở X0 và X5).
+  > - MSSV 23120190. SUT: EShop backend, base URL http://localhost:3000, reset bằng scripts/reset_sut.sh (khởi động lại server = DB seed lại, cart trong RAM bị xóa).
+  > - Environment Postman: environments/local.postman_environment.json (baseUrl, studentId, adminEmail/adminPassword, userEmail/userPassword). Dùng {{baseUrl}}, không hardcode localhost trong request.
+  > - Newman 6.2.3 + newman-reporter-htmlextra đã cài global.
+  > 
+  > NGUỒN TEST CASE
+  > - Mỗi API có 1 file trong report/testcases/. Cuối file có mục "## Audit – Nhãn VALID / INVALID / INCOMPLETE (Human review)" và mục "## Extend – Human".
+  > - CHUYỂN THÀNH REQUEST: mọi case nhãn VALID, mọi case nhãn INCOMPLETE, và mọi case <tiền tố>-EX-xx.
+  > - BỎ QUA: case nhãn INVALID. Liệt kê các ID bị bỏ trong description của collection kèm lý do "INVALID theo audit".
+  > - Case INCOMPLETE: đọc lý do audit. Nếu lý do chỉ ra quy ước thay thế (ví dụ "phải sửa expected theo quy ước G6") thì dùng quy ước đó. Nếu case không thể tự động hóa đầy đủ thì làm phần làm được và ghi "INCOMPLETE: <phần thiếu>" trong description của request.
+  > - Mục G5 chỉ là báo cáo, không có request.
+  > 
+  > QUY ƯỚC COLLECTION
+  > - Postman Collection v2.1, tên collection trùng tên file (bỏ đuôi): 23120190_API1_Login, 23120190_API2_CancelOrder, 23120190_API3_ProductCRUD.
+  > - Cấu trúc folder: G1, G2, G3, G4, G6, EX (theo mục trong file test case). Mỗi test case là MỘT folder con tên "[<ID>] <Mục đích>". Request setup nằm trong folder đó, tên "[<ID>] setup: <việc>"; request chính tên "[<ID>] <method> <path>".
+  > - Pre-request script CẤP COLLECTION (đã có từ X0, không sửa):
+  >     pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });
+  >     console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));
+  >   Vì header được thêm ở đây, KHÔNG dùng pm.sendRequest cho setup (request gửi bằng pm.sendRequest không đi qua pre-request này). Setup phải là request thật, hiện trong report.
+  > - Dữ liệu độc lập: mỗi case tự tạo user/đơn/sản phẩm như cột Precondition. Email duy nhất dùng {{$guid}} hoặc Date.now(). Lưu biến bằng pm.collectionVariables với tên có tiền tố ID (ví dụ lg_g1_01_email) để case không dùng chung biến.
+  > - Case cần chờ (ví dụ chờ 31 giây sau khóa): dùng setTimeout trong pre-request của request cần chờ. Thời gian chờ lấy ĐÚNG theo file test case (spec 30 giây). KHÔNG tăng thời gian chờ để khớp hành vi thực tế của SUT.
+  > - Case xóa/sửa dữ liệu seed (ví dụ PR-EX-05 xóa product id 2) đặt ở CUỐI collection và ghi rõ trong description.
+  > 
+  > QUY ƯỚC ASSERTION (quan trọng nhất)
+  > - Tên test: "[<ID>] <điều kiện>". Mỗi case có:
+  >   * Assertion CỐT LÕI: điều spec nói chắc chắn hoặc điều kiện trong cột "Expected body / kiểm tra" (ví dụ: không có token, dữ liệu không đổi, không lộ password, schema đúng). Tên: "[<ID>] core: <điều kiện>".
+  >   * Assertion STATUS: nếu status ghi trong file là spec nói rõ thì tên "[<ID>] status <n>". Nếu status là GIẢ ĐỊNH thì tên "[<ID>] status <n> (GIẢ ĐỊNH)" và VẪN kiểm đúng mã đó.
+  >   Mục đích: khi chạy, người dùng tách được fail do bug thật (core) với fail do giả định mã lỗi.
+  > - Schema (G4 và case SCH): dùng pm.response.to.have.jsonSchema(<schema trong file test case>), dán nguyên schema.
+  > - Expected lấy từ file test case. TUYỆT ĐỐI KHÔNG sửa expected, mã status, schema hay thời gian chờ cho khớp response thực tế. Được phép đọc eshop-sut/backend/ ở bước này chỉ để hiểu vì sao REQUEST lỗi kỹ thuật (ví dụ tên field), không để đổi expected.
+  > - Test fail là kết quả bình thường. Không thêm điều kiện bỏ qua (skip), không bọc assertion trong try/catch để nuốt lỗi.
+  > 
+  > CHẠY THỬ (chỉ để gỡ lỗi collection)
+  > - Trước mỗi lần chạy thử: scripts/reset_sut.sh.
+  > - Lệnh: newman run <collection> -e environments/local.postman_environment.json --reporters cli [--folder <tên>]
+  > - CẤM ghi file vào results/newman/ và CẤM dùng reporter htmlextra/json. File report chính thức do người dùng tự chạy.
+  > - Kết quả chạy thử chỉ dùng để sửa lỗi kỹ thuật. Không chép response vào report như bằng chứng bug.
+  > 
+  > QUY TẮC AI LOG
+  > - Prompt có cụm "ghi vào log" thì sau khi xong PHẢI append một entry vào report/AI_LOG.md theo đúng định dạng agent.md mục 1. AI tool = tên agent + model của chính bạn. Giờ lấy bằng `date "+%Y-%m-%d %H:%M"`. Prompt ghi NGUYÊN VĂN, chỉ bỏ cụm "ghi vào log" ở câu đầu. Human review để trống. Nếu agent khác đang ghi log thì đợi.
+  > - API / Bước ghi dạng "API 1 – Execute – LG-X1".
+  > 
+  > CẤM
+  > - Bịa response SUT; sửa code SUT; sửa file test case (report/testcases/*); sửa collection của API khác; tạo/sửa file trong results/newman/.
+  > 
+  > CUỐI MỖI LẦN LÀM
+  > - Báo lại cho Manager: file đã tạo/sửa, số folder case đã thêm, danh sách ID đã chuyển, ID bỏ qua kèm lý do, và bằng chứng cho từng tiêu chí "Xong khi".
+  > 
+  > API 2 – Execute – CN-X3: chuyển các case CN-G6-xx và CN-EX-xx thành request trong collection API 2, folder G6 và EX.
+  > Input: report/testcases/API2_cancel_generated.md (mục G6, Extend – Human, Audit). Tuân thủ Phần B.
+  > Chú ý riêng:
+  > - CN-EX-01/03/04: path %2B{{O}}, {{O}}.0, 0{{O}} gửi nguyên văn. Sau request hủy, gọi GET /api/orders/{{O}} bằng token chủ đơn để kiểm đơn vẫn pending (oracle K).
+  > - CN-EX-02 đi qua forgot-password → reset-password rồi dùng token CŨ.
+  > - CN-EX-05 ký JWT HS256 bằng CryptoJS với secret ghi trong file.
+  > Chạy thử: reset SUT, newman ... --folder G6, rồi --folder EX, rồi toàn collection. Chỉ sửa lỗi kỹ thuật.
+  > Xong khi: mọi case G6 VALID/INCOMPLETE và đủ 5 case CN-EX có folder; toàn collection chạy không lỗi script; báo tổng pass/fail và thời gian chạy.
+  > 
+  > 
+  > 
+  > MANAGER CONTRACT (higher priority): Read skill://ponytail first; active throughout; reviewers also ponytail-review. User requests parallel chains X1→X4, then X-DATA, stop human gate, NO X5/commits. Only ONE assigned step per task. Manager owns AI_LOG; DO NOT edit log/git. Return actual model/date and exact case/request counts, skipped INVALID IDs/reasons and implementation evidence. Repo rules already supplied: no discovery/read of agent/context files.
+  > CRITICAL USER UPDATE: collection-level prerequest two lines from NEW PartB are IMMUTABLE, especially console.log pm.variables.replaceIn(...). Do not modify, reformat or replace either line/event. If mismatch report immediately, NEVER repair. Manager verified starting hooks match user c7b77c2.
+  > Own ONLY assigned collection; edit ONLY current step folders and description INVALID list, existing file MUST edit (never shell/Python overwrite/write whole existing JSON). No testcase/env/reset/runner/SUT/reports/other collection changes. New scratch generator files ONLY local:// if genuinely needed, delete afterward; don't leave generator/source scripts in repo. Shared language/helper patterns inside your own collection must be boring and request assertions explicit. No nested delegation.
+  > IMPORTANT RUNTIME SERIALIZATION: skip all test/build/lint/formatters/static QA commands and ALL SUT/Newman/reset calls while coding. Manager delegates CLI checking to sonic afterward with shared SUT exclusive lock. Thus verbatim prompt's debug-run clauses handled by manager, not worker. Do not tune expected from SUT. Read spec/testcases only as necessary; backend only if later exact technical request defect cannot be resolved from docs.
+  > Implement every VALID/INCOMPLETE case in assigned G sections; audit is source of truth, read its reason + G6 current convention and latest G5 for oracle precedence. INVALID IDs listed with 'INVALID theo audit', never folders. Copy request/expectation precisely, own case-prefixed collectionVariables, fresh setup per case, all actual setup requests (no pm.sendRequest). No skipRequest/setNextRequest skipping consumer failures; no swallowed assertions/try-catch suppression, no fake fallback tokens/IDs/data. Assert core and status separately; assumptions in status testnames. Assertions must be consumer meaningful, no always-true/not-throw/source echoes. Assertion fail due SUT/schema/status is normal, not 'technical error' to fix. Safe JSON field extraction cannot hide failed setup; requests missing identifiers must produce explicit failed setup assertions, not fake success.
+  > Use environment admin/user credentials. Never derive an endpoint from display-label substrings: earlier label contains "chưa đăng ký" wrongly mapped login to register; construct explicit method/path. Avoid top-level identifier data because Newman sandbox injects legacy data binding; use a case-specific/scoped response variable. For large one-line JSON, ast_edit exact folder node then resolve proposal; a staged or failed edit is NOT applied. Verify tool operation result before claiming ready (no runtime tests while coding). Every URL starts {{baseUrl}}; percent-encoded paths exact, disable URL encoding when needed using request.protocolProfileBehavior disableUrlEncoding. Postman sandbox CryptoJS built-in where needed; no added dependencies. Long JSON/control/raw values exact. Timers per source31/29 relative lock timestamp, no extending wait due SUT. Folder testcases [ID] purpose; all setup/main request/test names prefixed[ID]. Subedges for CN A[...] have NEW independent orders. Snapshot comparisons by ID with entire fields ignoring ordering; never accept additional statuses. Collections may include _smoke unchanged.
+  > For X3: modify only G6/EX and API3 EX-last ordering; preserve earlier completed G1/G2/G3/G4 folders and protected hook. EX-last containing PR-EX-05 must be last after _smoke; only its own verification requests may follow seed delete. Audit+Human Extend are authoritative. No expected changes. Read complete setup definitions, not truncated lines. Preserve original hook lines bytes. Do not run commands merely to test generation; deliver and Manager checks.
+  > 
+  > OWN FILE: collections/23120190_API2_CancelOrder.postman_collection.json
+  > SOURCE: report/testcases/API2_cancel_generated.md
+- **AI output:**
+  > Thêm15caseG6=10/EX=5,220requests; bỏG6-05/12INVALID vàemptyduplicates. Sửa24GUIDliteralsX2(thừa kỹthuật20G3/4G4)thànhdoublebrace, khôngexpected/hookchanges. G6CLI178req239assert234pass5fail/4.2s; EX42req63assert48pass15fail/1.101s. Finalfullverbatimlocal83:904req,904testscripts,1073prerequests,1230assert1184pass46fail/36.4s; khôngrequest/scriptfailures. Báocáo688/792banđầucủaverifierđãsửa theoartifact, khôngdùngsốsai. ProperUUID,percentencodedpaths vàStudentIDlocalhostverified. Expiry/deleteduserpreconditionsINCOMPLETE khônggiảpass. Khôngofficialreport/commit.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+
+## #33 – 2026-11-25 03:07 (giờ VN)
+- **AI tool:** Manager (openai-codex/gpt-6.1-sol)
+- **API / Bước:** API 1 – Execute – LG-X4
+- **Prompt:**
+  > . Đội agent quay lại dùng Codex (quota 5h vừa hồi). Tiếp tục bước Execute đang dở theo EXECUTE_PROMPTS.md, đọc lại PHẦN A và PHẦN B trong file trước khi giao việc.
+  > Trạng thái hiện tại (đã kiểm từ file và AI_LOG):
+  > - Xong: X0 (commit c7b77c2), LG-X1..X3, CN-X1..X3, PR-X1..X3. Collection đã có đủ folder G1..EX.
+  > - LG-X4: đã có report/execute/API1_login_mapping.md nhưng CHƯA có entry log. Kiểm file này đủ tiêu chí "Xong khi" của LG-X4; đạt thì ghi log, chưa đạt thì giao LG-X4 lại.
+  > - X-DATA: đã có data/lg_g1_partition.csv, folder "DATA – LG-G1" và lệnh trong scripts/run_newman.sh nhưng CHƯA có log. Kiểm tiêu chí "Xong khi" của X-DATA rồi xử lý như trên.
+  > - Chưa làm: CN-X4, PR-X4 → giao cho reviewer, chạy song song.
+  > Giữ nguyên quy tắc: không commit trong X1–X4, không tạo file trong results/newman/, không sửa expected, không sửa 2 dòng pre-request. Xong hết thì dừng ở bước 🧑 và gửi tôi tin nhắn hướng dẫn chạy run_newman.sh.
+- **AI output:**
+  > Kiểm mapping hiện có đạt tiêu chí: 71/71 ID nguồn có dòng; 68 case chuyển (61 VALID, 2 INCOMPLETE, 5 EX), 3 INVALID không có folder; 229 request/473 assertion nguồn, cộng smoke 230/474. Các số từng folder khớp collection hiện tại. Bằng chứng CLI LG-X4 đã có trong mapping: 322 pass/152 fail, 230 request, không lỗi script/request, 4m17s; không chạy lại. Bổ sung mô tả phạm vi tổng đếm trước X-DATA và ngoại lệ skipRequest hợp lệ khi DATA không có caseId. Không finding mở; hai dòng pre-request giữ nguyên; results/newman chỉ có .gitkeep. Không commit/report chính thức.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+
+## #34 – 2026-11-25 03:07 (giờ VN)
+- **AI tool:** Manager (openai-codex/gpt-6.1-sol); sonic ExecuteProof (openai-codex/gpt-6-luna)
+- **API / Bước:** Execute – X-DATA
+- **Prompt:**
+  > . Đội agent quay lại dùng Codex (quota 5h vừa hồi). Tiếp tục bước Execute đang dở theo EXECUTE_PROMPTS.md, đọc lại PHẦN A và PHẦN B trong file trước khi giao việc.
+  > Trạng thái hiện tại (đã kiểm từ file và AI_LOG):
+  > - Xong: X0 (commit c7b77c2), LG-X1..X3, CN-X1..X3, PR-X1..X3. Collection đã có đủ folder G1..EX.
+  > - LG-X4: đã có report/execute/API1_login_mapping.md nhưng CHƯA có entry log. Kiểm file này đủ tiêu chí "Xong khi" của LG-X4; đạt thì ghi log, chưa đạt thì giao LG-X4 lại.
+  > - X-DATA: đã có data/lg_g1_partition.csv, folder "DATA – LG-G1" và lệnh trong scripts/run_newman.sh nhưng CHƯA có log. Kiểm tiêu chí "Xong khi" của X-DATA rồi xử lý như trên.
+  > - Chưa làm: CN-X4, PR-X4 → giao cho reviewer, chạy song song.
+  > Giữ nguyên quy tắc: không commit trong X1–X4, không tạo file trong results/newman/, không sửa expected, không sửa 2 dòng pre-request. Xong hết thì dừng ở bước 🧑 và gửi tôi tin nhắn hướng dẫn chạy run_newman.sh.
+- **AI output:**
+  > Kiểm CSV đủ 20 dòng lớp email/password VALID LG-G1-01..21 trừ INVALID LG-G1-14; các lớp body/media LG-G1-22..25 nằm ngoài phạm vi CSV và vẫn có trong G1. Folder DATA có setup độc lập UUID và login dựng body bằng iterationData, giữ expected/core/GIẢ ĐỊNH. CLI thực chạy bởi sonic openai-codex/gpt-6-luna: 20 iterations, 40 requests, 76 assertions = 54 pass/22 fail, không lỗi request/script, 1009 ms. Chạy DATA không CSV: 0 request/0 assertion, guard hoạt động, 40 ms. Runner chính thức lọc G1..EX (API3 thêm EX-last), có lần chạy DATA riêng với -d và reset trước mỗi run; bash -n đạt. Không chạy runner chính thức, không tạo report, không commit. Đạt tiêu chí X-DATA; giữ nguyên hai dòng pre-request.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #35 – 2026-11-25 15:23 (giờ VN)
+- **AI tool:** Manager (openai-codex/gpt-6.1-sol)
+- **API / Bước:** API 2 – Execute – CN-X4
+- **Prompt:**
+  > . Tiếp tục bước Execute theo EXECUTE_PROMPTS.md. Đọc lại PHẦN A, PHẦN B và agent.md trước khi giao việc. Giữ model của các agent đúng như config hiện tại, không đổi model.
+  >
+  > Trạng thái (đã kiểm từ file và AI_LOG):
+  > - Xong và đã có log: X0 (commit c7b77c2), LG/CN/PR-X1..X3, LG-X4 (#33), X-DATA (#34).
+  > - CN-X4: đã có report/execute/API2_cancel_mapping.md nhưng CHƯA có log. Kiểm tiêu chí "Xong khi" của CN-X4: đạt thì ghi log, chưa đạt thì giao reviewer làm lại phần thiếu. Các điểm F1–F7 trong mục 7 của file cần Manager quyết định; ghi quyết định vào log.
+  > - PR-X4: đã có report/execute/API3_product_mapping.md nhưng CHƯA có log. Phần tĩnh đạt; phần runtime "chưa khẳng định" vì lần chạy thử SUT dừng ở PR-G6-09.
+  >   → Giao task: reset SUT bằng scripts/reset_sut.sh, chạy collection PR bằng newman --reporters cli để tìm nguyên nhân dừng ở PR-G6-09 (SUT crash hay lỗi script/setup). Nếu do script thì sửa script/setup của collection; nếu SUT crash thật thì đó là bug: ghi lại response/log thật, để case đó fail, xếp nó chạy cuối hoặc tách để các case sau vẫn chạy. Không sửa expected để cho pass.
+  >   → Sau đó reviewer cập nhật mục "Runtime sạch" trong API3_product_mapping.md theo kết quả chạy thật, rồi ghi log PR-X4.
+  >
+  > Quy tắc giữ nguyên: không commit, không tạo file trong results/newman/, không sửa expected, không sửa 2 dòng pre-request cấp collection, không dùng htmlextra/json reporter. Commit message không ghi tên AI.
+  >
+  > Xong hết thì dừng ở bước 🧑 và gửi tôi tin nhắn hướng dẫn chạy ./scripts/run_newman.sh và chụp console X-Student-Id vào evidence/xstudentid_console.png.
+- **AI output:**
+  > Đọc lại PHẦN A/B và agent.md. CN-X4 đạt: 64/64 ID nguồn được mapping, 55 case nguồn + 25 sub-folder cạnh trạng thái; 9 INVALID bỏ đúng; 906 request/1233 assertion tĩnh gồm smoke khớp mapping. Không cần giao reviewer làm lại. Dùng bằng chứng CLI đã có, không chạy lại để xác nhận: 906 request, 1233 assertion = 1185 pass/48 fail, 31.6 s, không lỗi request/script. results/newman/ chỉ có .gitkeep; hook đúng hai dòng.
+  > Quyết định Manager F1: giữ tên oracle “setup” lần này; assertion core và ID vẫn phân biệt được lỗi, không ảnh hưởng expected. F2: chấp nhận INCOMPLETE CN-G3-04 theo file và SUT hiện không có exp; đây chỉ là kiểm precondition, KHÔNG tuyên bố đã kiểm token hết hạn; nếu sau này có exp thì phải bổ sung nhánh chờ/PUT/K trước khi tuyên bố đầy đủ. F3: giữ điều hướng dừng case theo precondition xóa user của file; đây không phải bỏ qua assertion request chính; lần chạy quan sát không kích hoạt, request đích tồn tại; ràng buộc ID cứng được ghi nhận, không coi case đạt khi setup fail. F4: giữ kiểm JWT chặt hơn; nếu thông báo chứa a.b.c thì cần human review false positive, không nới regex theo response. F5: giữ bước lưu baseline, chỉ request 2/3 chứng minh so sánh; assertion đầu không được diễn giải là bằng chứng chống dò ID độc lập. F6: giữ oracle dùng token cũ đúng file; khi token bị vô hiệu, oracle không quan sát được trạng thái đơn, không suy diễn lỗi dữ liệu từ 401. F7: giữ tên folder hiện tại vì ID duy nhất và mapping mô tả rõ mục đích; không đổi tên thuần hình thức trong lượt này. Không sửa collection/expected, không commit, không tạo report chính thức.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #36 – 2026-11-25 15:33 (giờ VN)
+- **AI tool:** Manager (openai-codex/gpt-6.1-sol); task ProductIsolation (openai-codex/gpt-6.1-terra); sonic ProductRuntime/ProductProof (openai-codex/gpt-6-luna); reviewer ProductMappingReview (anthropic/claude-sonnet-5-5)
+- **API / Bước:** API 3 – Execute – PR-X4
+- **Prompt:**
+  > . Tiếp tục bước Execute theo EXECUTE_PROMPTS.md. Đọc lại PHẦN A, PHẦN B và agent.md trước khi giao việc. Giữ model của các agent đúng như config hiện tại, không đổi model.
+  >
+  > Trạng thái (đã kiểm từ file và AI_LOG):
+  > - Xong và đã có log: X0 (commit c7b77c2), LG/CN/PR-X1..X3, LG-X4 (#33), X-DATA (#34).
+  > - CN-X4: đã có report/execute/API2_cancel_mapping.md nhưng CHƯA có log. Kiểm tiêu chí "Xong khi" của CN-X4: đạt thì ghi log, chưa đạt thì giao reviewer làm lại phần thiếu. Các điểm F1–F7 trong mục 7 của file cần Manager quyết định; ghi quyết định vào log.
+  > - PR-X4: đã có report/execute/API3_product_mapping.md nhưng CHƯA có log. Phần tĩnh đạt; phần runtime "chưa khẳng định" vì lần chạy thử SUT dừng ở PR-G6-09.
+  >   → Giao task: reset SUT bằng scripts/reset_sut.sh, chạy collection PR bằng newman --reporters cli để tìm nguyên nhân dừng ở PR-G6-09 (SUT crash hay lỗi script/setup). Nếu do script thì sửa script/setup của collection; nếu SUT crash thật thì đó là bug: ghi lại response/log thật, để case đó fail, xếp nó chạy cuối hoặc tách để các case sau vẫn chạy. Không sửa expected để cho pass.
+  >   → Sau đó reviewer cập nhật mục "Runtime sạch" trong API3_product_mapping.md theo kết quả chạy thật, rồi ghi log PR-X4.
+  >
+  > Quy tắc giữ nguyên: không commit, không tạo file trong results/newman/, không sửa expected, không sửa 2 dòng pre-request cấp collection, không dùng htmlextra/json reporter. Commit message không ghi tên AI.
+  >
+  > Xong hết thì dừng ở bước 🧑 và gửi tôi tin nhắn hướng dẫn chạy ./scripts/run_newman.sh và chụp console X-Student-Id vào evidence/xstudentid_console.png.
+- **AI output:**
+  > Giữ nguyên model theo config, không đổi model. Đọc PHẦN A/B và agent.md trước giao việc; ghép PHẦN B nguyên văn qua local://execute_worker_context.txt. Sonic reset rồi chạy full PR CLI để chẩn đoán: 979 request/77 lỗi, 1234 assertion/341 fail, 1m24.4s. PR-G6-09 PUT price:null trên id121 lẻ trả 200, chưa crash; lần crash đầu của lượt này ở PR-G6-31 GET id150 sau PUT body {} trả 200. Log thật server.js:162: TypeError: Cannot read properties of null (reading 'toString'); sau đó ECONNREFUSED. Đây là bug SUT, không phải lỗi setup. Giữ artifact CLI/server trước reset trong local://product-before-isolation-{cli,server}.log; không coi là report chính thức.
+  > Task chuyển nguyên vẹn PR-G6-09/15/31 (price null, thiếu price, body rỗng) sang G6-isolated trong collection API3; không sửa request/expected/assertion/hook. scripts/run_newman.sh chạy mỗi case riêng với reset trước từng lượt, ghi trạng thái fail nhưng tiếp tục; reset rồi chạy lượt chính G1/G2/G3/G4/G6/EX/EX-last. PR-EX-05 vẫn cuối lượt chính và collection. Manager đổi dấu phân tách tên report riêng thành API3_ProductCRUD_isolated-<ID>_<ngày>.html/json để khớp wildcard API3_ProductCRUD_* của X5. Agent không chạy runner hay reporter chính thức; các file đó chỉ sinh khi sinh viên chạy.
+  > Kiểm CLI sau sửa bởi sonic: bash -n đạt. Ba lượt riêng mỗi lượt 9 request/1 lỗi request, 13 assertion = 8 pass/5 fail, không lỗi script; thời gian PR-G6-09/15/31 lần lượt 292/297/342ms. Cả ba GET detail id6 báo socket hang up và log TypeError null.toString; giữ fail, không nuốt lỗi. Lượt chính reset độc lập: 951 request/0 lỗi, 948 test script/0 lỗi, 1198 pre-request script/0 lỗi, 1231 assertion = 938 pass/293 fail, 1m22.1s; chạy tới PR-G6-32..35 và PR-EX-05, không crash. Cộng bốn lượt độc lập: 978 request, 3 lỗi request, 1270 assertion = 962 pass/308 fail. Reset cuối đã hoàn thành. Artifact local://product-isolate-PR-G6-<09|15|31>-{cli,server}.log và local://product-regular-G1-G2-G3-G4-G6-EX-EX-last-{cli,server}.log lưu số liệu thật.
+  > Reviewer cập nhật report/execute/API3_product_mapping.md: mapping đủ 133 ID (125 case + 8 INVALID), G6 còn 32 case/295 request/419 assertion; G6-isolated 3/27/39; tổng tĩnh nguồn giữ 994 request/1287 assertion. Lượt chính tĩnh 967/1248, thực chạy 951/1231 do parity PR-G4-07 thoát setup sớm đúng file. Đủ 125 case qua bốn lượt; runtime sạch chỉ cho lượt chính về request/script, KHÔNG sạch toàn cục và KHÔNG all pass. X5 phải gộp JSON chính và cả ba JSON isolated. Không finding chặn; giữ các quan sát tĩnh không đổi expected. Reviewer báo không có edit tool nên đã sửa mapping bằng scripted replacement trái chỉ dẫn edit-only; Manager đã report_issue về bất nhất tool, không lặp lại thao tác đó. results/newman/ chỉ có .gitkeep; không commit, không tạo report chính thức, không sửa SUT/testcase/hai dòng pre-request. Dừng ở bước người dùng tự chạy và chụp console, chưa làm X5.
+- **Human review:** _(để trống – sinh viên tự điền)_
+
+## #37 – 2026-11-25 16:05 (giờ VN)
+- **AI tool:** Manager (openai-codex/gpt-6.1-sol); task LoginResults/CancelResults/ProductResults (openai-codex/gpt-6.1-terra); sonic OfficialManifest (openai-codex/gpt-6-luna); reviewer ResultsReview (anthropic/claude-sonnet-5-5)
+- **API / Bước:** API 1, API 2, API 3 – Execute – X5
+- **Prompt:**
+  > . Tôi đã chạy ./scripts/run_newman.sh và chụp evidence/xstudentid_console.png. Làm X5 theo EXECUTE_PROMPTS.md: đọc JSON thật trong results/newman/ (gộp cả 3 file isolated của API3), viết report/execute/API<n>_*_results.md, rồi tạo 3 commit execute như prompt X5. Không sửa file trong results/newman/. Commit message không ghi tên AI. Chưa push.
+  > Lưu ý: results/newman/23120190_API3_ProductCRUD_20261125.json nặng 190MB, vượt giới hạn 100MB của GitHub; KHÔNG commit file này (thêm vào .gitignore), chỉ commit file HTML. Ghi rõ lý do trong results.md.
+- **AI output:**
+  > Chỉ đọc sáu JSON Newman chính thức ngày 20261125, đủ HTML tương ứng và DATA HTML; mọi request host localhost. Không chạy lại Newman/SUT/runner. Đã xem ảnh evidence/xstudentid_console.png: console có X-Student-Id: 23120190 và localhost. Tạo report/execute/API1_login_results.md, API2_cancel_results.md, API3_product_results.md: số liệu run.stats/timings, bảng đủ failure nối đúng execution/cursor, expected từ testcase/audit/G6, body thật che token/mật khẩu, nhóm ứng viên theo hiện tượng và phần status GIẢ ĐỊNH cần sinh viên quyết định. Không severity, không bug report.
+  > API1 JSON: 229 request, 473 assertion = 321 pass/152 fail, 257312ms, 10 nhóm ứng viên. DATA HTML riêng: 20 iteration, 40 request, 76 assertion = 54 không fail/22 fail, 1078ms; runner không sinh JSON DATA, không giả số liệu hay response JSON DATA và không cộng vào JSON chính. API2: 905 request, 1232 assertion = 1184 pass/48 fail, 34558ms, 8 nhóm ứng viên; 17 fail chỉ status giả định, 1 setup INCOMPLETE exp không phải tấn công hết hạn đã chạy.
+  > API3 gộp bốn lượt: 978 request/3 lỗi request, 1270 assertion = 962 pass/308 fail, tổng thời lượng 83153ms không gồm reset, 7 nhóm ứng viên. Lượt chính 951 request, 1231 assertion = 938 pass/293 fail, 82173ms; isolated PR-G6-09/15/31 mỗi lượt 9 request/1 lỗi, 13 assertion = 8 pass/5 fail, 321/347/312ms. Bảng đủ 311 failure records = 308 assertion + 3 lỗi request. Không cộng trùng setup parity bị bỏ qua. Trích mảng là phần tử thật nhưng không luôn là phần tử chứng minh thay đổi; xem full JSON để đối chiếu snapshot.
+  > Main JSON API3 chính xác 189863153 byte, SHA256 b9cccdbf68c595cd12868289b5032cab2f2ef44143f732f3cf50df3dead31eae: giữ local, thêm đúng đường dẫn vào .gitignore, loại khỏi commit vì vượt giới hạn GitHub100MB; báo cáo ghi rõ lý do/hash/kích thước. HTML chính và cả HTML/JSON của ba isolated vẫn thuộc commit API3. Không sửa bất kỳ file trong results/newman; đã lấy manifest hash/kích thước các artifact gốc. Reviewer độc lập ACCEPT, không lỗi thực tế chặn. Ứng viên chỉ là nhóm cần điều tra, không phải số bug đã xác nhận.
+  > Thực hiện ba commit riêng theo X5 qua selective commit: API1 kèm DATA, runner chung, AI_LOG và ảnh; API2 kèm collection/mapping/results/HTML/JSON; API3 kèm collection/mapping/results/HTML chính/ba cặp isolated và quy tắc ignore main JSON lớn. Giữ nguyên thay đổi .gitignore có sẵn ngoài quy tắc được yêu cầu. Không push. Artifact chính thức và ảnh gốc có thể chứa token/password local; không chỉnh bằng chứng theo yêu cầu người dùng.
+- **Human review:** _(để trống – sinh viên tự điền)_
