@@ -1,0 +1,44 @@
+name: API tests (Newman)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+
+      - name: Checkout SUT (eshop-sut @ 85af3ba)
+        uses: actions/checkout@v4
+        with:
+          repository: ttbhanh/eshop-sut
+          ref: 85af3ba875c88283615e22cb108f13e2fccaf0e9
+          path: eshop-sut
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install SUT backend and Newman
+        run: |
+          npm ci --prefix eshop-sut/backend
+          npm install -g newman@6.2.3 newman-reporter-htmlextra@1.23.1
+
+      - name: Run regression suite (reset SUT per API)
+        run: scripts/run_ci.sh
+
+      - name: Upload Newman reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-reports
+          path: |
+            results/ci/
+            results/server.log

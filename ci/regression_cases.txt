@@ -1,0 +1,55 @@
+# Bộ regression cho CI: các case PASS hoàn toàn trong lần chạy Newman 2026-11-25.
+# Case lộ bug (fail) được theo dõi ở GitHub Issues #1–#16, không đưa vào CI.
+# Định dạng: <API>|<tên folder case>
+# Bỏ PR-G6-10, PR-G6-22, PR-G6-25, PR-G6-26: pass/fail phụ thuộc id chẵn/lẻ được cấp (BUG-16), không ổn định khi chạy riêng.
+API1_Login|[LG-G1-01] Email tồn tại
+API1_Login|[LG-G1-25] Field thừa
+API1_Login|[LG-G3-08] JWT đúng cấu trúc và danh tính user
+API1_Login|[LG-G6-02] Token mới được API bảo mật chấp nhận
+API1_Login|[LG-G6-04] Bearer sai không chặn login
+API1_Login|[LG-G6-05] Role client không nâng quyền
+API2_CancelOrder|[CN-G1-01] Hủy pending
+API2_CancelOrder|[CN-G1-02] ID dương vắng
+API2_CancelOrder|[CN-G1-05] ID vượt 32 bit
+API2_CancelOrder|[CN-G1-06] ID rất lớn
+API2_CancelOrder|[CN-G1-11] Thiếu Authorization
+API2_CancelOrder|[CN-G1-12] Bearer rỗng
+API2_CancelOrder|[CN-G1-16] Body thừa
+API2_CancelOrder|[CN-G2-02] User hủy confirmed
+API2_CancelOrder|[CN-G2-04] User không hủy delivered
+API2_CancelOrder|[CN-G2-05] Hủy hai lần
+API2_CancelOrder|[CN-G2-06] Các cạnh từ pending
+API2_CancelOrder|[CN-G2-07] Các cạnh từ confirmed
+API2_CancelOrder|[CN-G2-08] Các cạnh từ shipping
+API2_CancelOrder|[CN-G2-09] Các cạnh từ delivered
+API2_CancelOrder|[CN-G2-13] Hủy không đổi đơn khác
+API2_CancelOrder|[CN-G3-01] B hủy đơn A pending
+API2_CancelOrder|[CN-G3-02] B hủy đơn A confirmed
+API2_CancelOrder|[CN-G3-12] Dò ID liên tiếp và ID vắng mặt
+API2_CancelOrder|[CN-G4-01] Schema response hủy pending
+API2_CancelOrder|[CN-G4-02] Schema GET sau hủy
+API2_CancelOrder|[CN-G4-05] Thời gian hủy thành công
+API2_CancelOrder|[CN-G4-06] Thời gian GET sau hủy
+API2_CancelOrder|[CN-G6-01] bảo vệ đơn pending
+API2_CancelOrder|[CN-G6-04] bảo vệ đơn pending
+API2_CancelOrder|[CN-G6-08] bảo vệ đơn shipping
+API2_CancelOrder|[CN-G6-09] bảo vệ đơn delivered
+API2_CancelOrder|[CN-G6-10] bảo vệ đơn canceled
+API3_ProductCRUD|[PR-G1-05] Name 254 ký tự
+API3_ProductCRUD|[PR-G1-06] Name 255 ký tự
+API3_ProductCRUD|[PR-G1-08] Name tiếng Việt
+API3_ProductCRUD|[PR-G1-14] Price 0.01
+API3_ProductCRUD|[PR-G1-15] Price 1
+API3_ProductCRUD|[PR-G1-16] Price rất lớn
+API3_ProductCRUD|[PR-G1-27] Thiếu description
+API3_ProductCRUD|[PR-G1-28] Description rỗng
+API3_ProductCRUD|[PR-G1-29] Description rất dài
+API3_ProductCRUD|[PR-G1-30] Thiếu imageUrl
+API3_ProductCRUD|[PR-G1-31] Image rỗng
+API3_ProductCRUD|[PR-G1-32] Image rất dài
+API3_ProductCRUD|[PR-G1-33] Image không phải URL
+API3_ProductCRUD|[PR-G1-34] PUT id tồn tại
+API3_ProductCRUD|[PR-G1-46] Field id thừa
+API3_ProductCRUD|[PR-G2-05] POST khi sản phẩm mục tiêu đang tồn tại
+API3_ProductCRUD|[PR-G2-15] Hai sản phẩm trùng tên
+API3_ProductCRUD|[PR-G4-01] Schema tạo và round-trip price
