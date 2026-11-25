@@ -1,0 +1,322 @@
+{
+  "info": {
+    "name": "23120190_Mock",
+    "description": "Mock server + monitor demo. Example lấy từ response thật của SUT localhost (2026-11-25).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });",
+          "console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "[MOCK-01] POST /api/login – đúng mật khẩu",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{mockUrl}}/api/login",
+          "host": [
+            "{{mockUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"test@eshop.com\", \"password\": \"Test1234!\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "name": "200 Login successful",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{mockUrl}}/api/login",
+              "host": [
+                "{{mockUrl}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"test@eshop.com\", \"password\": \"Test1234!\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\"message\": \"Login successful\", \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InVzZXIiLCJpYXQiOjE3OTU2MjQ4NTV9.7uxavI6BPwockif8JxbMr56P32eNQVMTkogqSO7rX54\", \"user\": {\"id\": 2, \"name\": \"Test User\", \"email\": \"test@eshop.com\", \"password\": \"Test1234!\", \"role\": \"user\", \"login_attempts\": 0, \"locked_until\": null, \"reset_token\": null, \"shipping_address\": null, \"phone\": null}}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('[MOCK-01] status 200', () => pm.response.to.have.status(200));",
+              "pm.test('[MOCK-01] có token', () => pm.expect(pm.response.json().token).to.be.a('string'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "[MOCK-02] POST /api/login – sai mật khẩu",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-mock-response-name",
+            "value": "401 Invalid email or password"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{mockUrl}}/api/login",
+          "host": [
+            "{{mockUrl}}"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"test@eshop.com\", \"password\": \"Sai12345!\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "name": "401 Invalid email or password",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-mock-response-name",
+                "value": "401 Invalid email or password"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{mockUrl}}/api/login",
+              "host": [
+                "{{mockUrl}}"
+              ],
+              "path": [
+                "api",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"test@eshop.com\", \"password\": \"Sai12345!\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\"error\": \"Invalid email or password\"}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('[MOCK-02] status 401', () => pm.response.to.have.status(401));",
+              "pm.test('[MOCK-02] có error', () => pm.expect(pm.response.json().error).to.be.a('string'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "[MOCK-03] GET /api/products/1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{mockUrl}}/api/products/1",
+          "host": [
+            "{{mockUrl}}"
+          ],
+          "path": [
+            "api",
+            "products",
+            "1"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "200 Product 1",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{mockUrl}}/api/products/1",
+              "host": [
+                "{{mockUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                "1"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\"id\": 1, \"name\": \"iPhone 15 Pro Max\", \"price\": 30000000, \"description\": \"Điện thoại cao cấp của Apple\", \"imageUrl\": \"https://placehold.co/300x300/png?text=iPhone+15\", \"category_id\": 1}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('[MOCK-03] status 200', () => pm.response.to.have.status(200));",
+              "pm.test('[MOCK-03] price là số', () => pm.expect(pm.response.json().price).to.be.a('number'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "[MOCK-04] PUT /api/orders/1/cancel – thiếu token",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{mockUrl}}/api/orders/1/cancel",
+          "host": [
+            "{{mockUrl}}"
+          ],
+          "path": [
+            "api",
+            "orders",
+            "1",
+            "cancel"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "401 Unauthorized",
+          "originalRequest": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{mockUrl}}/api/orders/1/cancel",
+              "host": [
+                "{{mockUrl}}"
+              ],
+              "path": [
+                "api",
+                "orders",
+                "1",
+                "cancel"
+              ]
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\"error\": \"Unauthorized\"}"
+        }
+      ],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('[MOCK-04] status 401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
