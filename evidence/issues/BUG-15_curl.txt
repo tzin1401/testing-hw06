@@ -1,0 +1,31 @@
+# BUG-15 – transcript tái hiện thật, 2026-11-25 16:30:04 +07, SUT eshop-sut@85af3ba
+
+# SEC-06: API cập nhật hồ sơ không được đổi role
+$ scripts/reset_sut.sh   # SUT seed lại
+
+$ curl -X POST 'http://localhost:3000/api/register' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"name":"Bug User","email":"bug-1795599006137333491@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"User registered successfully","id":3}
+
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"bug-1795599006137333491@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"Login successful","token":"eyJ***(JWT đã che)","user":{"id":3,"name":"Bug User","email":"bug-1795599006137333491@test.com","password":"Test1234!","role":"user","login_attempts":0,"locked_until":null,"reset_token":null,"shipping_address":null,"phone":null}}
+
+
+$ curl -X PUT 'http://localhost:3000/api/users/me' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A' -H 'Content-Type: application/json' -d '{"name":"Bug User","role":"admin"}'
+HTTP 200
+{"message":"Profile updated"}
+
+
+$ curl -X GET 'http://localhost:3000/api/users/me' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A'
+HTTP 200
+{"id":3,"name":"Bug User","email":"bug-1795599006137333491@test.com","password":"Test1234!","role":"admin","login_attempts":0,"locked_until":null,"reset_token":null,"shipping_address":null,"phone":null}
+
+=> role = admin
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"bug-1795599006137333491@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"Login successful","token":"eyJ***(JWT đã che)","user":{"id":3,"name":"Bug User","email":"bug-1795599006137333491@test.com","password":"Test1234!","role":"admin","login_attempts":0,"locked_until":null,"reset_token":null,"shipping_address":null,"phone":null}}
+
+=> role trong login = admin

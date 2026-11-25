@@ -1,0 +1,36 @@
+# BUG-05 – transcript tái hiện thật, 2026-11-25 16:29:46 +07, SUT eshop-sut@85af3ba
+
+# FR-02: không để lộ chi tiết nguyên nhân
+$ scripts/reset_sut.sh   # SUT seed lại
+
+$ curl -X POST 'http://localhost:3000/api/register' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"name":"Bug User","email":"bug-1795598988482011963@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"User registered successfully","id":3}
+
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"bug-1795598988482011963@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"Login successful","token":"eyJ***(JWT đã che)","user":{"id":3,"name":"Bug User","email":"bug-1795598988482011963@test.com","password":"Test1234!","role":"user","login_attempts":0,"locked_until":null,"reset_token":null,"shipping_address":null,"phone":null}}
+
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"bug-1795598988482011963@test.com","password":"Sai12345!"}'
+HTTP 401
+{"error":"Invalid email or password"}
+
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"bug-1795598988482011963@test.com","password":"Sai12345!"}'
+HTTP 401
+{"error":"Invalid email or password"}
+
+
+# Email đã đăng ký (đang bị khóa) vs email không tồn tại, cùng password sai
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"bug-1795598988482011963@test.com","password":"Sai12345!"}'
+HTTP 403
+{"error":"Tài khoản đã bị khóa. Vui lòng thử lại sau."}
+
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"khong-ton-tai-123@test.com","password":"Sai12345!"}'
+HTTP 401
+{"error":"Invalid email or password"}
+

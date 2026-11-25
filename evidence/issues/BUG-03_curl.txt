@@ -1,0 +1,10 @@
+# BUG-03 – transcript tái hiện thật, 2026-11-25 16:29:43 +07, SUT eshop-sut@85af3ba
+
+# SEC-01 / không lộ dữ liệu nhạy cảm
+$ scripts/reset_sut.sh   # SUT seed lại
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"test@eshop.com","password":"Test1234!"}'
+HTTP 200
+{"message":"Login successful","token":"eyJ***(JWT đã che)","user":{"id":2,"name":"Test User","email":"test@eshop.com","password":"Test1234!","role":"user","login_attempts":0,"locked_until":null,"reset_token":null,"shipping_address":null,"phone":null}}
+
+=> user.password trong response = Test1234!

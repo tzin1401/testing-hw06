@@ -1,0 +1,18 @@
+# BUG-04 – transcript tái hiện thật, 2026-11-25 16:29:45 +07, SUT eshop-sut@85af3ba
+
+# Content-Type không phải JSON
+$ scripts/reset_sut.sh   # SUT seed lại
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: text/plain' -d '{"email":"test@eshop.com","password":"Test1234!"}'
+HTTP 500
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Error</title>
+</head>
+<body>
+<pre>TypeError: Cannot destructure property &#39;email&#39; of &#39;req.body&#39; as it is undefined.<br> &nbsp; &nbsp;at /home/zinn/zinn/testing/hw06/eshop-sut/backend/server.js:33:11<br> &nbsp; &nbsp;at Layer.handleRequest (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/router/lib/layer.js:152:17)<br> &nbsp; &nbsp;at next (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/router/lib/route.js:157:13)<br> &nbsp; &nbsp;at Route.dispatch (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/router/lib/route.js:117:3)<br> &nbsp; &nbsp;at handle (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/router/index.js:435:11)<br> &nbsp; &nbsp;at Layer.handleRequest (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/router/lib/layer.js:152:17)<br> &nbsp; &nbsp;at /home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/router/index.js:295:15<br> &nbsp; &nbsp;at processParams (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/router/index.js:582:12)<br> &nbsp; &nbsp;at next (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/router/index.js:291:5)<br> &nbsp; &nbsp;at read (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/body-parser/lib/read.js:62:5)</pre>
+</body>
+</html>
+

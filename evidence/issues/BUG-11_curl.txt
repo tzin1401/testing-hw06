@@ -1,0 +1,79 @@
+# BUG-11 – transcript tái hiện thật, 2026-11-25 16:29:57 +07, SUT eshop-sut@85af3ba
+
+# Path id không phải số nguyên chuẩn vẫn khớp bản ghi
+$ scripts/reset_sut.sh   # SUT seed lại
+
+$ curl -X POST 'http://localhost:3000/api/register' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"name":"Bug User","email":"bug-1795598999127720465@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"User registered successfully","id":3}
+
+
+$ curl -X POST 'http://localhost:3000/api/login' -H 'X-Student-Id: 23120190' -H 'Content-Type: application/json' -d '{"email":"bug-1795598999127720465@test.com","password":"Test1234!"}'
+HTTP 200
+{"message":"Login successful","token":"eyJ***(JWT đã che)","user":{"id":3,"name":"Bug User","email":"bug-1795598999127720465@test.com","password":"Test1234!","role":"user","login_attempts":0,"locked_until":null,"reset_token":null,"shipping_address":null,"phone":null}}
+
+
+$ curl -X POST 'http://localhost:3000/api/checkout' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A' -H 'Content-Type: application/json' -d '{"total_amount":100000,"shipping_address":"HCM"}'
+HTTP 200
+{"message":"Checkout successful","orderId":1}
+
+
+$ curl -X PUT 'http://localhost:3000/api/orders/%2B1/cancel' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A'
+HTTP 200
+{"message":"Order canceled successfully"}
+
+
+$ curl -X GET 'http://localhost:3000/api/orders/1' -H 'X-Student-Id: 23120190'
+HTTP 200
+{"id":1,"user_id":3,"total_amount":100000,"status":"canceled","shipping_address":"HCM","created_at":"2026-11-25 09:29:59"}
+
+=> order 1 status = canceled
+
+$ curl -X POST 'http://localhost:3000/api/checkout' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A' -H 'Content-Type: application/json' -d '{"total_amount":100000,"shipping_address":"HCM"}'
+HTTP 200
+{"message":"Checkout successful","orderId":2}
+
+
+$ curl -X PUT 'http://localhost:3000/api/orders/2.0/cancel' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A'
+HTTP 200
+{"message":"Order canceled successfully"}
+
+
+$ curl -X GET 'http://localhost:3000/api/orders/2' -H 'X-Student-Id: 23120190'
+HTTP 200
+{"id":2,"user_id":3,"total_amount":100000,"status":"canceled","shipping_address":"HCM","created_at":"2026-11-25 09:29:59"}
+
+=> order 2 status = canceled
+
+$ curl -X POST 'http://localhost:3000/api/checkout' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A' -H 'Content-Type: application/json' -d '{"total_amount":100000,"shipping_address":"HCM"}'
+HTTP 200
+{"message":"Checkout successful","orderId":3}
+
+
+$ curl -X PUT 'http://localhost:3000/api/orders/03/cancel' -H 'X-Student-Id: 23120190' -H 'Authorization: Bearer $TOKEN_A'
+HTTP 200
+{"message":"Order canceled successfully"}
+
+
+$ curl -X GET 'http://localhost:3000/api/orders/3' -H 'X-Student-Id: 23120190'
+HTTP 200
+{"id":3,"user_id":3,"total_amount":100000,"status":"canceled","shipping_address":"HCM","created_at":"2026-11-25 09:29:59"}
+
+=> order 3 status = canceled
+
+# Product: DELETE /api/products/2.0 xóa product id 2
+
+$ curl -X GET 'http://localhost:3000/api/products/2' -H 'X-Student-Id: 23120190'
+HTTP 200
+{"id":2,"name":"Samsung Galaxy S24 Ultra","price":"28000000","description":"Màn hình hiển thị xuất sắc, camera siêu zoom","imageUrl":"https://placehold.co/300x300/png?text=Samsung+S24","category_id":1}
+
+
+$ curl -X DELETE 'http://localhost:3000/api/products/2.0' -H 'X-Student-Id: 23120190'
+HTTP 200
+{"message":"Product deleted"}
+
+
+$ curl -X GET 'http://localhost:3000/api/products/2' -H 'X-Student-Id: 23120190'
+HTTP 200
+{}
+
