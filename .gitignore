@@ -8,3 +8,5 @@ __pycache__/
 2026.HW06*.pdf
 # Prompt giữ local (đề cấm copy prompt; chỉ đưa vào zip)
 *_PROMPTS.md
+# Main API3 Newman JSON exceeds GitHub's 100 MB file limit; keep local.
+results/newman/23120190_API3_ProductCRUD_20261125.json
