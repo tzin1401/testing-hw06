@@ -1,0 +1,420 @@
+{
+ "count": {
+  "PASS": 33,
+  "BUG_CANDIDATE": 12,
+  "SPEC_AMBIGUOUS": 1,
+  "SETUP_ERROR": 1,
+  "NOT_RUN": 3
+ },
+ "rows": [
+  [
+   "LG-G1-01",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-02",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-03",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-04",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-05",
+   "BUG_CANDIDATE",
+   "[LG-G1-05] status 400/401 (GIẢ ĐỊNH); [LG-G1-05] core: không có token; [LG-G1-05] core: có error"
+  ],
+  [
+   "LG-G1-06",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-07",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-08",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-09",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-10",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-11",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-12",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G1-13",
+   "BUG_CANDIDATE",
+   "[LG-G1-13] core: body không chứa node_modules"
+  ],
+  [
+   "LG-G1-14",
+   "SPEC_AMBIGUOUS",
+   "[LG-G1-14] status 400/401/415 (GIẢ ĐỊNH)"
+  ],
+  [
+   "LG-G1-15",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G2-01",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G2-02",
+   "BUG_CANDIDATE",
+   "[LG-G2-02] status 200; [LG-G2-02] core: token là string; [LG-G2-02] oracle: dùng token gọi /api/users/me status 200; [LG-G2-02] oracle: id = {{uid}}"
+  ],
+  [
+   "LG-G2-03",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G2-04",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G2-05",
+   "BUG_CANDIDATE",
+   "[LG-G2-05] status 200; [LG-G2-05] core: token là string; [LG-G2-05] oracle: dùng token gọi /api/users/me status 200; [LG-G2-05] oracle: id = {{uid}}"
+  ],
+  [
+   "LG-G2-06",
+   "BUG_CANDIDATE",
+   "[LG-G2-06] oracle: chờ thêm 6 s (tổng > 30 s) rồi đúng → mở khóa status 200; [LG-G2-06] oracle: token là string"
+  ],
+  [
+   "LG-G2-07",
+   "SETUP_ERROR",
+   "[LG-G2-07] setup: đăng nhập đúng (reset) status 200; [LG-G2-07] status 200; [LG-G2-07] core: token là string; [LG-G2-07] oracle: dùng token gọi /api/users/me status 200; [LG-G2-07] oracle: id = {{uid}"
+  ],
+  [
+   "LG-G2-08",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G3-01",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G3-02",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G3-03",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G3-04",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G3-05",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G3-06",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G3-07",
+   "BUG_CANDIDATE",
+   "[LG-G3-07] core: không có user.password; [LG-G3-07] core: body không chứa Test1234!"
+  ],
+  [
+   "LG-G3-08",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G3-09",
+   "NOT_RUN",
+   "quá 2 vòng sinh lại vẫn INCOMPLETE: Status 200 với field thừa role chỉ có từ GD6 (như LG-G1-15) nhưng expect.assumed=false và source không trích GD6: đặt assumed=true và thêm GD6 vào source; phần after (admin 401/403, GD14) và setup độc lập đã đủ."
+  ],
+  [
+   "LG-G3-10",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G4-01",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G4-02",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G4-03",
+   "BUG_CANDIDATE",
+   "[LG-G4-03] core: không có user.login_attempts; [LG-G4-03] core: không có user.locked_until"
+  ],
+  [
+   "LG-G4-04",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G6-01",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G6-02",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G6-03",
+   "BUG_CANDIDATE",
+   "[LG-G6-03] status 200 (GIẢ ĐỊNH); [LG-G6-03] core: user.id = {{uid}}"
+  ],
+  [
+   "LG-G6-04",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G6-05",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-G6-06",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-EX-01",
+   "BUG_CANDIDATE",
+   "[LG-EX-01] status 401/403 (GIẢ ĐỊNH); [LG-EX-01] core: không có id"
+  ],
+  [
+   "LG-EX-02",
+   "BUG_CANDIDATE",
+   "[LG-EX-02] oracle: token vừa cấp gọi /api/admin/users → bị từ chối status 401/403"
+  ],
+  [
+   "LG-EX-03",
+   "BUG_CANDIDATE",
+   "[LG-EX-03] core: body không chứa \"password\""
+  ],
+  [
+   "LG-EX-04",
+   "BUG_CANDIDATE",
+   "[LG-EX-04] oracle: [id={{uid}}].login_attempts = 1"
+  ],
+  [
+   "LG-EX-05",
+   "NOT_RUN",
+   "trùng LG-G2-05: cùng setup (đăng ký, sai 3 lần) và request (đúng sau chờ) + expected 200, chỉ khác wait 32s vs 31s và 1 lần đăng nhập thêm khi khóa; xóa hoặc đổi thành case khác biệt rõ (vd kiểm tra đăng nhập khi khóa không gia hạn khóa)."
+  ],
+  [
+   "LG-EX-06",
+   "PASS",
+   ""
+  ],
+  [
+   "LG-EX-07",
+   "NOT_RUN",
+   "trùng LG-G4-01: request chính và expect (user.id number, equals uid) giống hệt; 'id chẵn/lẻ' không điều khiển được; nếu cần thì gộp login user B vào after của G4-01."
+  ]
+ ],
+ "bugs": [
+  {
+   "id": "LG-G1-05",
+   "group": "G1",
+   "purpose": "EP email sai format \"lg-no-at\" → từ chối",
+   "failed": [
+    "[LG-G1-05] status 400/401 (GIẢ ĐỊNH)",
+    "[LG-G1-05] core: không có token",
+    "[LG-G1-05] core: có error"
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"lg-no-at\", \"password\": \"Test1234!\"}",
+   "status": 200,
+   "response": "{\"message\":\"Login successful\",\"token\":\"eyJ***\",\"user\":{\"id\":6,\"name\":\"LG User\",\"email\":\"lg-no-at\",\"password\":\"Test1234!\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"reset_token\":null,\"shipping_address\":null,\"phone\":null}}"
+  },
+  {
+   "id": "LG-G1-13",
+   "group": "G1",
+   "purpose": "JSON sai cú pháp → 400, không lộ stack trace",
+   "failed": [
+    "[LG-G1-13] core: body không chứa node_modules"
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"x@test.com\", \"password\": ",
+   "status": 400,
+   "response": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<title>Error</title>\n</head>\n<body>\n<pre>SyntaxError: Unexpected end of JSON input<br> &nbsp; &nbsp;at JSON.parse (&lt;anonymous&gt;)<br> &nbsp; &nbsp;at parse (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/body-parser/lib/types/json.js:72:19)<br> &nbsp; &nbsp;at /home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modules/body-parser/lib/read.js:162:18<br> &nbsp; &nbsp;at AsyncResource.runInAsyncScope (node:async_hooks:214:14)<br> &nbsp; &nbsp;at invokeCallback (/home/zinn/zinn/testing/hw06/eshop-sut/backend/node_modu"
+  },
+  {
+   "id": "LG-G2-02",
+   "group": "G2",
+   "purpose": "Normal(n=2): sai 2 lần rồi đúng → 200 (biên dưới ngưỡng 3)",
+   "failed": [
+    "[LG-G2-02] status 200",
+    "[LG-G2-02] core: token là string",
+    "[LG-G2-02] oracle: dùng token gọi /api/users/me status 200",
+    "[LG-G2-02] oracle: id = {{uid}}"
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"lg-cd7b791a-14c0-4cdd-b4e1-0e91102514ad@test.com\", \"password\": \"Test1234!\"}",
+   "status": 403,
+   "response": "{\"error\":\"Tài khoản đã bị khóa. Vui lòng thử lại sau.\"}"
+  },
+  {
+   "id": "LG-G2-05",
+   "group": "G2",
+   "purpose": "Locked--hết 30s, đúng-->Normal: chờ 31 s rồi đúng → 200",
+   "failed": [
+    "[LG-G2-05] status 200",
+    "[LG-G2-05] core: token là string",
+    "[LG-G2-05] oracle: dùng token gọi /api/users/me status 200",
+    "[LG-G2-05] oracle: id = {{uid}}"
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"lg-80c27720-e9a1-44ac-8f8e-f499f57e09b0@test.com\", \"password\": \"Test1234!\"}",
+   "status": 403,
+   "response": "{\"error\":\"Tài khoản đã bị khóa. Vui lòng thử lại sau.\"}"
+  },
+  {
+   "id": "LG-G2-06",
+   "group": "G2",
+   "purpose": "Locked tại 25 s (< 30 s): đúng mật khẩu → vẫn khóa",
+   "failed": [
+    "[LG-G2-06] oracle: chờ thêm 6 s (tổng > 30 s) rồi đúng → mở khóa status 200",
+    "[LG-G2-06] oracle: token là string"
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"lg-7cbf0719-d01e-446e-81ab-53a9c12f0b19@test.com\", \"password\": \"Test1234!\"}",
+   "status": 403,
+   "response": "{\"error\":\"Tài khoản đã bị khóa. Vui lòng thử lại sau.\"}"
+  },
+  {
+   "id": "LG-G3-07",
+   "group": "G3",
+   "purpose": "Login thành công không trả password trong body",
+   "failed": [
+    "[LG-G3-07] core: không có user.password",
+    "[LG-G3-07] core: body không chứa Test1234!"
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"lg-5483787b-0c35-4816-b0e1-d7256fc40fb0@test.com\", \"password\": \"Test1234!\"}",
+   "status": 200,
+   "response": "{\"message\":\"Login successful\",\"token\":\"eyJ***\",\"user\":{\"id\":30,\"name\":\"LG User\",\"email\":\"lg-5483787b-0c35-4816-b0e1-d7256fc40fb0@test.com\",\"password\":\"Test1234!\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"reset_token\":null,\"shipping_address\":null,\"phone\":null}}"
+  },
+  {
+   "id": "LG-G4-03",
+   "group": "G4",
+   "purpose": "Không lộ trạng thái khóa trong user: không có login_attempts, locked_until",
+   "failed": [
+    "[LG-G4-03] core: không có user.login_attempts",
+    "[LG-G4-03] core: không có user.locked_until"
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"lg-98aa1efc-ea63-47af-9a41-68187b361ba4@test.com\", \"password\": \"Test1234!\"}",
+   "status": 200,
+   "response": "{\"message\":\"Login successful\",\"token\":\"eyJ***\",\"user\":{\"id\":35,\"name\":\"LG User\",\"email\":\"lg-98aa1efc-ea63-47af-9a41-68187b361ba4@test.com\",\"password\":\"Test1234!\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"reset_token\":null,\"shipping_address\":null,\"phone\":null}}"
+  },
+  {
+   "id": "LG-G6-03",
+   "group": "G6",
+   "purpose": "Heuristic hoa/thường: email viết HOA vẫn đăng nhập đúng user",
+   "failed": [
+    "[LG-G6-03] status 200 (GIẢ ĐỊNH)",
+    "[LG-G6-03] core: user.id = {{uid}}"
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"LG-UP-1795689158397@TEST.COM\", \"password\": \"Test1234!\"}",
+   "status": 401,
+   "response": "{\"error\":\"Invalid email or password\"}"
+  },
+  {
+   "id": "LG-EX-01",
+   "group": "EX",
+   "purpose": "P3: token cấp trước khi đặt lại mật khẩu phải bị từ chối sau khi đặt lại",
+   "failed": [
+    "[LG-EX-01] status 401/403 (GIẢ ĐỊNH)",
+    "[LG-EX-01] core: không có id"
+   ],
+   "request": "GET /api/users/me",
+   "request_body": "",
+   "status": 200,
+   "response": "{\"id\":43,\"name\":\"LG User\",\"email\":\"lg-385898c0-5fca-4286-a099-d9ffebea0092@test.com\",\"password\":\"NewPass123!\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"reset_token\":null,\"shipping_address\":null,\"phone\":null}"
+  },
+  {
+   "id": "LG-EX-02",
+   "group": "EX",
+   "purpose": "P4: user đã đăng ký kèm role:\"admin\" thì login vẫn trả role user",
+   "failed": [
+    "[LG-EX-02] oracle: token vừa cấp gọi /api/admin/users → bị từ chối status 401/403"
+   ],
+   "request": "GET /api/admin/users",
+   "request_body": "",
+   "status": 200,
+   "response": "[{\"id\":1,\"name\":\"Admin User\",\"email\":\"admin@eshop.com\",\"role\":\"admin\",\"login_attempts\":0,\"locked_until\":null,\"shipping_address\":null},{\"id\":2,\"name\":\"Test User\",\"email\":\"test@eshop.com\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"shipping_address\":null},{\"id\":3,\"name\":\"LG User\",\"email\":\"lg-880dd9f1-3531-41c3-a405-eec1fba06f02@test.com\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"shipping_address\":null},{\"id\":4,\"name\":\"LG User\",\"email\":\"lg-b9fc9394-9c41-4fc5-8c29-f51d790d54b1@test.com\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"shipping_address\":null},{\"id\":5,\"nam"
+  },
+  {
+   "id": "LG-EX-03",
+   "group": "EX",
+   "purpose": "P6: response login không chứa chuỗi \"password\" ở bất kỳ đâu",
+   "failed": [
+    "[LG-EX-03] core: body không chứa \"password\""
+   ],
+   "request": "POST /api/login",
+   "request_body": "{\"email\": \"lg-49c8b797-1c4c-4b6e-8316-4ccf7c4661de@test.com\", \"password\": \"Test1234!\"}",
+   "status": 200,
+   "response": "{\"message\":\"Login successful\",\"token\":\"eyJ***\",\"user\":{\"id\":45,\"name\":\"LG User\",\"email\":\"lg-49c8b797-1c4c-4b6e-8316-4ccf7c4661de@test.com\",\"password\":\"Test1234!\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"reset_token\":null,\"shipping_address\":null,\"phone\":null}}"
+  },
+  {
+   "id": "LG-EX-04",
+   "group": "EX",
+   "purpose": "P7: sai 1 lần → login_attempts của user đúng bằng 1",
+   "failed": [
+    "[LG-EX-04] oracle: [id={{uid}}].login_attempts = 1"
+   ],
+   "request": "GET /api/admin/users",
+   "request_body": "",
+   "status": 200,
+   "response": "[{\"id\":1,\"name\":\"Admin User\",\"email\":\"admin@eshop.com\",\"role\":\"admin\",\"login_attempts\":0,\"locked_until\":null,\"shipping_address\":null},{\"id\":2,\"name\":\"Test User\",\"email\":\"test@eshop.com\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"shipping_address\":null},{\"id\":3,\"name\":\"LG User\",\"email\":\"lg-880dd9f1-3531-41c3-a405-eec1fba06f02@test.com\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"shipping_address\":null},{\"id\":4,\"name\":\"LG User\",\"email\":\"lg-b9fc9394-9c41-4fc5-8c29-f51d790d54b1@test.com\",\"role\":\"user\",\"login_attempts\":0,\"locked_until\":null,\"shipping_address\":null},{\"id\":5,\"nam"
+  }
+ ]
+}

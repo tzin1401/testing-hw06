@@ -1,0 +1,769 @@
+[
+ {
+  "id": "LG-G1-01",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "EP email hợp lệ + password đúng → 200 có token và user",
+  "source": "A:24-32; R:43",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    },
+    {
+     "path": "user",
+     "type": "object"
+    },
+    {
+     "path": "user.email",
+     "equals": "{{email}}"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid}}"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G1-02",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "EP email chưa đăng ký (đúng format) → từ chối",
+  "source": "R:40-42; GD1",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": 401,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-03",
+  "group": "G1",
+  "technique": "BVA",
+  "requirement": "FR-02",
+  "purpose": "BVA email rỗng \"\" → từ chối",
+  "source": "R:40,44; GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-04",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "EP thiếu field email → từ chối",
+  "source": "A:25-31; GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-05",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "EP email sai format \"lg-no-at\" → từ chối",
+  "source": "R:44, R:33; GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {},
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "lg-no-at",
+     "password": "Test1234!"
+    },
+    "expect_status": [
+     200,
+     400,
+     500
+    ],
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "lg-no-at",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-06",
+  "group": "G1",
+  "technique": "BVA",
+  "requirement": "FR-02",
+  "purpose": "BVA email rất dài (4096 ký tự) → từ chối, không 500",
+  "source": "R:44; GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-07",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "EP password sai (email đúng) → 401",
+  "source": "R:41; GD1",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Wrong1234!"
+   }
+  },
+  "expect": {
+   "status": 401,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-08",
+  "group": "G1",
+  "technique": "BVA",
+  "requirement": "FR-02",
+  "purpose": "BVA password rỗng \"\" → từ chối",
+  "source": "R:40; GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": ""
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-09",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "EP thiếu field password → từ chối",
+  "source": "A:25-31; GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}"
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-10",
+  "group": "G1",
+  "technique": "BVA",
+  "requirement": "FR-02",
+  "purpose": "BVA password rất dài (4096 ký tự) → từ chối, không 500",
+  "source": "R:40; GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-11",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "EP password khác hoa/thường (\"test1234!\") → 401",
+  "source": "R:40-41; GD1",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "test1234!"
+   }
+  },
+  "expect": {
+   "status": 401,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-12",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "Body rỗng {} → từ chối",
+  "source": "A:25-31; GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {},
+  "setup": [],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {}
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-13",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "JSON sai cú pháp → 400, không lộ stack trace",
+  "source": "A:25; GD3",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {},
+  "setup": [],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "raw": "{\"email\": \"x@test.com\", \"password\": "
+  },
+  "expect": {
+   "status": 400,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "no_text": "node_modules"
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-14",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "Content-Type text/plain (thân là JSON hợp lệ) → từ chối",
+  "source": "A:25; GD4",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "raw": "{\"email\": \"{{email}}\", \"password\": \"Test1234!\"}",
+   "content_type": "text/plain"
+  },
+  "expect": {
+   "status": [
+    400,
+    401,
+    415
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G1-15",
+  "group": "G1",
+  "technique": "EP",
+  "requirement": "FR-02",
+  "purpose": "Field thừa trong body bị bỏ qua → 200 có token",
+  "source": "A:25-32; GD6",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!",
+    "foo": "bar"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  }
+ }
+]

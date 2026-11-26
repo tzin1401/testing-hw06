@@ -1,0 +1,252 @@
+[
+ {
+  "id": "LG-G1-01",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-02",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-03",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-04",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-05",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-06",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-07",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-08",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-09",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-10",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-11",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-12",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-13",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-14",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G1-15",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G2-01",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G2-02",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G2-03",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G2-04",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G2-05",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G2-06",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G2-07",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G2-08",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-01",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-02",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-03",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-04",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-05",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-06",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-07",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-08",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G3-09",
+  "label": "INCOMPLETE",
+  "reason": "Giá trị user.role=\"user\" không có trong spec (R:280/R:67 nói về token admin và PUT profile) mà assumed=false; thêm after: dùng token gọi GET /api/admin/users và kỳ vọng 401/403 (A:176-179), hoặc đặt assumed=true và nêu GD."
+ },
+ {
+  "id": "LG-G3-10",
+  "label": "INCOMPLETE",
+  "reason": "Tên field locked_until/login_attempts không có trong spec hay GD nên no_text có thể pass sai khi SUT dùng tên khác; thêm GD rõ ràng hoặc kiểm tra body không chứa số lần/thời gian khóa (vd chuỗi \"30\", \"attempt\"), và thêm check error exists."
+ },
+ {
+  "id": "LG-G4-01",
+  "label": "INCOMPLETE",
+  "reason": "Schema user.name/user.role/Content-Type JSON không có trong spec (A:32 chỉ nói 'thông tin user') nhưng assumed=false; đặt assumed=true kèm GD hoặc bỏ các check ngoài token, user.id, user.email."
+ },
+ {
+  "id": "LG-G4-02",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G4-03",
+  "label": "INCOMPLETE",
+  "reason": "reset_token/login_attempts/locked_until không được spec nêu tên, source R:284 là OTP; assumed=false sai, cần GD cho tên field và đặt assumed=true; user.password absent trùng G3-07."
+ },
+ {
+  "id": "LG-G4-04",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G6-01",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G6-02",
+  "label": "INCOMPLETE",
+  "reason": "Setup đăng ký password \"12345678\" vi phạm FR-01 (R:32 mật khẩu mạnh) nên setup expect 200 sẽ lỗi; đăng ký bằng Test1234! rồi chỉ gửi password số 12345678 ở request login."
+ },
+ {
+  "id": "LG-G6-03",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G6-04",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G6-05",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-G6-06",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-EX-01",
+  "label": "INCOMPLETE",
+  "reason": "Request chính (login mật khẩu mới) khác mục đích với after (token cũ bị vô hiệu); oracle sống nhờ GD10 nhưng assumed=false; đặt assumed=true và tách mục đích hoặc ghi rõ GD10 cho after."
+ },
+ {
+  "id": "LG-EX-02",
+  "label": "INCOMPLETE",
+  "reason": "Cùng vấn đề G3-09: role=\"user\" mặc định không có trong spec; dùng after gọi /api/admin/users bằng token login kỳ vọng 401/403 (A:176-179) thay vì equals \"user\"."
+ },
+ {
+  "id": "LG-EX-03",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-EX-04",
+  "label": "INCOMPLETE",
+  "reason": "Field login_attempts và đường /api/admin/users trả field này không có trong spec/GD (R:41 chỉ nói 'bộ đếm'); thêm GD cho tên field, hoặc oracle bằng hành vi (sai 3 lần mới khóa); after dựa trên giả định nhưng assumed chỉ ghi cho status."
+ },
+ {
+  "id": "LG-EX-05",
+  "label": "INVALID",
+  "reason": "trùng LG-G2-05: cùng setup (đăng ký, sai 3 lần) và request (đúng sau chờ) + expected 200, chỉ khác wait 32s vs 31s và 1 lần đăng nhập thêm khi khóa; xóa hoặc đổi thành case khác biệt rõ (vd kiểm tra đăng nhập khi khóa không gia hạn khóa)."
+ },
+ {
+  "id": "LG-EX-06",
+  "label": "VALID",
+  "reason": "Setup độc lập, expect khớp spec/GD, source trỏ được."
+ },
+ {
+  "id": "LG-EX-07",
+  "label": "INVALID",
+  "reason": "trùng LG-G4-01: request chính và expect (user.id number, equals uid) giống hệt; 'id chẵn/lẻ' không điều khiển được; nếu cần thì gộp login user B vào after của G4-01."
+ }
+]

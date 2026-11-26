@@ -1,0 +1,331 @@
+[
+ {
+  "id": "LG-G6-01",
+  "group": "G6",
+  "technique": "Heuristic: null",
+  "requirement": "FR-02",
+  "purpose": "Heuristic null: email = null → từ chối, không 500",
+  "source": "GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": null,
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "no_text": "node_modules"
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G6-02",
+  "group": "G6",
+  "technique": "Heuristic: kiểu sai",
+  "requirement": "FR-02",
+  "purpose": "Heuristic kiểu sai: password là số 12345678 → từ chối",
+  "source": "GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": 12345678
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G6-03",
+  "group": "G6",
+  "technique": "Heuristic: hoa/thường",
+  "requirement": "FR-02",
+  "purpose": "Heuristic hoa/thường: email viết HOA vẫn đăng nhập đúng user",
+  "source": "R:33; GD8",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "n": "{{$timestamp}}{{$randomInt}}",
+   "email": "lg-up-{{n}}@test.com",
+   "email_up": "LG-UP-{{n}}@TEST.COM"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email_up}}",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "user.id",
+     "equals": "{{uid}}"
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G6-04",
+  "group": "G6",
+  "technique": "Heuristic: khoảng trắng",
+  "requirement": "FR-02",
+  "purpose": "Heuristic khoảng trắng: password có space cuối → 401",
+  "source": "R:40; GD1/GD8",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234! "
+   }
+  },
+  "expect": {
+   "status": 401,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G6-05",
+  "group": "G6",
+  "technique": "Heuristic: Unicode",
+  "requirement": "FR-02",
+  "purpose": "Heuristic Unicode/tiếng Việt: password \"MậtKhẩu1!\" đăng nhập đúng → 200",
+  "source": "R:40,43",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "MậtKhẩu1!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "MậtKhẩu1!"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G6-06",
+  "group": "G6",
+  "technique": "Heuristic: gọi lặp",
+  "requirement": "FR-02",
+  "purpose": "Heuristic gọi lặp: login đúng 2 lần liên tiếp → cả 2 đều 200",
+  "source": "R:43",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "login đúng lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid}}"
+     }
+    ]
+   }
+  ]
+ }
+]

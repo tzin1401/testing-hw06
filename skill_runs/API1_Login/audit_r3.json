@@ -1,0 +1,4 @@
+[
+{"id":"LG-G3-09","label":"INCOMPLETE","reason":"Status 200 với field thừa role chỉ có từ GD6 (như LG-G1-15) nhưng expect.assumed=false và source không trích GD6: đặt assumed=true và thêm GD6 vào source; phần after (admin 401/403, GD14) và setup độc lập đã đủ."},
+{"id":"LG-G4-03","label":"VALID","reason":"Đã bỏ check reset_token; chỉ còn user.login_attempts/locked_until absent, assumed=true, source R:42; GD11, GD13 khớp, setup tự tạo user, không trùng LG-G3-10 (case khóa) hay LG-G4-01."}
+]

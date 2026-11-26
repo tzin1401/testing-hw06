@@ -1,0 +1,927 @@
+[
+ {
+  "id": "LG-G2-01",
+  "group": "G2",
+  "technique": "ST",
+  "requirement": "FR-02",
+  "purpose": "Normal(n=1): sai 1 lần rồi đúng → 200 (chưa khóa)",
+  "source": "R:41-43",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid}}"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G2-02",
+  "group": "G2",
+  "technique": "ST",
+  "requirement": "FR-02",
+  "purpose": "Normal(n=2): sai 2 lần rồi đúng → 200 (biên dưới ngưỡng 3)",
+  "source": "R:41-43",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid}}"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G2-03",
+  "group": "G2",
+  "technique": "ST",
+  "requirement": "FR-02",
+  "purpose": "Normal(n=2)--sai-->Locked: sai 3 lần rồi đúng → bị khóa, không token",
+  "source": "R:42; GD5",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 3",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": [
+    401,
+    403,
+    423,
+    429
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "path": "error",
+     "exists": true
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "đúng mật khẩu lần nữa vẫn khóa",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ],
+    "checks": [
+     {
+      "path": "token",
+      "absent": true
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G2-04",
+  "group": "G2",
+  "technique": "ST",
+  "requirement": "FR-02",
+  "purpose": "Locked--sai-->Locked: đã khóa, sai tiếp → vẫn khóa",
+  "source": "R:42; GD5",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 3",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Wrong1234!"
+   }
+  },
+  "expect": {
+   "status": [
+    401,
+    403,
+    423,
+    429
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "đúng mật khẩu sau đó vẫn khóa",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ],
+    "checks": [
+     {
+      "path": "token",
+      "absent": true
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G2-05",
+  "group": "G2",
+  "technique": "ST",
+  "requirement": "FR-02",
+  "purpose": "Locked--hết 30s, đúng-->Normal: chờ 31 s rồi đúng → 200",
+  "source": "R:42-43",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 3",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   },
+   "wait_ms": 31000
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid}}"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G2-06",
+  "group": "G2",
+  "technique": "BVA-time",
+  "requirement": "FR-02",
+  "purpose": "Locked tại 25 s (< 30 s): đúng mật khẩu → vẫn khóa",
+  "source": "R:42; GD5",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 3",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "wait_ms": 25000
+  },
+  "expect": {
+   "status": [
+    401,
+    403,
+    423,
+    429
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "chờ thêm 6 s (tổng > 30 s) rồi đúng → mở khóa",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "wait_ms": 6000,
+    "checks": [
+     {
+      "path": "token",
+      "type": "string"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G2-07",
+  "group": "G2",
+  "technique": "ST",
+  "requirement": "FR-02",
+  "purpose": "Đúng reset bộ đếm (\"liên tiếp\"): sai 2, đúng, sai 2, đúng → 200",
+  "source": "R:41-42",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "đăng nhập đúng (reset)",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200
+   },
+   {
+    "name": "sai lại lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai lại lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid}}"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G2-08",
+  "group": "G2",
+  "technique": "ST",
+  "requirement": "FR-02",
+  "purpose": "Khóa theo từng tài khoản: A bị khóa, B đăng nhập đúng → 200",
+  "source": "R:42",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com",
+   "email_b": "lg-b-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "đăng ký email_b",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email_b}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid_b": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 3",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email_b}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid_b}}"
+     }
+    ]
+   }
+  ]
+ }
+]

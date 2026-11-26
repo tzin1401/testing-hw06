@@ -1,0 +1,249 @@
+[
+ {
+  "id": "LG-G4-01",
+  "group": "G4",
+  "technique": "Schema",
+  "requirement": "FR-02",
+  "purpose": "Schema 200: Content-Type JSON, token string, user.id number, user.email string",
+  "source": "A:32; R:43; GD12",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": true,
+   "checks": [
+    {
+     "header": "Content-Type",
+     "includes": "application/json"
+    },
+    {
+     "path": "token",
+     "type": "string"
+    },
+    {
+     "path": "user.id",
+     "type": "number"
+    },
+    {
+     "path": "user.id",
+     "equals": "{{uid}}"
+    },
+    {
+     "path": "user.email",
+     "type": "string"
+    },
+    {
+     "path": "user.name",
+     "type": "string"
+    },
+    {
+     "path": "user.role",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid}}"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-G4-02",
+  "group": "G4",
+  "technique": "Schema",
+  "requirement": "FR-02",
+  "purpose": "Schema lỗi 401: Content-Type JSON, error là string, không token",
+  "source": "R:42; GD1",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Wrong1234!"
+   }
+  },
+  "expect": {
+   "status": 401,
+   "assumed": true,
+   "checks": [
+    {
+     "header": "Content-Type",
+     "includes": "application/json"
+    },
+    {
+     "path": "error",
+     "type": "string"
+    },
+    {
+     "path": "token",
+     "absent": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G4-03",
+  "group": "G4",
+  "technique": "Schema",
+  "requirement": "FR-02",
+  "purpose": "Không lộ trạng thái khóa trong user: không có login_attempts, locked_until",
+  "source": "R:42; GD11, GD13",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "user.login_attempts",
+     "absent": true
+    },
+    {
+     "path": "user.locked_until",
+     "absent": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-G4-04",
+  "group": "G4",
+  "technique": "Perf",
+  "requirement": "FR-02",
+  "purpose": "Thời gian phản hồi login < 2000 ms",
+  "source": "GD9",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": true,
+   "checks": [
+    {
+     "max_ms": 2000
+    }
+   ]
+  }
+ }
+]

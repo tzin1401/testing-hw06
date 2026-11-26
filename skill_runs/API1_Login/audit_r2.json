@@ -1,0 +1,42 @@
+[
+ {
+  "id": "LG-EX-01",
+  "label": "VALID",
+  "reason": "Một mục đích (token cũ sau reset), setup tự tạo user + OTP theo A:42/A:46-52, expect 401/403 assumed=true gắn GD10, không trùng case nào."
+ },
+ {
+  "id": "LG-EX-02",
+  "label": "VALID",
+  "reason": "Register kèm role rồi after dùng token login gọi /api/admin/users kỳ vọng 401/403 (A:173, GD14), khác G3-09 (role gửi ở register, không phải login); lưu ý setup register có field thừa phải trả 200."
+ },
+ {
+  "id": "LG-G3-09",
+  "label": "INCOMPLETE",
+  "reason": "Còn check user.role type string (GD12) nhưng assumed=false và source không trích GD12: đặt assumed=true + thêm GD12 vào source, hoặc bỏ check user.role (after admin đã đủ làm oracle)."
+ },
+ {
+  "id": "LG-G3-10",
+  "label": "VALID",
+  "reason": "GD11 nêu rõ locked_until/login_attempts, assumed=true, có check error exists + token absent; khác G2-03 vì thêm no_text, setup độc lập."
+ },
+ {
+  "id": "LG-G4-01",
+  "label": "VALID",
+  "reason": "Schema 200 gắn assumed=true + GD12, user.id so với uid (number), after xác thực token; chỉ cần sửa purpose bỏ chữ \"3 phần\" vì không có check tương ứng (cosmetic)."
+ },
+ {
+  "id": "LG-G4-03",
+  "label": "INCOMPLETE",
+  "reason": "user.reset_token không có trong GD nào (GD11/GD13 chỉ nêu locked_until/login_attempts) và R:284 là SEC-07 không nói lộ field: thêm GD cho reset_token (hoặc bỏ check đó) và sửa source."
+ },
+ {
+  "id": "LG-G6-02",
+  "label": "VALID",
+  "reason": "Setup đăng ký bằng Test1234! hợp lệ, request gửi password kiểu số, 400/401 theo GD2, token absent; không trùng G6-01/G3-05."
+ },
+ {
+  "id": "LG-EX-04",
+  "label": "VALID",
+  "reason": "Oracle hành vi qua admin read-only: sai 1 lần → login_attempts==1 theo R:41 + GD13 (path lọc theo uid, tự tạo user), assumed=true; admin chỉ đăng nhập đọc, không sửa tài khoản."
+ }
+]

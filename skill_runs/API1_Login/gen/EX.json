@@ -1,0 +1,561 @@
+[
+ {
+  "id": "LG-EX-01",
+  "group": "EX",
+  "technique": "P3",
+  "requirement": "SEC-02",
+  "purpose": "P3: token cấp trước khi đặt lại mật khẩu phải bị từ chối sau khi đặt lại",
+  "source": "R:43, R:279; A:34-53; GD10",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "login lấy token cũ",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "old_token": "token"
+    }
+   },
+   {
+    "name": "forgot-password",
+    "method": "POST",
+    "path": "/api/forgot-password",
+    "body": {
+     "email": "{{email}}"
+    },
+    "expect_status": 200,
+    "capture": {
+     "otp": "resetToken"
+    }
+   },
+   {
+    "name": "reset-password",
+    "method": "POST",
+    "path": "/api/reset-password",
+    "body": {
+     "email": "{{email}}",
+     "resetToken": "{{otp}}",
+     "newPassword": "NewPass123!"
+    },
+    "expect_status": 200
+   }
+  ],
+  "request": {
+   "method": "GET",
+   "path": "/api/users/me",
+   "headers": {
+    "Authorization": "Bearer {{old_token}}"
+   }
+  },
+  "expect": {
+   "status": [
+    401,
+    403
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "id",
+     "absent": true
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-EX-02",
+  "group": "EX",
+  "technique": "P4",
+  "requirement": "SEC-03",
+  "purpose": "P4: user đã đăng ký kèm role:\"admin\" thì login vẫn trả role user",
+  "source": "R:280, R:67, A:173; GD14",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!",
+     "role": "admin"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "token vừa cấp gọi /api/admin/users → bị từ chối",
+    "method": "GET",
+    "path": "/api/admin/users",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": [
+     401,
+     403
+    ],
+    "checks": []
+   }
+  ]
+ },
+ {
+  "id": "LG-EX-03",
+  "group": "EX",
+  "technique": "P6",
+  "requirement": "SEC-01",
+  "purpose": "P6: response login không chứa chuỗi \"password\" ở bất kỳ đâu",
+  "source": "R:278",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "no_text": "\"password\""
+    }
+   ]
+  }
+ },
+ {
+  "id": "LG-EX-04",
+  "group": "EX",
+  "technique": "P7",
+  "requirement": "FR-02",
+  "purpose": "P7: sai 1 lần → login_attempts của user đúng bằng 1",
+  "source": "R:41; GD1, GD13",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "admin login (chỉ đọc)",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "admin@eshop.com",
+     "password": "Admin123!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "admin_token": "token"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Wrong1234!"
+   }
+  },
+  "expect": {
+   "status": 401,
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "đọc login_attempts qua /api/admin/users",
+    "method": "GET",
+    "path": "/api/admin/users",
+    "headers": {
+     "Authorization": "Bearer {{admin_token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "[id={{uid}}].login_attempts",
+      "equals": 1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-EX-05",
+  "group": "EX",
+  "technique": "P7",
+  "requirement": "FR-02",
+  "purpose": "P7: thời gian khóa thật ≤ 30 s – sai 3 lần, chờ 32 s, đúng → 200",
+  "source": "R:42",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "sai mật khẩu lần 1",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 2",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "sai mật khẩu lần 3",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Wrong1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   },
+   {
+    "name": "ngay sau khi sai 3 lần: đúng → khóa",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": [
+     401,
+     403,
+     423,
+     429
+    ]
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   },
+   "capture": {
+    "token": "token"
+   },
+   "wait_ms": 32000
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "token",
+     "type": "string"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "dùng token gọi /api/users/me",
+    "method": "GET",
+    "path": "/api/users/me",
+    "headers": {
+     "Authorization": "Bearer {{token}}"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "id",
+      "equals": "{{uid}}"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "LG-EX-06",
+  "group": "EX",
+  "technique": "P8",
+  "requirement": "FR-02",
+  "purpose": "P8: password = null với email tồn tại không làm sập server",
+  "source": "GD2",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": true,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": null
+   }
+  },
+  "expect": {
+   "status": [
+    400,
+    401
+   ],
+   "assumed": true,
+   "checks": [
+    {
+     "path": "token",
+     "absent": true
+    },
+    {
+     "no_text": "node_modules"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "server còn sống: GET /api/products",
+    "method": "GET",
+    "path": "/api/products",
+    "expect_status": 200,
+    "checks": []
+   }
+  ]
+ },
+ {
+  "id": "LG-EX-07",
+  "group": "EX",
+  "technique": "P9",
+  "requirement": "FR-02",
+  "purpose": "P9: user.id cùng kiểu number trên 2 user tạo liên tiếp (id chẵn/lẻ)",
+  "source": "A:32",
+  "label": "PENDING",
+  "label_reason": "",
+  "crashes_sut": false,
+  "vars": {
+   "email": "lg-{{$guid}}@test.com",
+   "email_b": "lg-b-{{$guid}}@test.com"
+  },
+  "setup": [
+   {
+    "name": "đăng ký email",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid": "id"
+    }
+   },
+   {
+    "name": "đăng ký email_b",
+    "method": "POST",
+    "path": "/api/register",
+    "body": {
+     "name": "LG User",
+     "email": "{{email_b}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "capture": {
+     "uid_b": "id"
+    }
+   }
+  ],
+  "request": {
+   "method": "POST",
+   "path": "/api/login",
+   "body": {
+    "email": "{{email}}",
+    "password": "Test1234!"
+   }
+  },
+  "expect": {
+   "status": 200,
+   "assumed": false,
+   "checks": [
+    {
+     "path": "user.id",
+     "type": "number"
+    },
+    {
+     "path": "user.id",
+     "equals": "{{uid}}"
+    }
+   ]
+  },
+  "after": [
+   {
+    "name": "login user B, user.id là number",
+    "method": "POST",
+    "path": "/api/login",
+    "body": {
+     "email": "{{email_b}}",
+     "password": "Test1234!"
+    },
+    "expect_status": 200,
+    "checks": [
+     {
+      "path": "user.id",
+      "type": "number"
+     },
+     {
+      "path": "user.id",
+      "equals": "{{uid_b}}"
+     }
+    ]
+   }
+  ]
+ }
+]
