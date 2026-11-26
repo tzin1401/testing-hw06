@@ -2,7 +2,7 @@
 
 | Thành phần | Vị trí |
 |---|---|
-| Sơ đồ thiết kế (sinh viên tự vẽ) | `agent_skill/diagram.png` |
+| Sơ đồ thiết kế (sinh viên tự vẽ) | [`diagram.svg`](diagram.svg) |
 | Pseudocode | [`pseudocode.md`](pseudocode.md) |
 | Skill (Claude Code, dùng lại được) | [`.claude/skills/api-test-generator/`](../.claude/skills/api-test-generator/SKILL.md) |
 | Kết quả mỗi lần chạy | `skill_runs/<API>/` |
