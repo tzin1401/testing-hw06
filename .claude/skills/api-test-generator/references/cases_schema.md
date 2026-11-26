@@ -50,7 +50,8 @@
 | `request` | Request chính. Dùng `body` (JSON) **hoặc** `raw` (chuỗi gửi nguyên văn) và `content_type` nếu không phải JSON. Header `Authorization` ghi như `"Bearer {{token}}"` |
 | `expect.status` | Số, hoặc mảng số nếu chấp nhận nhiều mã |
 | `expect.assumed` | `true` nếu status lấy từ GIẢ ĐỊNH; assertion sẽ có nhãn `(GIẢ ĐỊNH)` để `triage.py` nhận diện |
-| `expect.checks[]` | Gồm: `{path, type}` với type `string`/`number`/`boolean`/`object`/`array`; `{path, equals}`; `{path, absent: true}`; `{path, exists: true}`; `{no_text: "chuỗi"}` (body không chứa chuỗi, vd `"password"`, `"at "` của stack trace) |
+| `expect.checks[]` | Gồm: `path` có thể lọc mảng: `[id={{uid}}].login_attempts`. `{path, type}` với type `string`/`number`/`boolean`/`object`/`array`; `{path, equals}` (`"{{var}}"` nguyên chuỗi so theo kiểu thật của biến); `{path, absent: true}`; `{path, exists: true}`; `{no_text: "chuỗi"}` (body không chứa chuỗi, vd `"password"`, `"at "` của stack trace); `{header: "Content-Type", includes: "application/json"}`; `{max_ms: 2000}` |
+| `wait_ms` | Tùy chọn trên `setup`/`request`/`after`: chờ N ms trước khi gửi (vd hết thời gian khóa) |
 | `after[]` | Tùy chọn: request kiểm tra sau (oracle), cùng dạng với `setup` nhưng có thêm `checks` |
 | `crashes_sut` | `true` nếu case có thể làm sập server; case sẽ được chạy riêng sau khi reset |
 

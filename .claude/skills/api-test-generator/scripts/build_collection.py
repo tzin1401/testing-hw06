@@ -4,7 +4,9 @@ Dùng: build_collection.py OUT/cases.json OUT/collection.json [--base-url URL] [
 Case label INVALID bị bỏ qua. Mỗi case là một folder "[ID] purpose" trong folder nhóm (G1..G6, EX)."""
 import json, sys, argparse, pathlib
 
-GET = "const g=(o,p)=>p.split('.').reduce((a,k)=>a==null?undefined:a[k],o);"
+# path "a.b", "0.x" hoặc lọc mảng "[id={{uid}}].x"
+GET = ("const g=(o,p)=>pm.variables.replaceIn(p).split('.').reduce((a,k)=>{if(a==null)return undefined;"
+       "const m=k.match(/^\\[(\\w+)=(.*)\\]$/);return m?(Array.isArray(a)?a.find(x=>x&&String(x[m[1]])===m[2]):undefined):a[k];},o);")
 PRE = [
     "pm.request.headers.upsert({ key: 'X-Student-Id', value: pm.environment.get('studentId') });",
     "console.log('X-Student-Id: ' + pm.environment.get('studentId') + ' -> ' + pm.request.method + ' ' + pm.variables.replaceIn(pm.request.url.toString()));",
@@ -24,6 +26,14 @@ def status_test(cid, label, status, assumed):
 def check_tests(cid, checks, prefix="core"):
     out = []
     for c in checks or []:
+        if "max_ms" in c:
+            out.append(f"pm.test({js(f'[{cid}] {prefix}: phản hồi < ' + str(c['max_ms']) + ' ms')}, () => "
+                       f"pm.expect(pm.response.responseTime).to.be.below({int(c['max_ms'])}));")
+            continue
+        if "header" in c:
+            out.append(f"pm.test({js(f'[{cid}] {prefix}: header ' + c['header'] + ' chứa ' + c['includes'])}, () => "
+                       f"pm.expect(pm.response.headers.get({js(c['header'])}) || '').to.include({js(c['includes'])}));")
+            continue
         if "no_text" in c:
             out.append(f"pm.test({js(f'[{cid}] {prefix}: body không chứa ' + c['no_text'])}, () => "
                        f"pm.expect(pm.response.text()).to.not.include({js(c['no_text'])}));")
@@ -35,7 +45,10 @@ def check_tests(cid, checks, prefix="core"):
         elif c.get("exists"):
             name, cond = f"[{cid}] {prefix}: có {p}", "pm.expect(v).to.not.be.undefined;"
         elif "equals" in c:
-            name, cond = f"[{cid}] {prefix}: {p} = {c['equals']}", f"const E = {js(c['equals'])}; pm.expect(v).to.eql(typeof E === 'string' ? pm.variables.replaceIn(E) : E);"
+            # "{{var}}" nguyên chuỗi → lấy giá trị biến giữ kiểu (vd id là number)
+            name, cond = f"[{cid}] {prefix}: {p} = {c['equals']}", (
+                f"const E = {js(c['equals'])}; const m = typeof E === 'string' && E.match(/^\\{{\\{{(\\w+)\\}}\\}}$/); "
+                f"pm.expect(v).to.eql(m ? pm.variables.get(m[1]) : typeof E === 'string' ? pm.variables.replaceIn(E) : E);")
         else:
             t = c["type"]
             cond = "pm.expect(Array.isArray(v)).to.be.true;" if t == "array" else f"pm.expect(v).to.be.a({js(t)});"
@@ -68,19 +81,24 @@ def request(step, cid, name, tests, pre=None):
     return {"name": f"[{cid}] {name}", "request": req, "event": ev}
 
 
+def wait(step):
+    # Newman giữ request tới khi timer trong pre-request chạy xong
+    return [f"setTimeout(() => {{}}, {int(step['wait_ms'])});"] if step.get("wait_ms") else []
+
+
 def case_folder(c):
     cid = c["id"]
     pre = [f"pm.collectionVariables.set({js(k)}, pm.variables.replaceIn({js(v)}));" for k, v in (c.get("vars") or {}).items()]
     items = []
     for s in c.get("setup", []):
         t = [status_test(cid, "setup: " + s["name"] + " ", s.get("expect_status", 200), False)] + captures(s.get("capture"))
-        items.append(request(s, cid, "setup: " + s["name"], t, pre if not items else None))
+        items.append(request(s, cid, "setup: " + s["name"], t, (pre if not items else []) + wait(s) or None))
     r, e = c["request"], c["expect"]
     t = [status_test(cid, "", e["status"], e.get("assumed", False))] + check_tests(cid, e.get("checks")) + captures(r.get("capture"))
-    items.append(request(r, cid, f"{r['method']} {r['path']}", t, pre if not items else None))
+    items.append(request(r, cid, f"{r['method']} {r['path']}", t, (pre if not items else []) + wait(r) or None))
     for a in c.get("after", []):
-        t = [status_test(cid, "oracle: " + a["name"] + " ", a.get("expect_status", 200), False)] + check_tests(cid, a.get("checks"), "oracle")
-        items.append(request(a, cid, "oracle: " + a["name"], t))
+        t = [status_test(cid, "oracle: " + a["name"] + " ", a.get("expect_status", 200), False)] + check_tests(cid, a.get("checks"), "oracle") + captures(a.get("capture"))
+        items.append(request(a, cid, "oracle: " + a["name"], t, wait(a) or None))
     return {"name": f"[{cid}] {c['purpose']}", "item": items}
 
 
