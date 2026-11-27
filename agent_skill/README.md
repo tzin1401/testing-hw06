@@ -5,7 +5,8 @@
 | Sơ đồ thiết kế (sinh viên tự vẽ) | [`diagram.png`](diagram.png) (bản gốc [`diagram.svg`](diagram.svg)) |
 | Pseudocode | [`pseudocode.md`](pseudocode.md) |
 | Skill (Claude Code, dùng lại được) | [`.claude/skills/api-test-generator/`](../.claude/skills/api-test-generator/SKILL.md) |
-| Kết quả mỗi lần chạy | `skill_runs/<API>/` |
+| Kết quả mỗi lần chạy | `skill_runs/<API>/` (lần chạy trên API 1: [`skill_runs/API1_Login/`](../skill_runs/API1_Login/run_log.md)) |
+| Video demo (sinh viên tự quay) | https://youtu.be/FAk1krlB-ng |
 
 ## Cấu trúc skill
 

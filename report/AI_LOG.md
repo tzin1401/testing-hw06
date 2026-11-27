@@ -1217,7 +1217,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > Runner minimal Bash; own root independent of invoking cwd, exact API selection with no-arg all3 and invalid usage rejected before work. set -e preparation; actual Newman nonzero captured without aborting remaining selected APIs. Reset before EACH API. CLI,htmlextra,json reporter options/naming/date/title exactly prompt. Summarize each selected API and overall exit1 if any newman fails. Do not swallow reset failure; do not forge reports or call any reporters during creation. Leave ONLY requested X-DATA integration comment, no fake execution. No retries/dependencies/abstractions/extraneous scripts/docs. Keep all errors observable. Return files ready for check; do not claim smoke pass.
 - **AI output:**
   > Tạo 3 collection v2.1 đúng tên, pre-request cấp collection đúng 2 dòng X-Student-Id/console.log, G1/G2/G3/G4/G6/EX rỗng và mỗi collection 1 request _smoke GET {{baseUrl}}/api/products. Tạo scripts/run_newman.sh executable: chọn một/cả ba API, reset trước từng API, CLI+HTMLextra+JSON theo tên/ngày, tiếp tục sau lỗi Newman, tổng kết và exit1 nếu có fail; comment X-DATA. Cập nhật README cách chạy và giới hạn X0. Kiểm JSON, bash -n, Newman6.2.3/reporter htmlextra1.23.1 đạt. Reset riêng trước mỗi smoke; 3 lần Newman CLI thật đều 1 request/1 assertion/0 fail, console in X-Student-Id:23120190 (URL template ở console, HTTP GET thực tế localhost:3000 trả200). Harness bản sao tạm cô lập xác nhận fail giữa vẫn chạy đủ3, chọnAPI, invalidargs, lỗi reset, cwd và reporter argv; đã xóa fixtures. Không chạy runner chính thức; results/newman/ trước/sau chỉ .gitkeep cùng hash; không sửa test case/SUT, không tạo ảnh/report chính thức. Chưa thêm folder test case, chưa làm X1–X5.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đã mở 3 collection và run_newman.sh: đúng tên, folder G1..EX rỗng, _smoke và hai dòng pre-request giữ nguyên; runner reset trước từng API và không dừng khi Newman fail. Đồng ý X0 đạt; lưu ý bằng chứng chỉ là 3 lần smoke và bash -n vì worker chưa chạy runner chính thức.
 
 ## #24 – 2026-11-24 22:32 (giờ VN)
 - **AI tool:** CN-X1 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1297,7 +1297,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Chuyển26foldercase G1=16/G2=10,493request,25cạnhAdmin G2 mỗiđích có register/checkout mới. BỏCN-G2-01/11/12 INVALID,3caseG1 INCOMPLETE ghidescription. Hookmới giữnguyên; pathencoded cấpitem. Debug CLI serialized: G1 requests135/assert183 pass172 fail11; G2 requests358/assert493 pass487 fail6; tổng659pass17fail. Khônglỗi script/biếnURLchưathay; failassertgiữtheofile, khôngđổiexpected. Khôngreportchínhthức/commit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đối chiếu 26 folder với G1/G2: đủ case VALID/INCOMPLETE, CN-G2-01/11/12 bị bỏ đúng nhãn INVALID, path %2B/1.5/%20 giữ nguyên văn. Fail trong debug là do SUT/expected giả định, không phải lỗi script; đồng ý giữ nguyên và chuyển sang X2.
 
 ## #25 – 2026-11-24 22:32 (giờ VN)
 - **AI tool:** LG-X1 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1376,7 +1376,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Chuyển35foldercase G1=24/G2=11,112request; bỏLG-G1-14/LG-G2-02 INVALID. Đổi biến dẫnxuấtG1 sangcollectionVariables cóprefixID, hookmớigiữnguyên; rawmalformedJSON/textplain vàtimer29/31 giữtheofile. Debug correctedG1:48requests/72assert pass46fail26/1.932s; unchangedG2:64requests/119assert pass61fail58/2m36.4s. Tổng107pass84fail, khônglỗiscriptchưabắt/unresolvedvars. JSONErrortrongpm.test làbodyassertfail, khôngnớiexpected. Khôngreportchínhthức/commit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Kiểm 35 folder G1/G2: LG-G1-14 và LG-G2-02 không có folder, raw malformed JSON/text-plain và timer 29/31 giữ đúng file. Biến đã đổi sang collectionVariables có prefix ID nên không lẫn giữa case; pass/fail debug chỉ dùng gỡ lỗi kỹ thuật.
 
 ## #26 – 2026-11-24 22:37 (giờ VN)
 - **AI tool:** PR-X1 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1456,7 +1456,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Chuyển54foldercase/312requests: G1=41,G2=13; bỏ8IDINVALID theoaudit, G2-16INCOMPLETE ghi fullPUT400+unchanged. Sửa kỹthuật bindingdata xungđột sandbox vàthiếu) tạiG2-05, parseerrorbody trongcorecallback, khôngđổiexpected/hook. FinalCLI G1:208requests/271assert201pass70fail/6.2s; finalG2:104requests/123assert95pass28fail/2.4s; tổng296pass98fail. Khônglỗi scriptchưabắt/unresolvedvars/requesterrors ởfinalruns. Initialruns kỹthuật lỗikhôngdùnglàkếtquảbug. Khôngreportchínhthức/commit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đối chiếu 54 folder G1/G2 với audit: 8 INVALID không có folder, PR-G2-16 ghi rõ INCOMPLETE theo quy ước full PUT 400. Hai lỗi kỹ thuật ở G2-05 và parse error body đã sửa mà không đổi expected; 98 fail còn lại là ứng viên bug/giả định, không phải lỗi collection.
 
 ## #27 – 2026-11-24 22:42 (giờ VN)
 - **AI tool:** LG-X2 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1534,7 +1534,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Thêm23folderG3=16/G4=7,68requests, bỏLG-G3-06INVALID; 2schemaunique khớpnguồn. SửatechnicalapplyAST/escape vàURL LG-G3-07 nhầmsangregister vìlabelchứa đăngký, naysanglogin. CLI G3trướcsửaURL:51req104assert81pass23fail/32.4s; G4:17req45assert34pass11fail/608ms. Rerunchỉcase07đãsửa:4req9assert7pass2fail/191ms;2failstatus400so401, coreequivalencepass. KhôngclaimtổngG3cuốitừrunold; fullcollectionX3sẽđếmlại. Khônglỗiscriptchưabắt; hookmới vàschema/status400/423theoauditgiữnguyên. Khôngreportchínhthức/commit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Kiểm G3/G4: 23 folder, LG-G3-06 bị bỏ đúng, schema G4 dán nguyên 2 schema nguồn. Việc sửa URL LG-G3-07 từ register về login là đúng endpoint; 2 fail status 400/401 ở case đó là giả định, không phải lỗi script.
 
 ## #28 – 2026-11-24 22:47 (giờ VN)
 - **AI tool:** PR-X2 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1614,7 +1614,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Thêm30folderG3=22/G4=8,321requestkhaitriển; khôngINVALIDở2nhóm. G4-07source-definedparityjump bằngstableID, max10, dừngsaukhiE/Ocómặt, giữmọimainassert; actualchỉ2POST+GETpairs. Exact4schemasS1–S4 với12occurrenceskhớpnguồn. CLI G3:257req268assert201pass67fail/8.1s; G4:48req95assert80pass15fail/1.301s; tổng281pass82fail/305requeststhựcthi. Khônglỗiscriptchưabắt/unresolvedvars; hookmớigiữnguyên, failauth/state/schema giữtheofile. Khôngreportchínhthức/commit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đối chiếu G3/G4 API3: 30 folder, không bỏ case nào; PR-G4-07 chỉ chạy 2 cặp POST/GET nhưng giữ mọi assertion chính và dừng sau 10 vòng nên chấp nhận. Bốn schema S1–S4 khớp nguyên văn nguồn; 82 fail là bug/giả định cần triage.
 
 ## #29 – 2026-11-24 22:50 (giờ VN)
 - **AI tool:** task CNX2 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1694,7 +1694,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Thêm14folderG3=10/G4=4,192requestkhaitriển; bỏCN-G3-03/05,G4-03/04INVALID. Schemaunique khớpnguồn, owner404theoG6. CN-G3-04INCOMPLETE chỉkiểmexp thiếu, khônggiảtokenhếthạn. SửaguardG3-06: failedsetupassertvẫnghi, chưađủđiềukiệnđơnsaudelete thìjumpstableIDcase07; khitiềnđềđạt vẫnattack401. FinalcoherentG3CLI:158req205assert196pass9fail/3.8s, case07vàsaurunsvẫntiếptục; G4:32req46assert46pass0fail/903ms. Tổng242pass9fail, khônglỗiscriptchưabắt; guardcasekhôngđượcgiảpass/hayclaimđãchạyattack. Hookmớigiữnguyên, khôngreportchínhthức/commit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Kiểm G3/G4 API2: 14 folder, CN-G3-03/05 và G4-03/04 bị bỏ đúng INVALID, CN-G3-04 chỉ kiểm precondition exp và ghi rõ không giả token hết hạn. Guard CN-G3-06 không cho setup fail thành pass; đồng ý 9 fail còn lại là thật hoặc giả định.
 
 ## #30 – 2026-11-24 22:57 (giờ VN)
 - **AI tool:** task LGX3 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1774,7 +1774,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API1_login_generated.md
 - **AI output:**
   > Thêm10caseG6/EX5mỗi nhóm,49requests. Sửa11GUIDcallsdobuilderfstringmấtbrace; khôngđổi payload/expected/timert0+31/hook. G6debugtrướcfreshnessfix28req65assert44pass21fail; EX21req43assert30pass13fail; oldfullkhôngdùnglàprooffinal. FinalfullcorrectedCLI:230requests449assert299pass150fail/4m17.1s, zeroScriptErrors/requesterrors và properUUIDthật,localhost/XStudentId. Schema/status/corefailgiữnguyênfile, khôngofficialreport/commit. Đủ5EX, hmac/forgot/reset/exp theoHumanExtend.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Kiểm G6/EX API1: đủ 10 case G6 và 5 EX, gồm decode exp, forgot/reset và HMAC bằng secret trong file. 11 GUID mất brace đã sửa trước lần chạy cuối; full run 230 request/449 assertion, 0 lỗi script, 150 fail là ứng viên bug nên giữ nguyên.
 
 ## #31 – 2026-11-24 23:03 (giờ VN)
 - **AI tool:** task PRX3 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1854,7 +1854,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API3_product_generated.md
 - **AI output:**
   > Thêm41caseG6=35/EX=6,361requests; xóaemptyduplicateG6/EX, EX-lastchứaPR-EX-05sau_smoke vàrequestdescriptionriskreset. Literal1e309/-0 vàencodedpaths giữđúng. DebugG6:322requestattempts242requesterrors,351assert83pass268fail/6.8s; SUTchếtkhicaseG6-09price:nullđượcchấpnhậnrồiGETserializertoString(null). EXriêng34req47assert29pass18fail/856ms; EX-last5req7assert4pass3fail/221ms. Full:979attempts77requesterrors,1233assert892pass341fail/1m34.5s,51testscriptfailuresdoserverunavailable. server.logxácnhậnbackend/server.js:162TypeError, khôngorchestrationreset. TIÊUCHÍruntimecleanCHƯAĐẠTdoSUTcrash; oraclesphầnsaukhôngđượckiểmđầyđủ. KhôngváSUT/đổi expected/bỏcase/retryđểchecrash; X4mappingghirõgiớihạn, khôngreportchínhthức/commit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đồng ý không vá SUT: crash tại server.js:162 do serialize price null, không phải lỗi setup; các case sau không quan sát được nên việc ghi tiêu chí runtime sạch chưa đạt là trung thực. Cần tách PR-G6-09/15/31 ở X4 và ghi crash thành bug.
 
 ## #32 – 2026-11-24 23:05 (giờ VN)
 - **AI tool:** task CNX3 (openai-codex/gpt-6.1-terra); Manager ghi log (openai-codex/gpt-6.1-sol)
@@ -1933,7 +1933,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > SOURCE: report/testcases/API2_cancel_generated.md
 - **AI output:**
   > Thêm15caseG6=10/EX=5,220requests; bỏG6-05/12INVALID vàemptyduplicates. Sửa24GUIDliteralsX2(thừa kỹthuật20G3/4G4)thànhdoublebrace, khôngexpected/hookchanges. G6CLI178req239assert234pass5fail/4.2s; EX42req63assert48pass15fail/1.101s. Finalfullverbatimlocal83:904req,904testscripts,1073prerequests,1230assert1184pass46fail/36.4s; khôngrequest/scriptfailures. Báocáo688/792banđầucủaverifierđãsửa theoartifact, khôngdùngsốsai. ProperUUID,percentencodedpaths vàStudentIDlocalhostverified. Expiry/deleteduserpreconditionsINCOMPLETE khônggiảpass. Khôngofficialreport/commit.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Kiểm G6/EX API2: 15 folder, bỏ G6-05/12 đúng INVALID, 24 GUID thiếu brace đã sửa mà không đổi expected. Full run 904 request/1230 assertion, 0 lỗi request/script, 46 fail giữ nguyên. Không giả pass cho precondition exp/user bị xóa là đúng.
 
 
 ## #33 – 2026-11-25 03:07 (giờ VN)
@@ -1949,7 +1949,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > Giữ nguyên quy tắc: không commit trong X1–X4, không tạo file trong results/newman/, không sửa expected, không sửa 2 dòng pre-request. Xong hết thì dừng ở bước 🧑 và gửi tôi tin nhắn hướng dẫn chạy run_newman.sh.
 - **AI output:**
   > Kiểm mapping hiện có đạt tiêu chí: 71/71 ID nguồn có dòng; 68 case chuyển (61 VALID, 2 INCOMPLETE, 5 EX), 3 INVALID không có folder; 229 request/473 assertion nguồn, cộng smoke 230/474. Các số từng folder khớp collection hiện tại. Bằng chứng CLI LG-X4 đã có trong mapping: 322 pass/152 fail, 230 request, không lỗi script/request, 4m17s; không chạy lại. Bổ sung mô tả phạm vi tổng đếm trước X-DATA và ngoại lệ skipRequest hợp lệ khi DATA không có caseId. Không finding mở; hai dòng pre-request giữ nguyên; results/newman chỉ có .gitkeep. Không commit/report chính thức.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Mở mapping API1: 71/71 ID có dòng, 68 case được chuyển, 3 INVALID không có folder, số request/assertion khớp collection. Chấp nhận dùng lại bằng chứng CLI cũ thay vì chạy lại; ngoại lệ skipRequest khi DATA thiếu caseId đã ghi rõ nên không che fail.
 
 
 ## #34 – 2026-11-25 03:07 (giờ VN)
@@ -1965,7 +1965,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > Giữ nguyên quy tắc: không commit trong X1–X4, không tạo file trong results/newman/, không sửa expected, không sửa 2 dòng pre-request. Xong hết thì dừng ở bước 🧑 và gửi tôi tin nhắn hướng dẫn chạy run_newman.sh.
 - **AI output:**
   > Kiểm CSV đủ 20 dòng lớp email/password VALID LG-G1-01..21 trừ INVALID LG-G1-14; các lớp body/media LG-G1-22..25 nằm ngoài phạm vi CSV và vẫn có trong G1. Folder DATA có setup độc lập UUID và login dựng body bằng iterationData, giữ expected/core/GIẢ ĐỊNH. CLI thực chạy bởi sonic openai-codex/gpt-6-luna: 20 iterations, 40 requests, 76 assertions = 54 pass/22 fail, không lỗi request/script, 1009 ms. Chạy DATA không CSV: 0 request/0 assertion, guard hoạt động, 40 ms. Runner chính thức lọc G1..EX (API3 thêm EX-last), có lần chạy DATA riêng với -d và reset trước mỗi run; bash -n đạt. Không chạy runner chính thức, không tạo report, không commit. Đạt tiêu chí X-DATA; giữ nguyên hai dòng pre-request.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Kiểm CSV 20 dòng phủ LG-G1-01..21 trừ LG-G1-14, folder DATA dùng iterationData và giữ expected/core. Chạy không CSV ra 0 request chứng minh guard đúng; 22 fail là do SUT/giả định. Lưu ý chỉ có HTML DATA, không có JSON nên số liệu DATA lấy từ HTML.
 
 ## #35 – 2026-11-25 15:23 (giờ VN)
 - **AI tool:** Manager (openai-codex/gpt-6.1-sol)
@@ -1986,7 +1986,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
 - **AI output:**
   > Đọc lại PHẦN A/B và agent.md. CN-X4 đạt: 64/64 ID nguồn được mapping, 55 case nguồn + 25 sub-folder cạnh trạng thái; 9 INVALID bỏ đúng; 906 request/1233 assertion tĩnh gồm smoke khớp mapping. Không cần giao reviewer làm lại. Dùng bằng chứng CLI đã có, không chạy lại để xác nhận: 906 request, 1233 assertion = 1185 pass/48 fail, 31.6 s, không lỗi request/script. results/newman/ chỉ có .gitkeep; hook đúng hai dòng.
   > Quyết định Manager F1: giữ tên oracle “setup” lần này; assertion core và ID vẫn phân biệt được lỗi, không ảnh hưởng expected. F2: chấp nhận INCOMPLETE CN-G3-04 theo file và SUT hiện không có exp; đây chỉ là kiểm precondition, KHÔNG tuyên bố đã kiểm token hết hạn; nếu sau này có exp thì phải bổ sung nhánh chờ/PUT/K trước khi tuyên bố đầy đủ. F3: giữ điều hướng dừng case theo precondition xóa user của file; đây không phải bỏ qua assertion request chính; lần chạy quan sát không kích hoạt, request đích tồn tại; ràng buộc ID cứng được ghi nhận, không coi case đạt khi setup fail. F4: giữ kiểm JWT chặt hơn; nếu thông báo chứa a.b.c thì cần human review false positive, không nới regex theo response. F5: giữ bước lưu baseline, chỉ request 2/3 chứng minh so sánh; assertion đầu không được diễn giải là bằng chứng chống dò ID độc lập. F6: giữ oracle dùng token cũ đúng file; khi token bị vô hiệu, oracle không quan sát được trạng thái đơn, không suy diễn lỗi dữ liệu từ 401. F7: giữ tên folder hiện tại vì ID duy nhất và mapping mô tả rõ mục đích; không đổi tên thuần hình thức trong lượt này. Không sửa collection/expected, không commit, không tạo report chính thức.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đối chiếu mapping API2: 64/64 ID, 55 case + 25 sub-folder cạnh, 9 INVALID bị bỏ, 906 request/1233 assertion khớp. F2/F5/F6 giữ đúng giới hạn quan sát, không tuyên bố đã kiểm token hết hạn và không suy diễn khi oracle 401; F1/F7 chỉ là đặt tên nên không ảnh hưởng kết quả.
 
 ## #36 – 2026-11-25 15:33 (giờ VN)
 - **AI tool:** Manager (openai-codex/gpt-6.1-sol); task ProductIsolation (openai-codex/gpt-6.1-terra); sonic ProductRuntime/ProductProof (openai-codex/gpt-6-luna); reviewer ProductMappingReview (anthropic/claude-sonnet-5-5)
@@ -2009,7 +2009,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > Task chuyển nguyên vẹn PR-G6-09/15/31 (price null, thiếu price, body rỗng) sang G6-isolated trong collection API3; không sửa request/expected/assertion/hook. scripts/run_newman.sh chạy mỗi case riêng với reset trước từng lượt, ghi trạng thái fail nhưng tiếp tục; reset rồi chạy lượt chính G1/G2/G3/G4/G6/EX/EX-last. PR-EX-05 vẫn cuối lượt chính và collection. Manager đổi dấu phân tách tên report riêng thành API3_ProductCRUD_isolated-<ID>_<ngày>.html/json để khớp wildcard API3_ProductCRUD_* của X5. Agent không chạy runner hay reporter chính thức; các file đó chỉ sinh khi sinh viên chạy.
   > Kiểm CLI sau sửa bởi sonic: bash -n đạt. Ba lượt riêng mỗi lượt 9 request/1 lỗi request, 13 assertion = 8 pass/5 fail, không lỗi script; thời gian PR-G6-09/15/31 lần lượt 292/297/342ms. Cả ba GET detail id6 báo socket hang up và log TypeError null.toString; giữ fail, không nuốt lỗi. Lượt chính reset độc lập: 951 request/0 lỗi, 948 test script/0 lỗi, 1198 pre-request script/0 lỗi, 1231 assertion = 938 pass/293 fail, 1m22.1s; chạy tới PR-G6-32..35 và PR-EX-05, không crash. Cộng bốn lượt độc lập: 978 request, 3 lỗi request, 1270 assertion = 962 pass/308 fail. Reset cuối đã hoàn thành. Artifact local://product-isolate-PR-G6-<09|15|31>-{cli,server}.log và local://product-regular-G1-G2-G3-G4-G6-EX-EX-last-{cli,server}.log lưu số liệu thật.
   > Reviewer cập nhật report/execute/API3_product_mapping.md: mapping đủ 133 ID (125 case + 8 INVALID), G6 còn 32 case/295 request/419 assertion; G6-isolated 3/27/39; tổng tĩnh nguồn giữ 994 request/1287 assertion. Lượt chính tĩnh 967/1248, thực chạy 951/1231 do parity PR-G4-07 thoát setup sớm đúng file. Đủ 125 case qua bốn lượt; runtime sạch chỉ cho lượt chính về request/script, KHÔNG sạch toàn cục và KHÔNG all pass. X5 phải gộp JSON chính và cả ba JSON isolated. Không finding chặn; giữ các quan sát tĩnh không đổi expected. Reviewer báo không có edit tool nên đã sửa mapping bằng scripted replacement trái chỉ dẫn edit-only; Manager đã report_issue về bất nhất tool, không lặp lại thao tác đó. results/newman/ chỉ có .gitkeep; không commit, không tạo report chính thức, không sửa SUT/testcase/hai dòng pre-request. Dừng ở bước người dùng tự chạy và chụp console, chưa làm X5.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Chấp nhận tách 3 case sang G6-isolated và reset từng lượt: lượt chính 951 request/1231 assertion, 938 pass, không lỗi script, chạy tới PR-EX-05. Ba lượt isolated đều tái hiện TypeError null.toString nên đó là bug SUT, phải giữ fail. Việc reviewer sửa mapping bằng script trái quy ước đã được báo; số liệu vẫn khớp artifact.
 
 ## #37 – 2026-11-25 16:05 (giờ VN)
 - **AI tool:** Manager (openai-codex/gpt-6.1-sol); task LoginResults/CancelResults/ProductResults (openai-codex/gpt-6.1-terra); sonic OfficialManifest (openai-codex/gpt-6-luna); reviewer ResultsReview (anthropic/claude-sonnet-5-5)
@@ -2023,7 +2023,7 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > API3 gộp bốn lượt: 978 request/3 lỗi request, 1270 assertion = 962 pass/308 fail, tổng thời lượng 83153ms không gồm reset, 7 nhóm ứng viên. Lượt chính 951 request, 1231 assertion = 938 pass/293 fail, 82173ms; isolated PR-G6-09/15/31 mỗi lượt 9 request/1 lỗi, 13 assertion = 8 pass/5 fail, 321/347/312ms. Bảng đủ 311 failure records = 308 assertion + 3 lỗi request. Không cộng trùng setup parity bị bỏ qua. Trích mảng là phần tử thật nhưng không luôn là phần tử chứng minh thay đổi; xem full JSON để đối chiếu snapshot.
   > Main JSON API3 chính xác 189863153 byte, SHA256 b9cccdbf68c595cd12868289b5032cab2f2ef44143f732f3cf50df3dead31eae: giữ local, thêm đúng đường dẫn vào .gitignore, loại khỏi commit vì vượt giới hạn GitHub100MB; báo cáo ghi rõ lý do/hash/kích thước. HTML chính và cả HTML/JSON của ba isolated vẫn thuộc commit API3. Không sửa bất kỳ file trong results/newman; đã lấy manifest hash/kích thước các artifact gốc. Reviewer độc lập ACCEPT, không lỗi thực tế chặn. Ứng viên chỉ là nhóm cần điều tra, không phải số bug đã xác nhận.
   > Thực hiện ba commit riêng theo X5 qua selective commit: API1 kèm DATA, runner chung, AI_LOG và ảnh; API2 kèm collection/mapping/results/HTML/JSON; API3 kèm collection/mapping/results/HTML chính/ba cặp isolated và quy tắc ignore main JSON lớn. Giữ nguyên thay đổi .gitignore có sẵn ngoài quy tắc được yêu cầu. Không push. Artifact chính thức và ảnh gốc có thể chứa token/password local; không chỉnh bằng chứng theo yêu cầu người dùng.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đã đối chiếu 3 results.md với JSON/HTML: API1 229/473, API2 905/1232, API3 gộp 978 request/1270 assertion, đúng 311 failure record. Token/password trong body đã che; JSON 190MB không commit nhưng có hash/kích thước trong báo cáo và .gitignore. Các nhóm chỉ là ứng viên, chưa chốt bug.
 
 ## #38 – 2026-11-25 16:17 (giờ VN)
 - **AI tool:** Manager (openai-codex/gpt-6.1-sol); scout BugTriage (openai-codex/gpt-6-luna); task CorrectTriage (openai-codex/gpt-6.1-terra)
@@ -2035,4 +2035,4 @@ Sinh viên 23120190. Quy tắc ghi: xem [agent.md](../agent.md) mục 1.
   > Tạo report/issues/00_triage.md sau khi đối chiếu ba results.md, testcase, README/api_specification và backend. Bảng (a): 10 dòng đề xuất nguyên nhân gốc, bao phủ 13 nhóm nguồn; bảng (b): 12 nhóm cần sinh viên quyết định với hai cách hiểu; bảng (c): failure setup CN-G3-04 INCOMPLETE ngoài 25 nhóm, không kết luận đã thực thi token hết hạn. Đủ 25/25 nhóm, mỗi nhóm đúng một bảng. Giữ mơ hồ về status, wire type/schema, normalization, thu hồi JWT, ID canonical và media-type/JSON lỗi ở phần cần quyết định; ghi giới hạn case validation trong ghi chú, không sửa expected.
   > Bug ID đề xuất: BUG-LG-01 đếm sai/thời lượng khóa, BUG-LG-02 lộ password, BUG-LG-03 secret JWT cố định (gộp LG-EX-05 và CN-EX-05 một nguyên nhân xuyên API); BUG-CN-01 scheme Basic, BUG-CN-02 user hủy shipping, BUG-CN-03 canceled→delivered; BUG-PR-01 thiếu validation POST/PUT, BUG-PR-02 thiếu JWT/admin middleware, BUG-PR-03 tự sửa role, BUG-PR-04 GET detail null.toString gây mất kết nối. AI bỏ sót: 1 nguyên nhân Human Extend-only (BUG-LG-03); các nhóm có cả AI-generated và Extend không tính bỏ sót. Severity/priority đều là đề xuất của AI, chưa chốt.
   > Manager đối chiếu trực tiếp R:41–43,158–162,177–179,195–198,278–283 và các nhánh backend liên quan; xác nhận code +2/180000ms, thiếu validation/middleware, sửa role và chuyển canceled→delivered tại server.js:550–551. Kiểm cấu trúc bằng đọc Markdown: 25 khóa nhóm xuất hiện đúng một lần trong hai bảng phân loại, 10 dòng đề xuất, 1 Human Extend-only, mọi ô “Sinh viên xác nhận” trống. Không chạy SUT/curl/Newman/reset, không sửa kết quả Newman, testcase, collection, SUT hay ảnh; không commit/push/tạo issue, không làm B1. Dừng ở 🧑1 để sinh viên xác nhận triage.
-- **Human review:** _(để trống – sinh viên tự điền)_
+- **Human review:** Đọc 00_triage.md: đủ 25 nhóm, 10 nguyên nhân gốc, 12 nhóm cần sinh viên quyết định, 1 failure setup tách riêng. Đồng ý gộp secret JWT của LG-EX-05 và CN-EX-05 thành một root cause xuyên API; BUG-LG-03 đúng là lỗ hổng chỉ Extend bắt được. Severity/priority vẫn là đề xuất, dừng ở 🧑1 là đúng.
