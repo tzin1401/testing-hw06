@@ -69,7 +69,7 @@ Ghi chú: VALID, INCOMPLETE, INVALID là nhãn audit của các case AI sinh. C�
 - Partition cho `name` (≤255), `price` (>0), `category_id`, `id`. Vòng đời tạo → sửa → xóa → xem lại. Security gồm role (SEC-03), thiếu token (SEC-02), XSS, SQLi. Schema theo kiểu từng field.
 - Bug: BUG-12 (không cần đăng nhập hay quyền admin), BUG-13 (không validate input), BUG-14 (price null làm sập server), BUG-15 (tự nâng quyền admin qua `/api/users/me`), BUG-16 (price là chuỗi với id chẵn), cùng BUG-11.
 - Extend: PR-EX-01..06. AI bỏ sót vì không thử id `+P`, `P.0`, và giá trị biên `1e309`, `-0`.
-- Chi tiết: [testcases](testcases/API3_product_generated.md) · [mapping](execute/API3_product_mapping.md) · [kết quả](execute/API3_product_results.md) · Newman `results/newman/23120190_API3_ProductCRUD_20261125.html` (JSON lớn hơn 100 MB nên chỉ có trong zip)
+- Chi tiết: [testcases](testcases/API3_product_generated.md) · [mapping](execute/API3_product_mapping.md) · [kết quả](execute/API3_product_results.md) · Newman `results/newman/23120190_API3_ProductCRUD_20261125.html` (file JSON nặng 190 MB, vượt giới hạn của GitHub và Moodle nên chỉ giữ local; SHA-256 ghi trong [kết quả](execute/API3_product_results.md))
 
 ## 5. Bug report
 
@@ -116,8 +116,9 @@ Lần chạy trên API 1: sinh 50 case, chạy 47, có 33 PASS và 12 BUG_CANDID
 ## 10. Nộp bài
 
 File `23120190_HW06_AI_API_100.zip` gồm toàn bộ repo cùng các file chỉ giữ local:
-- Newman JSON của API 3;
-- report CI;
+- report CI (`results/ci/`);
 - các file prompt `*_PROMPTS.md`.
+
+Newman JSON của API 3 (190 MB) không có trong zip vì Moodle giới hạn 20 MB. File HTML report của API 3 vẫn có trong zip; bản JSON gửi khi được yêu cầu.
 
 Git commit log: [`git_commit_log.txt`](git_commit_log.txt).
