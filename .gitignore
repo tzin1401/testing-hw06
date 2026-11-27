@@ -13,3 +13,6 @@ __pycache__/
 # Main API3 Newman JSON exceeds GitHub's 100 MB file limit; keep local.
 results/newman/23120190_API3_ProductCRUD_20261125.json
 results/ci/
+
+# File nộp bài, chỉ nằm local
+*.zip

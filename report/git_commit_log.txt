@@ -1,0 +1,53 @@
+0f0aa2d  2026-11-27 13:47  zinn1401  docs: add main report and fill self-assessment and test summary
+4952b87  2026-11-27 13:47  zinn1401  docs: add ai audit report, critique and demo video link
+e70dff6  2026-11-26 17:52  zinn1401  test(skill): add api1 login end-to-end skill run with newman results
+0a0d797  2026-11-26 17:52  zinn1401  feat(skill): support wait, header and response-time checks in collection builder
+9e8c62b  2026-11-26 16:58  zinn1401  docs(skill): add png export of pipeline diagram
+7f47874  2026-11-26 16:55  zinn1401  docs(skill): add agent skill pipeline diagram
+a27ad4c  2026-11-26 16:43  zinn1401  feat(skill): add api test generator agent skill and pseudocode
+6824ebb  2026-11-26 12:56  zinn1401  docs: add excel test cases with test summary
+25fd68a  2026-11-26 12:53  zinn1401  docs: add ci/cd report with pipeline run screenshots
+dbb639e  2026-11-26 00:43  zinn1401  test(ci): add LG-EX-03 jwt expiry case to regression suite
+582e8a2  2026-11-26 00:37  zinn1401  ci: run newman regression suite in github actions
+85c9c78  2026-11-25 23:55  zinn1401  docs: add postman features report with mock server and monitor
+2b0dd3d  2026-11-25 23:40  zinn1401  docs: add github issues page screenshots
+d553f33  2026-11-25 23:37  zinn1401  docs: attach postman screenshots to bug reports
+dcefd93  2026-11-25 16:34  zinn1401  docs: link bug reports to github issues
+87771f5  2026-11-25 16:32  zinn1401  docs: add bug reports with reproduction evidence
+6c629a1  2026-11-25 16:08  zinn1401  chore: ignore local helper scripts
+13f6f4f  2026-11-25 16:05  zinn1401  test(api3): execute product CRUD collection with newman
+978afb8  2026-11-25 16:05  zinn1401  test(api2): execute cancel order collection with newman
+c9d0734  2026-11-25 16:05  zinn1401  test(api1): execute login collection with newman
+c7b77c2  2026-11-24 22:09  zinn1401  chore: newman runner and collection skeletons
+08278ae  2026-11-24 16:13  zinn1401  test(api3): add human extension cases from backend code
+9b4afbe  2026-11-24 16:13  zinn1401  test(api2): add human extension cases from backend code
+01cde15  2026-11-24 16:13  zinn1401  test(api1): add human extension cases from backend code
+650668c  2026-11-24 15:41  zinn1401  test(api3): human audit of AI-generated product CRUD cases
+341b9e6  2026-11-24 15:41  zinn1401  test(api2): human audit of AI-generated cancel order cases
+dcd1508  2026-11-24 15:41  zinn1401  test(api1): human audit of AI-generated login cases
+d56bcf4  2026-11-24 15:15  zinn1401  docs(api2): coverage summary of AI-generated cancel order cases
+08120e5  2026-11-24 15:13  zinn1401  docs(api3): coverage summary of AI-generated product CRUD cases
+3c1cb14  2026-11-24 15:07  zinn1401  test(api2): fill coverage gaps found by reviewer
+f675f45  2026-11-24 15:07  zinn1401  test(api3): fill coverage gaps found by reviewer
+1123608  2026-11-24 15:05  zinn1401  docs(api1): coverage summary of AI-generated login cases
+a18cb2d  2026-11-24 15:04  zinn1401  docs(api2): coverage summary of AI-generated cancel order cases
+12b8c51  2026-11-24 15:03  zinn1401  docs(api3): coverage summary of AI-generated product CRUD cases
+1e2e7f6  2026-11-24 15:01  zinn1401  test(api1): fill coverage gaps found by reviewer
+a3c0a78  2026-11-24 14:59  zinn1401  docs(api1): coverage summary of AI-generated login cases
+9547664  2026-11-24 14:57  zinn1401  test(api3): AI-generated schema validation cases for product CRUD
+8349dde  2026-11-24 14:57  zinn1401  test(api2): AI-generated schema validation cases for cancel order
+5bb94b1  2026-11-24 14:56  zinn1401  test(api2): AI-generated security cases for cancel order
+6e18c81  2026-11-24 14:56  zinn1401  test(api3): AI-generated security cases for product CRUD
+e5e6e45  2026-11-24 14:54  zinn1401  test(api2): AI-generated state transition cases for cancel order
+ac2bd93  2026-11-24 14:54  zinn1401  test(api1): AI-generated schema validation cases for login
+bae7089  2026-11-24 14:54  zinn1401  test(api3): AI-generated state transition cases for product CRUD
+1a7cc83  2026-11-24 14:53  zinn1401  test(api1): AI-generated security cases for login
+868351a  2026-11-24 14:52  zinn1401  test(api3): AI-generated domain partition cases for product CRUD
+bbefab2  2026-11-24 14:51  zinn1401  test(api2): AI-generated domain partition cases for cancel order
+b688713  2026-11-24 14:51  zinn1401  test(api1): AI-generated state transition cases for login
+877782b  2026-11-24 14:46  zinn1401  chore: keep prompt files local
+4c03a3e  2026-11-24 14:45  zinn1401  test(api1): AI-generated domain partition cases for login
+9a985ac  2026-11-24 14:43  zinn1401  docs: agent rule for commit messages
+a7bb1c0  2026-11-24 01:55  zinn1401  docs: spec analysis for login, cancel order, product CRUD
+c7a7ab6  2026-11-24 01:38  zinn1401  docs: claim row 1 in team API allocation
+58fcf31  2026-11-24 01:35  zinn1401  chore: init repo, SUT reset script, Postman env, issue template
